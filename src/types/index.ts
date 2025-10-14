@@ -12,6 +12,15 @@ export interface SearchResult {
   status: SearchResultStatus;
   url: string | null;
   error?: string;
+  category?: string;
+  metadata?: MetadataItem[];
+}
+
+// 元数据项接口
+export interface MetadataItem {
+  name: string;
+  value: any;
+  data_type: string;
 }
 
 // 搜索进度信息
@@ -20,6 +29,17 @@ export interface SearchProgress {
   checked_sites: number;
   found_count: number;
   error_count: number;
+  current_site?: string;
+}
+
+// 搜索进度载荷（从后端发送）
+export interface SearchProgressPayload {
+  total_sites: number;
+  checked_sites: number;
+  found_count: number;
+  error_count: number;
+  percentage: number;
+  current_site?: string;
 }
 
 // 搜索完成信息
@@ -57,6 +77,7 @@ export interface DisclaimerModalProps {
 export interface SearchFormProps {
   isSearching: boolean;
   onSubmit: (username: string) => void;
+  onStopSearch?: () => void;
 }
 
 export interface ResultsDisplayProps {
@@ -72,4 +93,9 @@ export interface ResultItemProps {
 export interface ProgressIndicatorProps {
   progress: SearchProgress;
   isSearching: boolean;
+}
+
+export interface AboutModalProps {
+  isOpen: boolean;
+  onClose: () => void;
 }

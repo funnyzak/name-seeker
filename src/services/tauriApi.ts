@@ -3,7 +3,7 @@ import { listen } from '@tauri-apps/api/event';
 import type {
   SearchUpdatePayload,
   SearchFinished,
-  SearchProgress
+  SearchProgressPayload
 } from '../types';
 
 // Tauri API 服务类
@@ -46,12 +46,98 @@ export class TauriApiService {
   /**
    * 开始搜索用户名
    */
-  async startSearch(username: string): Promise<void> {
+  async startSearch(
+    username: string,
+    options?: {
+      maxConcurrentRequests?: number;
+      timeoutSeconds?: number;
+      excludeNsfw?: boolean;
+      categoryFilter?: string;
+    }
+  ): Promise<void> {
     try {
-      await invoke('start_search', { username });
+      await invoke('start_search', {
+        username,
+        maxConcurrentRequests: options?.maxConcurrentRequests,
+        timeoutSeconds: options?.timeoutSeconds,
+        excludeNsfw: options?.excludeNsfw,
+        categoryFilter: options?.categoryFilter
+      });
     } catch (error) {
       console.error('Error starting search:', error);
       throw error;
+    }
+  }
+
+  /**
+   * 停止当前搜索
+   */
+  async stopSearch(): Promise<boolean> {
+    try {
+      return await invoke<boolean>('stop_search');
+    } catch (error) {
+      console.error('Error stopping search:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取搜索统计信息
+   */
+  async getSearchStats(): Promise<any> {
+    try {
+      return await invoke('get_search_stats');
+    } catch (error) {
+      console.error('Error getting search stats:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 获取可用网站类别
+   */
+  async getCategories(): Promise<string[]> {
+    try {
+      return await invoke<string[]>('get_categories');
+    } catch (error) {
+      console.error('Error getting categories:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 验证用户名格式
+   */
+  async validateUsername(username: string): Promise<boolean> {
+    try {
+      return await invoke<boolean>('validate_username_format', { username });
+    } catch (error) {
+      console.error('Error validating username:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 验证邮箱格式
+   */
+  async validateEmail(email: string): Promise<boolean> {
+    try {
+      return await invoke<boolean>('validate_email_format', { email });
+    } catch (error) {
+      console.error('Error validating email:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取应用信息
+   */
+  async getAppInfo(): Promise<any> {
+    try {
+      return await invoke('get_app_info');
+    } catch (error) {
+      console.error('Error getting app info:', error);
+      return null;
     }
   }
 
@@ -76,9 +162,27 @@ export class TauriApiService {
   /**
    * 监听搜索进度事件
    */
-  onSearchProgress(callback: (payload: SearchProgress) => void): Promise<() => void> {
+  onSearchProgress(callback: (payload: SearchProgressPayload) => void): Promise<() => void> {
     return listen('search-progress', (event) => {
-      callback(event.payload as SearchProgress);
+      callback(event.payload as SearchProgressPayload);
+    });
+  }
+
+  /**
+   * 监听搜索错误事件
+   */
+  onSearchError(callback: (error: string) => void): Promise<() => void> {
+    return listen('search-error', (event) => {
+      callback(event.payload as string);
+    });
+  }
+
+  /**
+   * 监听搜索停止事件
+   */
+  onSearchStopped(callback: () => void): Promise<() => void> {
+    return listen('search-stopped', () => {
+      callback();
     });
   }
 
@@ -87,7 +191,7 @@ export class TauriApiService {
    */
   async openUrl(url: string): Promise<void> {
     try {
-      await invoke('plugin:opener|open', { path: url });
+      await invoke('open_url', { url });
     } catch (error) {
       console.error('Error opening URL:', error);
       throw error;

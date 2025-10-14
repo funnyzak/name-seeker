@@ -18,7 +18,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
       <div className="progress-info">
         <div className="progress-text">
           <span>进度: {progress.checked_sites} / {progress.total_sites}</span>
-          <span className="percentage">{percentage}%</span>
+          <span className="percentage"> {percentage}%</span>
         </div>
 
         <div className="progress-stats">
@@ -41,7 +41,10 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
       {isSearching && (
         <div className="searching-status">
           <div className="pulse-dot"></div>
-          <span>正在搜索...</span>
+          <span>
+            正在搜索
+            {progress.current_site ? `: ${progress.current_site}` : '...'}
+          </span>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "search-my-name",
+  "productName": "SearchMyName",
   "version": "0.1.0",
   "identifier": "com.leon.search-my-name",
   "build": {
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "search-my-name",
-        "width": 800,
-        "height": 600
+        "title": "Search My Name",
+        "width": 600,
+        "height": 600,
+        "decorations": true,
+        "resizable": false
       }
     ],
     "security": {

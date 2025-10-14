@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DisclaimerModal from './components/DisclaimerModal';
+import AboutModal from './components/AboutModal';
 import SearchForm from './components/SearchForm';
 import ResultsDisplay from './components/ResultsDisplay';
 import { useDisclaimer } from './hooks/useDisclaimer';
@@ -7,6 +8,8 @@ import { useSearch } from './hooks/useSearch';
 import './App.css';
 
 const App: React.FC = () => {
+  const [showAbout, setShowAbout] = useState(false);
+
   const {
     showDisclaimer,
     isLoading,
@@ -18,12 +21,18 @@ const App: React.FC = () => {
     isSearching,
     results,
     progress,
-    startSearch
+    startSearch,
+    stopSearch
   } = useSearch();
 
   const handleSearchSubmit = async (username: string) => {
     try {
-      await startSearch(username);
+      await startSearch(username, {
+        maxConcurrentRequests: 30,
+        timeoutSeconds: 30,
+        excludeNsfw: true,
+        categoryFilter: undefined
+      });
     } catch (error) {
       console.error('Search failed:', error);
       // 这里可以添加错误通知
@@ -48,26 +57,35 @@ const App: React.FC = () => {
         onDecline={declineDisclaimer}
       />
 
-      {/* 主应用内容 */}
-      <header className="app-header">
-        <div className="header-content">
-          <h1 className="app-title">
-            <span className="icon">🔍</span>
-            Search My Name
-          </h1>
-          <p className="app-subtitle">
-            在数百个网站上发现您的数字足迹
-          </p>
-        </div>
-      </header>
+      {/* 关于模态框 */}
+      <AboutModal
+        isOpen={showAbout}
+        onClose={() => setShowAbout(false)}
+      />
 
+      {/* 主应用内容 */}
       <main className="app-main">
         <div className="container">
+          {/* 顶部工具栏 */}
+          <header className="app-toolbar">
+            <div className="toolbar-title">
+              <span className="icon">🔍</span>
+              Search My Name
+            </div>
+            <button
+              className="about-button"
+              onClick={() => setShowAbout(true)}
+            >
+              关于
+            </button>
+          </header>
+
           {/* 搜索表单 */}
           <section className="search-section">
             <SearchForm
               isSearching={isSearching}
               onSubmit={handleSearchSubmit}
+              onStopSearch={stopSearch}
             />
           </section>
 
@@ -79,19 +97,15 @@ const App: React.FC = () => {
               isSearching={isSearching}
             />
           </section>
+
+          {/* 底部信息 */}
+          <footer className="app-footer">
+            <p>
+              ⚠️ 请负责任地使用本工具，仅用于合法的自助研究目的
+            </p>
+          </footer>
         </div>
       </main>
-
-      <footer className="app-footer">
-        <div className="footer-content">
-          <p>
-            ⚠️ 请负责任地使用本工具，仅用于合法的自助研究目的
-          </p>
-          <p className="footer-note">
-            本工具在本地运行，不会收集或传输任何个人信息
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };

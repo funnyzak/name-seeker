@@ -20,7 +20,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
       <div className="empty-state">
         <div className="empty-icon">🔍</div>
         <h3>开始您的第一次搜索</h3>
-        <p>输入用户名或邮箱，我们将帮您在数百个网站上查找相关信息</p>
+        <p>输入用户名或邮箱，将帮您在数百个网站上查找相关信息</p>
       </div>
     );
   }
@@ -86,20 +86,20 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         </div>
       )}
 
-      {!isSearching && results.length > 0 && (
+      {!isSearching && (results.length > 0 || progress.checked_sites > 0) && (
         <div className="search-summary">
           <div className="summary-stats">
             <span className="summary-stat found">
-              找到: {foundResults.length}
+              找到: {foundResults.length > 0 ? foundResults.length : progress.found_count}
             </span>
             <span className="summary-stat not-found">
-              未找到: {notFoundResults.length}
+              未找到: {notFoundResults.length > 0 ? notFoundResults.length : (progress.checked_sites - progress.found_count - progress.error_count)}
             </span>
             <span className="summary-stat error">
-              错误: {errorResults.length}
+              错误: {errorResults.length > 0 ? errorResults.length : progress.error_count}
             </span>
             <span className="summary-stat total">
-              总计: {results.length}
+              总计: {results.length > 0 ? results.length : progress.checked_sites}
             </span>
           </div>
         </div>

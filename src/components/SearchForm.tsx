@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { SearchFormProps } from '../types';
 
-const SearchForm: React.FC<SearchFormProps> = ({ isSearching, onSubmit }) => {
+const SearchForm: React.FC<SearchFormProps> = ({ isSearching, onSubmit, onStopSearch }) => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
 
@@ -29,6 +29,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ isSearching, onSubmit }) => {
     }
   };
 
+  const handleStopSearch = () => {
+    if (onStopSearch) {
+      onStopSearch();
+    }
+  };
+
   return (
     <div className="search-form-container">
       <form onSubmit={handleSubmit} className="search-form">
@@ -45,20 +51,34 @@ const SearchForm: React.FC<SearchFormProps> = ({ isSearching, onSubmit }) => {
           {error && <span className="error-message">{error}</span>}
         </div>
 
-        <button
-          type="submit"
-          disabled={isSearching || !username.trim()}
-          className={`search-button ${isSearching ? 'searching' : ''}`}
-        >
-          {isSearching ? (
-            <>
-              <div className="spinner"></div>
-              搜索中...
-            </>
-          ) : (
-            '开始搜索'
+        <div className="button-group">
+          <button
+            type="submit"
+            disabled={isSearching || !username.trim()}
+            className={`search-button ${isSearching ? 'searching' : ''}`}
+          >
+            {isSearching ? (
+              <>
+                <div className="spinner"></div>
+                搜索中...
+              </>
+            ) : (
+              '开始搜索'
+            )}
+          </button>
+
+          {isSearching && (
+            <button
+              type="button"
+              onClick={handleStopSearch}
+              className="stop-button"
+              title="停止搜索"
+            >
+              <div className="stop-icon">⏹</div>
+              停止
+            </button>
           )}
-        </button>
+        </div>
       </form>
 
       {isSearching && (
@@ -66,7 +86,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ isSearching, onSubmit }) => {
           <p>
             🔄 正在搜索中，这可能需要几分钟时间...
             <br />
-            <small>我们将检查数百个网站以查找相关用户信息</small>
+            <small>将检查数百个网站以查找相关用户信息</small>
           </p>
         </div>
       )}
