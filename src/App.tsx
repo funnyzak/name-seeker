@@ -1,51 +1,99 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import React from 'react';
+import DisclaimerModal from './components/DisclaimerModal';
+import SearchForm from './components/SearchForm';
+import ResultsDisplay from './components/ResultsDisplay';
+import { useDisclaimer } from './hooks/useDisclaimer';
+import { useSearch } from './hooks/useSearch';
+import './App.css';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+const App: React.FC = () => {
+  const {
+    showDisclaimer,
+    isLoading,
+    acceptDisclaimer,
+    declineDisclaimer
+  } = useDisclaimer();
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  const {
+    isSearching,
+    results,
+    progress,
+    startSearch
+  } = useSearch();
+
+  const handleSearchSubmit = async (username: string) => {
+    try {
+      await startSearch(username);
+    } catch (error) {
+      console.error('Search failed:', error);
+      // 这里可以添加错误通知
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="app-loading">
+        <div className="loading-spinner"></div>
+        <p>正在加载应用...</p>
+      </div>
+    );
   }
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <div className="app">
+      {/* 免责声明模态框 */}
+      <DisclaimerModal
+        isOpen={showDisclaimer}
+        onAccept={acceptDisclaimer}
+        onDecline={declineDisclaimer}
+      />
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+      {/* 主应用内容 */}
+      <header className="app-header">
+        <div className="header-content">
+          <h1 className="app-title">
+            <span className="icon">🔍</span>
+            Search My Name
+          </h1>
+          <p className="app-subtitle">
+            在数百个网站上发现您的数字足迹
+          </p>
+        </div>
+      </header>
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+      <main className="app-main">
+        <div className="container">
+          {/* 搜索表单 */}
+          <section className="search-section">
+            <SearchForm
+              isSearching={isSearching}
+              onSubmit={handleSearchSubmit}
+            />
+          </section>
+
+          {/* 结果显示 */}
+          <section className="results-section">
+            <ResultsDisplay
+              results={results}
+              progress={progress}
+              isSearching={isSearching}
+            />
+          </section>
+        </div>
+      </main>
+
+      <footer className="app-footer">
+        <div className="footer-content">
+          <p>
+            ⚠️ 请负责任地使用本工具，仅用于合法的自助研究目的
+          </p>
+          <p className="footer-note">
+            本工具在本地运行，不会收集或传输任何个人信息
+          </p>
+        </div>
+      </footer>
+    </div>
   );
-}
+};
 
 export default App;
