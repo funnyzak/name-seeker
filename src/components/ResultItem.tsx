@@ -3,13 +3,26 @@ import { tauriApi } from '../services/tauriApi';
 import type { ResultItemProps } from '../types';
 
 const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
+  const [isOpening, setIsOpening] = React.useState(false);
+
   const handleUrlClick = async () => {
-    if (result.url) {
+    if (result.url && !isOpening) {
+      setIsOpening(true);
       try {
         await tauriApi.openUrl(result.url);
       } catch (error) {
         console.error('Failed to open URL:', error);
+        // 可以在这里添加用户友好的错误提示
+      } finally {
+        setIsOpening(false);
       }
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleUrlClick();
     }
   };
 
@@ -57,11 +70,14 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
         <div className="result-details">
           {result.status === 'Found' && result.url && (
             <button
-              className="result-link"
+              className={`result-link ${isOpening ? 'opening' : ''}`}
               onClick={handleUrlClick}
+              onKeyDown={handleKeyDown}
               title="点击访问个人资料页面"
+              disabled={isOpening}
+              type="button"
             >
-              查看资料
+              {isOpening ? '正在打开...' : '查看资料'}
             </button>
           )}
 
@@ -71,7 +87,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
 
           {result.status === 'Error' && (
             <span className="result-message error-text">
-              {result.error || '检查时发生错误'}
+              {result.error === '搜索被用户停止' ? '⏸️ 搜索已停止' : (result.error || '检查时发生错误')}
             </span>
           )}
 

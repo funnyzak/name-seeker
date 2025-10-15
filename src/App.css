@@ -504,11 +504,30 @@ body {
   border-radius: 4px;
   font-size: 0.875rem;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.result-link:hover {
+.result-link:hover:not(:disabled) {
   background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.result-link:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.result-link.opening {
+  background: var(--gray-500);
+  cursor: wait;
 }
 
 .result-message {
@@ -535,6 +554,25 @@ body {
   padding: 1.5rem;
   background: var(--gray-50);
   border-top: 1px solid var(--gray-200);
+}
+
+.search-stopped-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(250, 173, 20, 0.1);
+  border: 1px solid rgba(250, 173, 20, 0.3);
+  border-radius: var(--border-radius);
+  color: var(--warning-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stopped-icon {
+  font-size: 1rem;
 }
 
 .summary-stats {

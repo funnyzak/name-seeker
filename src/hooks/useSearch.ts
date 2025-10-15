@@ -64,8 +64,23 @@ export const useSearch = () => {
       ...prev,
       total_sites: payload.total_sites,
       checked_sites: payload.total_sites, // 搜索完成时，所有网站都已检查
-      found_count: payload.found_count
+      found_count: payload.found_count,
+      current_site: undefined // 清除当前正在检查的网站
     }));
+
+    // 确保所有剩余的 Pending 状态都被正确处理
+    setResults(prevResults =>
+      prevResults.map(result => {
+        if (result.status === 'Pending') {
+          return {
+            ...result,
+            status: 'NotFound' as SearchResultStatus,
+            error: '检查完成，未找到用户'
+          };
+        }
+        return result;
+      })
+    );
   }, []);
 
   // 搜索错误处理
@@ -78,7 +93,26 @@ export const useSearch = () => {
   // 搜索停止处理
   const handleSearchStopped = useCallback(() => {
     setIsSearching(false);
-    // 搜索被停止时，保持当前的结果和进度状态，让用户看到已获得的结果
+
+    // 将所有 Pending 状态的结果标记为未完成，让用户知道这些网站没有被检查
+    setResults(prevResults =>
+      prevResults.map(result => {
+        if (result.status === 'Pending') {
+          return {
+            ...result,
+            status: 'Error' as SearchResultStatus,
+            error: '搜索被用户停止'
+          };
+        }
+        return result;
+      })
+    );
+
+    // 更新进度显示，显示搜索已停止
+    setProgress(prev => ({
+      ...prev,
+      current_site: undefined
+    }));
   }, []);
 
   // 开始搜索

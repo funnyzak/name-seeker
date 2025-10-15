@@ -88,6 +88,12 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
       {!isSearching && (results.length > 0 || progress.checked_sites > 0) && (
         <div className="search-summary">
+          {progress.current_site === undefined && progress.checked_sites < progress.total_sites && (
+            <div className="search-stopped-notice">
+              <span className="stopped-icon">⏸️</span>
+              搜索已被停止，显示已完成检查的结果
+            </div>
+          )}
           <div className="summary-stats">
             <span className="summary-stat found">
               找到: {foundResults.length > 0 ? foundResults.length : progress.found_count}
