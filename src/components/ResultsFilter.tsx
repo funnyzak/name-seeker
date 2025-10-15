@@ -43,11 +43,11 @@ const ResultsFilter: React.FC<ResultsFilterProps> = ({ onFilterChange, resultsCo
           </button>
         )}
       </div>
-      {/* {filter && (
+      {filter && (
         <span className="filter-count">
           显示 {resultsCount} 个结果
         </span>
-      )} */}
+      )}
     </div>
   );
 };

@@ -43,9 +43,9 @@
       "icons/icon.ico"
     ],
     "category": "Utility",
-    "shortDescription": "用户名和邮箱多平台搜索工具",
-    "longDescription": "NameSeeker 是一款强大的跨平台桌面应用，可以在数百个网站上搜索用户名和邮箱，帮助你快速发现你的数字足迹。基于 WhatsMyName 项目数据，支持导出搜索结果为 PDF、CSV、JSON 等格式。",
-    "copyright": "Copyright © 2025 Leon",
+    "shortDescription": "Multi-platform search tool for usernames and emails",
+    "longDescription": "NameSeeker is a powerful cross-platform desktop application that searches for usernames and email addresses across hundreds of websites to help you quickly discover your digital footprint. Based on WhatsMyName project data, it supports exporting search results to PDF, CSV, JSON and other formats.",
+    "copyright": "Copyright © 2025 Funnyzak",
     "resources": [],
     "externalBin": [],
     "macOS": {
