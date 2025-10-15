@@ -26,16 +26,31 @@ This project uses a **complete Rust implementation** with no Python sidecar. The
 src/                              # React Frontend
 ├── components/                   # UI Components
 │   ├── AboutModal.tsx           # About application modal
+│   ├── DisclaimerModal.tsx      # First-launch disclaimer modal
+│   ├── ExportButton.tsx         # Results export functionality
 │   ├── ProgressIndicator.tsx    # Search progress indicator
-│   ├── ResultsDisplay.tsx       # Results display component
-│   └── SearchForm.tsx           # Search input form
+│   ├── ResultItem.tsx           # Individual result display component
+│   ├── ResultsDisplay.tsx       # Results display and filtering
+│   ├── ResultsFilter.tsx        # Results filtering component
+│   ├── SearchForm.tsx           # Search input form with history
+│   ├── SearchHistory.tsx        # Search history dropdown
+│   ├── Toast.tsx                # Individual toast notification
+│   ├── ToastContainer.tsx       # Toast notification container
+│   └── index.ts                 # Component exports
 ├── hooks/                       # React Hooks
-│   └── useSearch.ts             # Search state management
+│   ├── useDisclaimer.ts         # Disclaimer state management
+│   ├── useKeyboardShortcuts.ts  # Keyboard shortcuts handling
+│   ├── useSearch.ts             # Search state management
+│   ├── useSearchHistory.ts      # Search history persistence
+│   └── useToast.ts              # Toast notification system
 ├── services/                    # Service Layer
-│   └── tauriApi.ts              # Tauri API wrapper
+│   └── tauriApi.ts              # Tauri API wrapper with singleton pattern
 ├── types/                       # TypeScript Definitions
-│   └── index.ts                 # Type declarations
-└── App.tsx                      # Main application component
+│   └── index.ts                 # Complete type declarations
+├── App.css                      # Application styles
+├── App.tsx                      # Main application component
+├── main.tsx                     # React application entry point
+└── vite-env.d.ts               # Vite environment types
 
 src-tauri/src/                    # Rust Backend
 ├── core/                        # Core Business Logic
@@ -64,14 +79,25 @@ All MVP features have been successfully implemented and are fully operational:
 
 ### Additional Implemented Features
 
+- **Dual Search Types**: Support for both username and email searches with format validation
+- **Search History**: Local storage-based search history with quick access (max 10 items)
+- **Advanced Export**: Export results to PDF, CSV, JSON, TXT formats with clipboard copy option
 - **Search Control**: Start/stop search functionality with proper cleanup
 - **Progress Tracking**: Real-time progress with percentage, counts, and current site
+- **Results Filtering**: Real-time filtering of results by site name, category, or URL
+- **Collapsible Sections**: Collapsible result categories (Found, Not Found, Error, Pending)
+- **Keyboard Shortcuts**: Quick shortcuts for focus (/), stop (Esc), help (Ctrl+H), etc.
+- **Toast Notifications**: Non-intrusive success/error/info/warning notifications
+- **Clear Results**: Clear search results with confirmation
 - **Category Filtering**: Filter websites by category (social, tech, art, etc.)
 - **NSFW Filtering**: Option to exclude adult websites from search
 - **Configuration**: Adjustable concurrent requests and timeout settings
 - **Error Handling**: Comprehensive error reporting and recovery
 - **About Modal**: Application information and version details
 - **Modern UI**: Glassmorphism design with animations and responsive layout
+- **Accessibility**: Full ARIA support, keyboard navigation, semantic HTML
+- **Loading States**: Loading spinner and empty state with feature highlights
+- **External Links**: Automatic opening of found profile links in default browser
 
 -----
 
@@ -95,7 +121,8 @@ async fn set_disclaimer_accepted() -> Result<(), String>
 #[tauri::command]
 async fn start_search(
     app: AppHandle,
-    username: String,
+    query: String,
+    searchType: SearchType,
     max_concurrent_requests: Option<usize>,
     timeout_seconds: Option<u64>,
     exclude_nsfw: Option<bool>,
@@ -106,7 +133,13 @@ async fn start_search(
 #[tauri::command]
 async fn stop_search(app: AppHandle, state: tauri::State<'_, AppState>) -> Result<bool, String>
 
-// Utility functions
+// Export and utility functions
+#[tauri::command]
+async fn export_results_cmd(options: ExportOptions) -> Result<String, String>
+#[tauri::command]
+async fn copy_to_clipboard(text: String) -> Result<(), String>
+#[tauri::command]
+async fn open_directory(path: String) -> Result<(), String>
 #[tauri::command]
 async fn get_categories() -> Result<Vec<String>, String>
 #[tauri::command]
@@ -155,10 +188,14 @@ The search functionality is implemented in `src-tauri/src/core/search.rs` with t
 
 ### Frontend State Management
 
-The React frontend uses custom hooks for state management:
+The React frontend uses a comprehensive set of custom hooks for state management:
 
-- **`useSearch.ts`**: Manages search state, results, and progress
-- **Event Listeners**: Real-time updates from Rust backend
+- **`useSearch.ts`**: Manages search state, results, progress, and event handling
+- **`useSearchHistory.ts`**: Handles search history persistence in localStorage
+- **`useToast.ts`**: Manages toast notifications with auto-dismiss functionality
+- **`useDisclaimer.ts`**: Manages first-launch disclaimer state
+- **`useKeyboardShortcuts.ts`**: Handles global keyboard shortcuts and hotkeys
+- **Event Listeners**: Real-time updates from Rust backend via Tauri events
 - **Type Safety**: Complete TypeScript definitions matching Rust models
 
 ### UI/UX Implementation
@@ -250,11 +287,17 @@ npm run tauri build
 - `src-tauri/src/core/models.rs` - Data structures and type definitions
 
 ### Core Frontend Files
-- `src/App.tsx` - Main application component with routing
-- `src/components/SearchForm.tsx` - Search input and validation
-- `src/components/ResultsDisplay.tsx` - Results rendering and filtering
-- `src/hooks/useSearch.ts` - Search state management
-- `src/services/tauriApi.ts` - Backend communication layer
+- `src/App.tsx` - Main application component with modal management and keyboard shortcuts
+- `src/components/SearchForm.tsx` - Search input with type selection and history dropdown
+- `src/components/ResultsDisplay.tsx` - Results rendering, filtering, and export controls
+- `src/components/ExportButton.tsx` - Multi-format export with dropdown menu
+- `src/components/DisclaimerModal.tsx` - First-launch legal disclaimer modal
+- `src/components/ToastContainer.tsx` - Toast notification management
+- `src/components/SearchHistory.tsx` - Search history dropdown with CRUD operations
+- `src/hooks/useSearch.ts` - Comprehensive search state management and event handling
+- `src/hooks/useSearchHistory.ts` - LocalStorage-based search history management
+- `src/hooks/useToast.ts` - Toast notification system with auto-dismiss
+- `src/services/tauriApi.ts` - Singleton-based Tauri API wrapper with error handling
 
 ### Configuration Files
 - `src-tauri/tauri.conf.json` - Tauri application configuration
