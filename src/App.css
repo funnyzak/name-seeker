@@ -1272,39 +1272,114 @@ kbd {
 }
 
 .about-content {
-  max-height: 50vh;
+  max-height: 60vh;
   overflow-y: auto;
+  padding: 0.5rem;
+  /* 滚动条样式 */
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-300) transparent;
+}
+
+.about-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.about-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.about-content::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.about-content::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
 }
 
 .about-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .about-section:last-child {
   margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .about-section h3 {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 1rem 0;
   color: var(--gray-800);
   font-size: 1.1rem;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.about-section h3::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 1.1rem;
+  background: var(--primary-color);
+  border-radius: 2px;
 }
 
 .about-section p {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
+  color: var(--gray-600);
+  line-height: 1.6;
+}
+
+.about-section ul {
+  margin: 0.75rem 0;
+  padding-left: 1.75rem;
+}
+
+.about-section li {
+  margin-bottom: 0.5rem;
   color: var(--gray-600);
   line-height: 1.5;
 }
 
-.about-section ul {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
+/* App Title Section */
+.app-title-section {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-.about-section li {
-  margin-bottom: 0.25rem;
-  color: var(--gray-600);
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.app-title::before {
+  display: none;
+}
+
+.app-version {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background: var(--primary-color);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.app-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--gray-700);
+  margin-bottom: 1rem;
 }
 
 .btn-primary {
@@ -1314,6 +1389,42 @@ kbd {
 
 .btn-primary:hover {
   background: var(--primary-hover);
+}
+
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(74, 144, 226, 0.08);
+  color: var(--primary-color);
+  text-decoration: none;
+  padding: 0.65rem 1.25rem;
+  border: 1px solid rgba(74, 144, 226, 0.2);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-link::after {
+  content: '↗';
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.btn-link:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-link:hover::after {
+  transform: translate(2px, -2px);
 }
 
 /* Export Button */
@@ -1418,6 +1529,45 @@ kbd {
 
 .export-menu-item .icon {
   font-size: 1.1rem;
+}
+
+/* Clear Results Button */
+.btn-clear {
+  padding: 0.8rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid var(--error-color);
+  border-radius: var(--border-radius);
+  background: white;
+  color: var(--error-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.btn-clear:hover {
+  background: var(--error-color);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.btn-clear:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.btn-clear .btn-icon {
+  font-size: 1rem;
+  display: inline-flex;
+}
+
+.btn-clear .btn-text {
+  display: inline-flex;
 }
 
 /* Results Header with Export */
@@ -1553,12 +1703,21 @@ kbd {
   .search-button-compact {
     padding: 0.9rem 1rem;
   }
+
+  /* About Modal 中等窗口优化 */
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-content {
+    max-height: 58vh;
+  }
 }
 
 /* Compact window (450px - 550px) */
 @media (max-width: 550px) {
   .container {
-    padding: 0 0.75rem;
+    padding: 0 0.75rem 0.5rem;
   }
 
   .app-toolbar {
@@ -1662,6 +1821,76 @@ kbd {
     gap: 0.75rem;
   }
 
+  /* About Modal 响应式优化 */
+  .app-title-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .app-title {
+    font-size: 1.25rem;
+  }
+
+  .app-version {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .app-description {
+    font-size: 0.875rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .info-item {
+    padding: 0.75rem;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+  }
+
+  .info-value,
+  .info-link {
+    font-size: 0.875rem;
+  }
+
+  .about-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .about-section h3 {
+    font-size: 1rem;
+  }
+
+  .about-section p {
+    font-size: 0.875rem;
+  }
+
+  .about-section li {
+    font-size: 0.875rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .btn-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .long-description {
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .about-content {
+    max-height: 55vh;
+  }
+
   .empty-state {
     padding: 2.5rem 1.25rem;
   }
@@ -1675,8 +1904,6 @@ kbd {
   }
 
   .results-actions {
-    flex-direction: column;
-    align-items: stretch;
     width: 100%;
   }
 
@@ -1986,6 +2213,80 @@ button,
 }
 
 /* ================================
+   About Modal Info Grid
+   ================================ */
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  background: rgba(74, 144, 226, 0.05);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.info-label {
+  color: var(--gray-500);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  color: var(--gray-800);
+  font-size: 0.95rem;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.info-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary-color);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.info-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.long-description {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 1rem 0;
+  padding: 1rem 1.25rem;
+  background: rgba(74, 144, 226, 0.05);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--primary-color);
+  font-style: italic;
+}
+
+/* ================================
    Accessibility Improvements
    ================================ */
 
@@ -2050,6 +2351,48 @@ button,
   .toast-close:hover {
     background: var(--gray-200);
     color: var(--gray-800);
+  }
+
+  /* About Modal 暗色模式优化 */
+  .app-title {
+    color: var(--gray-900);
+  }
+
+  .app-version {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .info-item {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+  }
+
+  .info-item:hover {
+    background: rgba(74, 144, 226, 0.1);
+    border-color: var(--primary-color);
+  }
+
+  .info-label {
+    color: var(--gray-600);
+  }
+
+  .info-value {
+    color: var(--gray-900);
+  }
+
+  .long-description {
+    background: rgba(74, 144, 226, 0.1);
+    color: var(--gray-800);
+  }
+
+  .btn-link {
+    background: rgba(74, 144, 226, 0.15);
+    border-color: rgba(74, 144, 226, 0.3);
+  }
+
+  .about-section h3::before {
+    background: var(--primary-color);
   }
 }
 

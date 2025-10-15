@@ -13,12 +13,12 @@
     "windows": [
       {
         "title": "Search My Name",
-        "minWidth": 450,
+        "minWidth": 520,
         "minHeight": 650,
         "maxWidth": 700,
         "maxHeight": 900,
-        "width": 600,
-        "height": 800,
+        "width": 520,
+        "height": 650,
         "decorations": true,
         "resizable": true,
         "center": true,

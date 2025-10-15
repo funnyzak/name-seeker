@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ask } from '@tauri-apps/plugin-dialog';
 import { ExportButtonProps, ExportFormat, SearchResultStatus } from '../types';
 import { tauriApi } from '../services/tauriApi';
 
@@ -65,6 +64,30 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     }
   };
 
+  const handleCopyToClipboard = async () => {
+    setIsOpen(false);
+    setIsExporting(true);
+
+    try {
+      // 格式化结果为文本
+      const resultText = foundResults
+        .map(r => `${r.site}: ${r.url || 'N/A'}`)
+        .join('\n');
+      
+      const header = `搜索结果 - ${username}\n生成时间: ${new Date().toLocaleString('zh-CN')}\n找到 ${foundResults.length} 个结果\n\n`;
+      const fullText = header + resultText;
+
+      await tauriApi.copyToClipboard(fullText);
+      onExportSuccess?.(`已复制 ${foundResults.length} 个结果到剪贴板`);
+    } catch (error) {
+      console.error('复制到剪贴板失败:', error);
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      onExportError?.(`复制失败: ${errorMessage}`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div 
       ref={dropdownRef}
@@ -93,6 +116,16 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 
       {isOpen && (
         <div className="export-menu" role="menu">
+          <button
+            className="export-menu-item"
+            onClick={handleCopyToClipboard}
+            disabled={isExporting}
+            role="menuitem"
+            aria-label="复制到剪贴板"
+          >
+            <span className="icon" aria-hidden="true">📋</span>
+            <span>复制到剪贴板</span>
+          </button>
           <button
             className="export-menu-item"
             onClick={() => handleExport(ExportFormat.PDF)}

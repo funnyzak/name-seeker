@@ -286,16 +286,46 @@ async fn open_directory(path: String) -> Result<(), String> {
     }
 }
 
+/// 复制文本到剪贴板
+#[tauri::command]
+async fn copy_to_clipboard(app: AppHandle, text: String) -> Result<(), String> {
+    use tauri_plugin_clipboard_manager::ClipboardExt;
+
+    app.clipboard()
+        .write_text(text.clone())
+        .map_err(|e| {
+            log::error!("复制到剪贴板失败: {}", e);
+            format!("复制失败: {}", e)
+        })?;
+
+    log::info!("已复制文本到剪贴板 (长度: {})", text.len());
+    Ok(())
+}
+
+
 /// 获取应用版本信息
 #[tauri::command]
-async fn get_app_info() -> Result<serde_json::Value, String> {
-    Ok(serde_json::json!({
-        "version": env!("CARGO_PKG_VERSION"),
-        "name": env!("CARGO_PKG_NAME"),
-        "description": env!("CARGO_PKG_DESCRIPTION"),
-        "authors": env!("CARGO_PKG_AUTHORS"),
-        "build_date": env!("VERGEN_BUILD_DATE")
-    }))
+async fn get_app_info(app: AppHandle) -> Result<serde_json::Value, String> {
+    // 从 Tauri 配置获取 bundle 信息
+    let config = app.config();
+    let bundle = &config.bundle;
+    
+    // 获取应用信息
+    let app_info = serde_json::json!({
+        "name": config.product_name,
+        "version": config.version,
+        "identifier": config.identifier,
+        "description": bundle.short_description,
+        "long_description": bundle.long_description,
+        "copyright": bundle.copyright,
+        "category": bundle.category,
+        "authors": env!("CARGO_PKG_AUTHORS"), // 这个还是从 Cargo.toml 获取
+        "build_date": env!("VERGEN_BUILD_DATE"), // 构建时间
+        "tauri_version": tauri::VERSION,
+        "build_profile": if cfg!(debug_assertions) { "debug" } else { "release" }
+    });
+    
+    Ok(app_info)
 }
 
 /// 导出搜索结果
@@ -329,11 +359,11 @@ pub fn run() {
             validate_email_format,
             open_url,
             open_directory,
+            copy_to_clipboard,
             get_app_info,
             export_results_cmd
         ])
         .setup(|app| {
-            // 这里可以进行应用初始化设置
             log::info!("Tauri应用初始化完成");
             Ok(())
         })

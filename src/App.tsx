@@ -17,7 +17,7 @@ const App: React.FC = () => {
 
   const { showDisclaimer, isLoading, acceptDisclaimer, declineDisclaimer } = useDisclaimer();
   const { toasts, removeToast, success, error, info } = useToast();
-  const { isSearching, searchType, query, results, progress, startSearch, stopSearch } = useSearch();
+  const { isSearching, searchType, query, results, progress, startSearch, stopSearch, clearResults } = useSearch();
   const { history, addToHistory, clearHistory, removeFromHistory } = useSearchHistory();
 
   const handleSearchSubmit = async (searchQuery: string, type: SearchType) => {
@@ -141,6 +141,10 @@ const App: React.FC = () => {
             query={query}
             onExportSuccess={success}
             onExportError={error}
+            onClearResults={() => {
+              clearResults();
+              info('已清除搜索结果');
+            }}
           />
         </div>
       </main>

@@ -18,7 +18,8 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   isSearching,
   query,
   onExportSuccess,
-  onExportError
+  onExportError,
+  onClearResults
 }) => {
   const [collapsed, setCollapsed] = useState<CollapsedSections>({
     found: false,
@@ -60,7 +61,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
     return (
       <div className="empty-state" role="status" aria-label="暂无搜索结果">
         <div className="empty-icon" aria-hidden="true">🔍</div>
-        <h3>开始您的第一次搜索</h3>
+        <h3>开始你的搜索</h3>
         <p className="empty-description">输入用户名或邮箱，将帮您在数百个网站上查找相关信息</p>
         <div className="empty-features">
           <div className="feature-item">
@@ -101,13 +102,28 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               onFilterChange={setFilterText}
               resultsCount={filteredResults.length}
             />
-            { !isSearching && <ExportButton 
-              results={results} 
-              username={query}
-              disabled={isSearching}
-              onExportSuccess={onExportSuccess}
-              onExportError={onExportError}
-            />}
+            {!isSearching && (
+              <>
+                <ExportButton 
+                  results={results} 
+                  username={query}
+                  disabled={isSearching}
+                  onExportSuccess={onExportSuccess}
+                  onExportError={onExportError}
+                />
+                {onClearResults && (
+                  <button
+                    className="btn btn-clear"
+                    onClick={onClearResults}
+                    aria-label="清除搜索结果"
+                    title="清除所有搜索结果"
+                  >
+                    <span className="btn-icon" aria-hidden="true">🗑️</span>
+                    <span className="btn-text">清除结果</span>
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -170,25 +186,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           </div>
         )}
 
-        {notFoundResults.length > 0 && (
-          <div className="results-section">
-            <h3 
-              className="section-header not-found-header"
-              onClick={() => toggleSection('notFound')}
-            >
-              <span>✗ 未找到 ({notFoundResults.length})</span>
-              <span className={`collapse-icon ${collapsed.notFound ? 'collapsed' : ''}`}>
-                ▼
-              </span>
-            </h3>
-            <div className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}>
-              {notFoundResults.reverse().map((result, index) => (
-                <ResultItem key={`notfound-${result.site}-${index}`} result={result} />
-              ))}
-            </div>
-          </div>
-        )}
-
         {errorResults.length > 0 && (
           <div className="results-section">
             <h3 
@@ -203,6 +200,25 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             <div className={`results-list ${collapsed.error ? 'collapsed' : ''}`}>
               {errorResults.reverse().map((result, index) => (
                 <ResultItem key={`error-${result.site}-${index}`} result={result} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {notFoundResults.length > 0 && (
+          <div className="results-section">
+            <h3 
+              className="section-header not-found-header"
+              onClick={() => toggleSection('notFound')}
+            >
+              <span>✗ 未找到 ({notFoundResults.length})</span>
+              <span className={`collapse-icon ${collapsed.notFound ? 'collapsed' : ''}`}>
+                ▼
+              </span>
+            </h3>
+            <div className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}>
+              {notFoundResults.reverse().map((result, index) => (
+                <ResultItem key={`notfound-${result.site}-${index}`} result={result} />
               ))}
             </div>
           </div>

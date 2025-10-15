@@ -5,7 +5,8 @@ import type {
   SearchFinished,
   SearchProgressPayload,
   ExportOptions,
-  SearchType
+  SearchType,
+  AppInfo
 } from '../types';
 
 // Tauri API 服务类
@@ -136,9 +137,9 @@ export class TauriApiService {
   /**
    * 获取应用信息
    */
-  async getAppInfo(): Promise<any> {
+  async getAppInfo(): Promise<AppInfo | null> {
     try {
-      return await invoke('get_app_info');
+      return await invoke<AppInfo>('get_app_info');
     } catch (error) {
       console.error('Error getting app info:', error);
       return null;
@@ -230,6 +231,18 @@ export class TauriApiService {
       return filePath;
     } catch (error) {
       console.error('Error exporting results:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 复制文本到剪贴板
+   */
+  async copyToClipboard(text: string): Promise<void> {
+    try {
+      await invoke('copy_to_clipboard', { text });
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
       throw error;
     }
   }

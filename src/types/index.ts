@@ -103,6 +103,7 @@ export interface ResultsDisplayProps {
   query: string;  // 用户名或邮箱
   onExportSuccess?: (message: string) => void;
   onExportError?: (message: string) => void;
+  onClearResults?: () => void;
 }
 
 export interface ResultItemProps {
@@ -117,6 +118,21 @@ export interface ProgressIndicatorProps {
 export interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+// 应用信息接口
+export interface AppInfo {
+  name: string;
+  version: string;
+  identifier: string;
+  description: string;
+  long_description?: string;
+  copyright?: string;
+  category?: string;
+  authors: string;
+  build_date: string;
+  tauri_version: string;
+  build_profile: string;
 }
 
 // 导出格式枚举

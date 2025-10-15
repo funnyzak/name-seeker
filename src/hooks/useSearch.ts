@@ -215,6 +215,19 @@ export const useSearch = () => {
     return { found, notFound, errors, pending, total: results.length };
   }, [results]);
 
+  // 清除搜索结果
+  const clearResults = useCallback(() => {
+    setResults([]);
+    setProgress({
+      total_sites: 0,
+      checked_sites: 0,
+      found_count: 0,
+      error_count: 0,
+      current_site: undefined
+    });
+    setQuery('');
+  }, []);
+
   return {
     isSearching,
     searchType,
@@ -223,6 +236,7 @@ export const useSearch = () => {
     progress,
     startSearch,
     stopSearch,
+    clearResults,
     getResultsByStatus,
     getStats
   };
