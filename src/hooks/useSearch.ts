@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { tauriApi } from '../services/tauriApi';
+import { SearchType } from '../types';
 import type {
   SearchResult,
   SearchProgress,
@@ -11,6 +12,8 @@ import type {
 
 export const useSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
+  const [searchType, setSearchType] = useState<SearchType>(SearchType.USERNAME);
+  const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [progress, setProgress] = useState<SearchProgress>({
     total_sites: 0,
@@ -30,8 +33,8 @@ export const useSearch = () => {
         status: payload.status,
         url: payload.url,
         error: payload.error,
-        category: undefined, // 后端暂未提供
-        metadata: undefined  // 后端暂未提供
+        category: payload.category,
+        metadata: payload.metadata
       };
 
       if (existingIndex >= 0) {
@@ -117,7 +120,8 @@ export const useSearch = () => {
 
   // 开始搜索
   const startSearch = useCallback(async (
-    username: string,
+    searchQuery: string,
+    type: SearchType,
     options?: {
       maxConcurrentRequests?: number;
       timeoutSeconds?: number;
@@ -125,17 +129,22 @@ export const useSearch = () => {
       categoryFilter?: string;
     }
   ) => {
-    if (!username.trim()) {
-      throw new Error('Username cannot be empty');
+    if (!searchQuery.trim()) {
+      throw new Error(type === SearchType.USERNAME ? '用户名不能为空' : '邮箱不能为空');
     }
 
-    // 验证用户名格式
-    const isValid = await tauriApi.validateUsername(username.trim());
+    // 根据类型验证格式
+    const isValid = type === SearchType.USERNAME
+      ? await tauriApi.validateUsername(searchQuery.trim())
+      : await tauriApi.validateEmail(searchQuery.trim());
+    
     if (!isValid) {
-      throw new Error('Invalid username format');
+      throw new Error(type === SearchType.USERNAME ? '用户名格式无效' : '邮箱格式无效');
     }
 
     // 重置状态
+    setSearchType(type);
+    setQuery(searchQuery.trim());
     setResults([]);
     setProgress({
       total_sites: 0,
@@ -147,7 +156,7 @@ export const useSearch = () => {
     setIsSearching(true);
 
     try {
-      await tauriApi.startSearch(username.trim(), options);
+      await tauriApi.startSearch(searchQuery.trim(), type, options);
     } catch (error) {
       console.error('Failed to start search:', error);
       setIsSearching(false);
@@ -208,6 +217,8 @@ export const useSearch = () => {
 
   return {
     isSearching,
+    searchType,
+    query,
     results,
     progress,
     startSearch,

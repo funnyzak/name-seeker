@@ -1,9 +1,23 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// 搜索类型
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum SearchType {
+    Username,
+    Email,
+}
+
+impl Default for SearchType {
+    fn default() -> Self {
+        SearchType::Username
+    }
+}
+
 /// 搜索结果状态
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "PascalCase")]
 pub enum SearchResultStatus {
     Found,
     NotFound,
@@ -96,6 +110,25 @@ pub struct Site {
     #[serde(default)]
     pub known: Vec<String>,
     pub cat: String,
+    /// HTTP 请求方法（默认 GET）
+    #[serde(default = "default_method")]
+    pub method: String,
+    /// 请求数据（用于 POST 请求）
+    #[serde(default)]
+    pub data: Option<String>,
+    /// 请求头
+    #[serde(default)]
+    pub headers: Option<serde_json::Value>,
+    /// 输入操作（如 hash-sha256）
+    #[serde(default)]
+    pub input_operation: Option<String>,
+    /// 预检查配置
+    #[serde(default)]
+    pub pre_check: Option<serde_json::Value>,
+}
+
+fn default_method() -> String {
+    "GET".to_string()
 }
 
 /// 元数据提取配置
@@ -122,7 +155,8 @@ pub struct SiteMetadataConfig {
 /// 搜索配置
 #[derive(Debug, Clone)]
 pub struct SearchConfig {
-    pub username: String,
+    pub search_type: SearchType,
+    pub query: String, // 用户名或邮箱
     pub max_concurrent_requests: usize,
     pub timeout_seconds: u64,
     pub user_agent: String,
@@ -133,7 +167,8 @@ pub struct SearchConfig {
 impl Default for SearchConfig {
     fn default() -> Self {
         Self {
-            username: String::new(),
+            search_type: SearchType::Username,
+            query: String::new(),
             max_concurrent_requests: 30,
             timeout_seconds: 30,
             user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36".to_string(),
@@ -150,6 +185,8 @@ pub struct SearchUpdatePayload {
     pub status: SearchResultStatus,
     pub url: Option<String>,
     pub error: Option<String>,
+    pub category: Option<String>,
+    pub metadata: Option<Vec<MetadataItem>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -160,4 +197,23 @@ pub struct SearchProgressPayload {
     pub error_count: u32,
     pub percentage: f32,
     pub current_site: Option<String>,
+}
+
+/// 导出格式
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ExportFormat {
+    Pdf,
+    Csv,
+    Json,
+    Txt,
+}
+
+/// 导出选项
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExportOptions {
+    pub format: ExportFormat,
+    pub username: String,
+    pub results: Vec<SearchResult>,
+    pub timestamp: Option<String>,
 }

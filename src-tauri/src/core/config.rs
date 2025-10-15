@@ -11,8 +11,10 @@ use tokio::fs as async_fs;
 pub struct AppConfig {
     /// 应用数据目录
     pub app_data_dir: PathBuf,
-    /// 网站数据文件路径
+    /// 用户名网站数据文件路径
     pub sites_data_path: PathBuf,
+    /// 邮箱网站数据文件路径
+    pub email_data_path: PathBuf,
     /// 元数据配置文件路径
     pub metadata_path: PathBuf,
     /// 用户代理列表文件路径
@@ -37,6 +39,7 @@ impl AppConfig {
         let config = Self {
             app_data_dir: data_dir.clone(),
             sites_data_path: data_dir.join("wmn-data.json"),
+            email_data_path: data_dir.join("email-data.json"),
             metadata_path: data_dir.join("wmn-metadata.json"),
             user_agents_path: data_dir.join("useragents.txt"),
             first_launch_flag_path: data_dir.join(".disclaimer_accepted"),
@@ -51,6 +54,9 @@ impl AppConfig {
 
     /// 确保数据文件存在
     fn ensure_data_files_exist(&self) -> AppResult<()> {
+        // 复制内置的数据文件到用户数据目录（作为初始缓存）
+        self.copy_bundled_data_files()?;
+
         // 创建用户代理文件（如果不存在）
         if !self.user_agents_path.exists() {
             let default_user_agents = vec![
@@ -62,6 +68,63 @@ impl AppConfig {
                 "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/121.0",
             ];
             fs::write(&self.user_agents_path, default_user_agents.join("\n"))?;
+        }
+
+        Ok(())
+    }
+
+    /// 复制内置数据文件到用户目录
+    fn copy_bundled_data_files(&self) -> AppResult<()> {
+        // 获取内置数据文件路径（相对于可执行文件）
+        let exe_dir = std::env::current_exe()
+            .ok()
+            .and_then(|p| p.parent().map(|p| p.to_path_buf()));
+
+        if let Some(exe_dir) = exe_dir {
+            // 尝试多个可能的位置
+            let possible_data_dirs = vec![
+                exe_dir.join("data"),          // Release 模式
+                exe_dir.join("../../../data"), // Debug 模式（target/debug）
+                exe_dir.join("../../data"),    // 其他情况
+            ];
+
+            for bundled_data_dir in possible_data_dirs {
+                if bundled_data_dir.exists() {
+                    log::info!("找到内置数据目录: {:?}", bundled_data_dir);
+
+                    // 复制邮箱数据文件
+                    let bundled_email = bundled_data_dir.join("email-data.json");
+                    if bundled_email.exists() && !self.email_data_path.exists() {
+                        fs::copy(&bundled_email, &self.email_data_path)?;
+                        log::info!("已复制邮箱数据文件");
+                    }
+
+                    // 复制元数据配置文件
+                    let bundled_metadata = bundled_data_dir.join("wmn-metadata.json");
+                    if bundled_metadata.exists() && !self.metadata_path.exists() {
+                        fs::copy(&bundled_metadata, &self.metadata_path)?;
+                        log::info!("已复制元数据配置文件");
+                    }
+
+                    // 复制用户代理文件
+                    let bundled_useragents = bundled_data_dir.join("useragents.txt");
+                    if bundled_useragents.exists() && !self.user_agents_path.exists() {
+                        fs::copy(&bundled_useragents, &self.user_agents_path)?;
+                        log::info!("已复制用户代理文件");
+                    }
+
+                    // 复制用户名数据文件
+                    let bundled_wmn = bundled_data_dir.join("wmn-data.json");
+                    if bundled_wmn.exists() && !self.sites_data_path.exists() {
+                        fs::copy(&bundled_wmn, &self.sites_data_path)?;
+                        log::info!("已复制用户名数据文件");
+                    }
+
+                    return Ok(());
+                }
+            }
+
+            log::warn!("未找到内置数据目录，将使用在线下载");
         }
 
         Ok(())
@@ -108,6 +171,5 @@ impl AppConfig {
 }
 
 /// 全局应用配置实例
-pub static APP_CONFIG: Lazy<AppConfig> = Lazy::new(|| {
-    AppConfig::new().expect("无法初始化应用配置")
-});
+pub static APP_CONFIG: Lazy<AppConfig> =
+    Lazy::new(|| AppConfig::new().expect("无法初始化应用配置"));

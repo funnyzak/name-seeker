@@ -1,111 +1,234 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import ResultItem from './ResultItem';
 import ProgressIndicator from './ProgressIndicator';
+import ExportButton from './ExportButton';
+import ResultsFilter from './ResultsFilter';
 import type { ResultsDisplayProps } from '../types';
+
+interface CollapsedSections {
+  found: boolean;
+  notFound: boolean;
+  error: boolean;
+  pending: boolean;
+}
 
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   results,
   progress,
-  isSearching
+  isSearching,
+  query,
+  onExportSuccess,
+  onExportError
 }) => {
-  const foundResults = results.filter(r => r.status === 'Found');
-  const notFoundResults = results.filter(r => r.status === 'NotFound');
-  const errorResults = results.filter(r => r.status === 'Error');
-  const pendingResults = results.filter(r => r.status === 'Pending');
+  const [collapsed, setCollapsed] = useState<CollapsedSections>({
+    found: false,
+    notFound: true,  // 默认折叠 Not Found
+    error: false,
+    pending: false
+  });
+  const [filterText, setFilterText] = useState('');
+
+  // 使用 useMemo 缓存筛选后的结果
+  const filteredResults = useMemo(() => {
+    if (!filterText.trim()) {
+      return results;
+    }
+    
+    const searchTerm = filterText.toLowerCase();
+    return results.filter(r => 
+      r.site.toLowerCase().includes(searchTerm) ||
+      (r.category && r.category.toLowerCase().includes(searchTerm)) ||
+      (r.url && r.url.toLowerCase().includes(searchTerm))
+    );
+  }, [results, filterText]);
+
+  const foundResults = filteredResults.filter(r => r.status === 'Found');
+  const notFoundResults = filteredResults.filter(r => r.status === 'NotFound');
+  const errorResults = filteredResults.filter(r => r.status === 'Error');
+  const pendingResults = filteredResults.filter(r => r.status === 'Pending');
 
   const hasResults = results.length > 0 || isSearching;
 
+  const toggleSection = (section: keyof CollapsedSections) => {
+    setCollapsed(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   if (!hasResults) {
     return (
-      <div className="empty-state">
-        <div className="empty-icon">🔍</div>
+      <div className="empty-state" role="status" aria-label="暂无搜索结果">
+        <div className="empty-icon" aria-hidden="true">🔍</div>
         <h3>开始您的第一次搜索</h3>
-        <p>输入用户名或邮箱，将帮您在数百个网站上查找相关信息</p>
+        <p className="empty-description">输入用户名或邮箱，将帮您在数百个网站上查找相关信息</p>
+        <div className="empty-features">
+          <div className="feature-item">
+            <span className="feature-icon" aria-hidden="true">⚡</span>
+            <span>快速搜索</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-icon" aria-hidden="true">🌐</span>
+            <span>多网站覆盖</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-icon" aria-hidden="true">📊</span>
+            <span>结果导出</span>
+          </div>
+        </div>
+        <div className="empty-shortcuts">
+          <p className="shortcuts-title">快捷键提示：</p>
+          <ul className="shortcuts-list">
+            <li><kbd>/</kbd> 聚焦搜索框</li>
+            <li><kbd>Esc</kbd> 停止搜索</li>
+            <li><kbd>Ctrl+H</kbd> 显示帮助</li>
+          </ul>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="results-container">
+    <div className="results-container" role="region" aria-label="搜索结果">
+      {/* 结果头部：标题和导出按钮 */}
+      {results.length > 0 && (
+        <div className="results-header">
+          <h3 className="results-title" id="results-heading">
+            搜索结果 <span className="results-count" aria-label={`显示 ${filteredResults.length} 个，共 ${results.length} 个结果`}>({filteredResults.length}/{results.length})</span>
+          </h3>
+          <div className="results-actions">
+            <ResultsFilter 
+              onFilterChange={setFilterText}
+              resultsCount={filteredResults.length}
+            />
+            { !isSearching && <ExportButton 
+              results={results} 
+              username={query}
+              disabled={isSearching}
+              onExportSuccess={onExportSuccess}
+              onExportError={onExportError}
+            />}
+          </div>
+        </div>
+      )}
+
+      {/* 进度指示器 */}
       <ProgressIndicator progress={progress} isSearching={isSearching} />
 
-      {foundResults.length > 0 && (
-        <div className="results-section">
-          <h3 className="section-header found-header">
-            ✓ 找到的用户 ({foundResults.length})
-          </h3>
-          <div className="results-list">
-            {foundResults.map((result, index) => (
-              <ResultItem key={`found-${result.site}-${index}`} result={result} />
-            ))}
+      {/* 结果区域滚动容器 */}
+      <div className="section-wrapper" role="main" aria-labelledby="results-heading">
+        {foundResults.length > 0 && (
+          <div className="results-section">
+            <h3 
+              className="section-header found-header"
+              onClick={() => toggleSection('found')}
+              role="button"
+              tabIndex={0}
+              aria-expanded={!collapsed.found}
+              aria-controls="found-results-list"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleSection('found');
+                }
+              }}
+            >
+              <span>✓ 找到的用户 ({foundResults.length})</span>
+              <span className={`collapse-icon ${collapsed.found ? 'collapsed' : ''}`} aria-hidden="true">
+                ▼
+              </span>
+            </h3>
+            <div 
+              id="found-results-list"
+              className={`results-list ${collapsed.found ? 'collapsed' : ''}`}
+              role="list"
+              aria-label="找到的用户列表"
+            >
+              {foundResults.reverse().map((result, index) => (
+                <ResultItem key={`found-${result.site}-${index}`} result={result} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {pendingResults.length > 0 && isSearching && (
-        <div className="results-section">
-          <h3 className="section-header pending-header">
-            ⏳ 正在检查 ({pendingResults.length})
-          </h3>
-          <div className="results-list">
-            {pendingResults.map((result, index) => (
-              <ResultItem key={`pending-${result.site}-${index}`} result={result} />
-            ))}
+        {pendingResults.length > 0 && isSearching && (
+          <div className="results-section">
+            <h3 
+              className="section-header pending-header"
+              onClick={() => toggleSection('pending')}
+            >
+              <span>⏳ 正在检查 ({pendingResults.length})</span>
+              <span className={`collapse-icon ${collapsed.pending ? 'collapsed' : ''}`}>
+                ▼
+              </span>
+            </h3>
+            <div className={`results-list ${collapsed.pending ? 'collapsed' : ''}`}>
+              {pendingResults.reverse().map((result, index) => (
+                <ResultItem key={`pending-${result.site}-${index}`} result={result} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {notFoundResults.length > 0 && (
-        <div className="results-section">
-          <h3 className="section-header not-found-header">
-            ✗ 未找到 ({notFoundResults.length})
-          </h3>
-          <div className="results-list collapsed">
-            {notFoundResults.slice(0, 5).map((result, index) => (
-              <ResultItem key={`notfound-${result.site}-${index}`} result={result} />
-            ))}
-            {notFoundResults.length > 5 && (
-              <div className="collapsed-hint">
-                还有 {notFoundResults.length - 5} 个未找到的结果...
-              </div>
-            )}
+        {notFoundResults.length > 0 && (
+          <div className="results-section">
+            <h3 
+              className="section-header not-found-header"
+              onClick={() => toggleSection('notFound')}
+            >
+              <span>✗ 未找到 ({notFoundResults.length})</span>
+              <span className={`collapse-icon ${collapsed.notFound ? 'collapsed' : ''}`}>
+                ▼
+              </span>
+            </h3>
+            <div className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}>
+              {notFoundResults.reverse().map((result, index) => (
+                <ResultItem key={`notfound-${result.site}-${index}`} result={result} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {errorResults.length > 0 && (
-        <div className="results-section">
-          <h3 className="section-header error-header">
-            ⚠ 错误 ({errorResults.length})
-          </h3>
-          <div className="results-list">
-            {errorResults.map((result, index) => (
-              <ResultItem key={`error-${result.site}-${index}`} result={result} />
-            ))}
+        {errorResults.length > 0 && (
+          <div className="results-section">
+            <h3 
+              className="section-header error-header"
+              onClick={() => toggleSection('error')}
+            >
+              <span>⚠ 错误 ({errorResults.length})</span>
+              <span className={`collapse-icon ${collapsed.error ? 'collapsed' : ''}`}>
+                ▼
+              </span>
+            </h3>
+            <div className={`results-list ${collapsed.error ? 'collapsed' : ''}`}>
+              {errorResults.reverse().map((result, index) => (
+                <ResultItem key={`error-${result.site}-${index}`} result={result} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {!isSearching && (results.length > 0 || progress.checked_sites > 0) && (
         <div className="search-summary">
-          {progress.current_site === undefined && progress.checked_sites < progress.total_sites && (
+          {/* {progress.current_site === undefined && progress.checked_sites < progress.total_sites && (
             <div className="search-stopped-notice">
               <span className="stopped-icon">⏸️</span>
               搜索已被停止，显示已完成检查的结果
             </div>
-          )}
+          )} */}
           <div className="summary-stats">
             <span className="summary-stat found">
-              找到: {foundResults.length > 0 ? foundResults.length : progress.found_count}
+              找到: {foundResults.length}
             </span>
             <span className="summary-stat not-found">
-              未找到: {notFoundResults.length > 0 ? notFoundResults.length : (progress.checked_sites - progress.found_count - progress.error_count)}
+              未找到: {notFoundResults.length}
             </span>
             <span className="summary-stat error">
-              错误: {errorResults.length > 0 ? errorResults.length : progress.error_count}
+              错误: {errorResults.length}
             </span>
             <span className="summary-stat total">
-              总计: {results.length > 0 ? results.length : progress.checked_sites}
+              总计: {results.length}
             </span>
           </div>
         </div>

@@ -1,0 +1,429 @@
+---
+globs: *.rs
+description: Rust 和 Tauri 后端开发规则
+---
+
+# Rust + Tauri 后端开发规则
+
+## 🦀 Rust 代码规范
+
+### 错误处理
+- 使用 `Result<T, E>` 处理可能失败的操作
+- 自定义错误类型，实现 `Display` 和 `Error` trait
+- 使用 `?` 操作符传播错误
+
+```rust
+// ✅ 正确的错误处理
+#[derive(Debug, thiserror::Error)]
+pub enum SearchError {
+    #[error("网络请求失败: {0}")]
+    NetworkError(#[from] reqwest::Error),
+    #[error("解析错误: {0}")]
+    ParseError(String),
+}
+
+pub async fn search_username(query: &str) -> Result<Vec<SearchResult>, SearchError> {
+    let response = reqwest::get(&url).await?;
+    let results: Vec<SearchResult> = response.json().await?;
+    Ok(results)
+}
+```
+
+### 异步编程
+- 使用 `async/await` 语法
+- 合理使用 `tokio::spawn` 进行并发
+- 使用 `Arc<Mutex<T>>` 处理共享状态
+
+```rust
+// ✅ 正确的异步编程
+pub struct SearchEngine {
+    config: SearchConfig,
+    client: reqwest::Client,
+}
+
+impl SearchEngine {
+    pub async fn search(&self, sites: &[Site]) -> Result<Vec<SearchResult>, SearchError> {
+        let semaphore = Arc::new(Semaphore::new(self.config.max_concurrent_requests));
+        let mut handles = Vec::new();
+        
+        for site in sites {
+            let semaphore = semaphore.clone();
+            let client = self.client.clone();
+            
+            let handle = tokio::spawn(async move {
+                let _permit = semaphore.acquire().await?;
+                self.check_site(&client, site).await
+            });
+            
+            handles.push(handle);
+        }
+        
+        // 等待所有任务完成
+        let mut results = Vec::new();
+        for handle in handles {
+            if let Ok(result) = handle.await? {
+                results.push(result);
+            }
+        }
+        
+        Ok(results)
+    }
+}
+```
+
+## 🎯 Tauri 命令开发
+
+### 命令函数规范
+- 使用 `#[tauri::command]` 宏
+- 函数名使用 snake_case
+- 返回 `Result<T, String>` 类型
+
+```rust
+// ✅ 正确的 Tauri 命令
+#[tauri::command]
+async fn start_search(
+    app: AppHandle,
+    query: String,
+    search_type: Option<String>,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), String> {
+    // 验证输入
+    validate_input(&query)?;
+    
+    // 执行搜索
+    let search_engine = SearchEngine::new(config)?;
+    let results = search_engine.search(&sites).await
+        .map_err(|e| e.to_string())?;
+    
+    // 发送事件到前端
+    app.emit("search-update", &results)
+        .map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+```
+
+### 状态管理
+- 使用 `tauri::State` 管理应用状态
+- 使用 `Arc<Mutex<T>>` 处理并发访问
+- 合理使用生命周期
+
+```rust
+// ✅ 正确的状态管理
+#[derive(Default)]
+pub struct AppState {
+    pub search_handle: Arc<Mutex<Option<JoinHandle<()>>>>,
+    pub search_results: Arc<Mutex<Vec<SearchResult>>>,
+}
+
+#[tauri::command]
+async fn get_search_results(
+    state: tauri::State<'_, AppState>
+) -> Result<Vec<SearchResult>, String> {
+    let results = state.search_results.lock().await;
+    Ok(results.clone())
+}
+```
+
+## 🔧 模块组织
+
+### 模块结构
+- 使用 `mod.rs` 文件组织模块
+- 每个模块有明确的职责
+- 使用 `pub` 控制可见性
+
+```rust
+// src-tauri/src/core/mod.rs
+pub mod config;
+pub mod error;
+pub mod models;
+pub mod search;
+pub mod sites;
+pub mod utils;
+pub mod export;
+
+pub use config::*;
+pub use error::*;
+pub use models::*;
+```
+
+### 数据模型
+- 使用 `serde` 进行序列化
+- 实现 `Clone` 和 `Debug` trait
+- 使用枚举表示状态
+
+```rust
+// ✅ 正确的数据模型
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SearchResult {
+    pub site: String,
+    pub url: String,
+    pub status: SearchResultStatus,
+    pub response_time: Option<u64>,
+    pub metadata: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum SearchResultStatus {
+    Found,
+    NotFound,
+    Error,
+    Timeout,
+}
+```
+
+## 🚀 性能优化
+
+### 并发控制
+- 使用 `Semaphore` 限制并发数
+- 使用 `tokio::spawn` 进行异步任务
+- 合理设置超时时间
+
+```rust
+// ✅ 正确的并发控制
+pub async fn search_with_concurrency(
+    sites: &[Site],
+    max_concurrent: usize,
+) -> Result<Vec<SearchResult>, SearchError> {
+    let semaphore = Arc::new(Semaphore::new(max_concurrent));
+    let mut handles = Vec::new();
+    
+    for site in sites {
+        let semaphore = semaphore.clone();
+        let handle = tokio::spawn(async move {
+            let _permit = semaphore.acquire().await?;
+            // 执行搜索逻辑
+            Ok::<_, SearchError>(())
+        });
+        handles.push(handle);
+    }
+    
+    // 等待所有任务完成
+    let mut results = Vec::new();
+    for handle in handles {
+        if let Ok(result) = handle.await? {
+            results.push(result);
+        }
+    }
+    
+    Ok(results)
+}
+```
+
+### 内存管理
+- 使用 `Arc` 进行引用计数
+- 避免不必要的克隆
+- 使用 `Cow` 处理字符串
+
+```rust
+// ✅ 正确的内存管理
+pub struct SearchEngine {
+    config: Arc<SearchConfig>,
+    client: Arc<reqwest::Client>,
+}
+
+impl SearchEngine {
+    pub fn new(config: SearchConfig) -> Result<Self, SearchError> {
+        Ok(Self {
+            config: Arc::new(config),
+            client: Arc::new(reqwest::Client::new()),
+        })
+    }
+}
+```
+
+## 🔄 事件系统
+
+### 事件发送
+- 使用 `app.emit()` 发送事件
+- 定义清晰的事件类型
+- 处理发送失败的情况
+
+```rust
+// ✅ 正确的事件发送
+#[tauri::command]
+async fn start_search(app: AppHandle, query: String) -> Result<(), String> {
+    // 发送搜索开始事件
+    app.emit("search-started", &query)
+        .map_err(|e| e.to_string())?;
+    
+    // 执行搜索
+    let results = perform_search(&query).await?;
+    
+    // 发送结果更新事件
+    app.emit("search-update", &results)
+        .map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+```
+
+### 事件类型定义
+- 使用结构体定义事件数据
+- 实现 `Serialize` trait
+- 使用描述性的字段名
+
+```rust
+// ✅ 正确的事件类型
+#[derive(Debug, Clone, Serialize)]
+pub struct SearchUpdatePayload {
+    pub site: String,
+    pub url: String,
+    pub status: SearchResultStatus,
+    pub response_time: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SearchProgressPayload {
+    pub total_sites: u32,
+    pub checked_sites: u32,
+    pub found_count: u32,
+    pub percentage: f64,
+}
+```
+
+## 🛡️ 安全性
+
+### 输入验证
+- 验证所有用户输入
+- 使用正则表达式验证格式
+- 防止注入攻击
+
+```rust
+// ✅ 正确的输入验证
+pub fn validate_username(username: &str) -> Result<(), SearchError> {
+    if username.is_empty() {
+        return Err(SearchError::ValidationError("用户名不能为空".to_string()));
+    }
+    
+    if username.len() > 50 {
+        return Err(SearchError::ValidationError("用户名过长".to_string()));
+    }
+    
+    // 检查用户名格式
+    let username_regex = Regex::new(r"^[a-zA-Z0-9._-]+$")?;
+    if !username_regex.is_match(username) {
+        return Err(SearchError::ValidationError("用户名格式无效".to_string()));
+    }
+    
+    Ok(())
+}
+```
+
+### 错误处理
+- 不要暴露内部错误信息
+- 记录详细的错误日志
+- 提供用户友好的错误消息
+
+```rust
+// ✅ 正确的错误处理
+#[tauri::command]
+async fn start_search(query: String) -> Result<(), String> {
+    match perform_search(&query).await {
+        Ok(_) => Ok(()),
+        Err(SearchError::NetworkError(e)) => {
+            log::error!("网络错误: {}", e);
+            Err("网络连接失败，请检查网络设置".to_string())
+        }
+        Err(SearchError::ValidationError(msg)) => {
+            log::warn!("验证错误: {}", msg);
+            Err(msg)
+        }
+        Err(e) => {
+            log::error!("未知错误: {}", e);
+            Err("搜索失败，请稍后重试".to_string())
+        }
+    }
+}
+```
+
+## 📝 日志记录
+
+### 日志级别
+- 使用 `log` crate 进行日志记录
+- 合理设置日志级别
+- 记录关键操作和错误
+
+```rust
+// ✅ 正确的日志记录
+use log::{info, warn, error, debug};
+
+pub async fn search_username(query: &str) -> Result<Vec<SearchResult>, SearchError> {
+    info!("开始搜索用户名: {}", query);
+    
+    let results = perform_search(query).await?;
+    
+    info!("搜索完成，找到 {} 个结果", results.len());
+    
+    Ok(results)
+}
+```
+
+### 日志配置
+- 在应用启动时配置日志
+- 使用环境变量控制日志级别
+- 记录到文件和控制台
+
+```rust
+// ✅ 正确的日志配置
+pub fn init_logging() {
+    env_logger::Builder::from_default_env()
+        .filter_level(log::LevelFilter::Info)
+        .format(|buf, record| {
+            writeln!(buf, "{} [{}] {}", 
+                chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
+                record.level(),
+                record.args()
+            )
+        })
+        .init();
+}
+```
+
+## 🧪 测试
+
+### 单元测试
+- 为每个函数编写测试
+- 使用 `#[cfg(test)]` 标记测试模块
+- 测试正常情况和边界情况
+
+```rust
+// ✅ 正确的单元测试
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_validate_username() {
+        assert!(validate_username("testuser").is_ok());
+        assert!(validate_username("").is_err());
+        assert!(validate_username("a".repeat(51)).is_err());
+    }
+    
+    #[tokio::test]
+    async fn test_search_username() {
+        let result = search_username("testuser").await;
+        assert!(result.is_ok());
+    }
+}
+```
+
+### 集成测试
+- 测试 Tauri 命令
+- 测试事件系统
+- 测试完整的搜索流程
+
+```rust
+// ✅ 正确的集成测试
+#[cfg(test)]
+mod integration_tests {
+    use tauri::test;
+    
+    #[tokio::test]
+    async fn test_start_search_command() {
+        let app = test::mock_app();
+        let result = start_search(app.handle(), "testuser".to_string()).await;
+        assert!(result.is_ok());
+    }
+}
+```

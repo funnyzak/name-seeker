@@ -13,14 +13,23 @@
     "windows": [
       {
         "title": "Search My Name",
+        "minWidth": 450,
+        "minHeight": 650,
+        "maxWidth": 700,
+        "maxHeight": 900,
         "width": 600,
-        "height": 600,
+        "height": 800,
         "decorations": true,
-        "resizable": false
+        "resizable": true,
+        "center": true,
+        "hiddenTitle": false,
+        "acceptFirstMouse": true,
+        "contentProtected": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'",
+      "dangerousDisableAssetCspModification": false
     }
   },
   "bundle": {
@@ -32,6 +41,22 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Utility",
+    "shortDescription": "用户名和邮箱多平台搜索工具",
+    "longDescription": "Search My Name 是一款强大的跨平台桌面应用，可以在数百个网站上搜索用户名和邮箱，帮助你快速发现你的数字足迹。基于 WhatsMyName 项目数据，支持导出搜索结果为 PDF、CSV、JSON 等格式。",
+    "copyright": "Copyright © 2025 Leon",
+    "resources": [],
+    "externalBin": [],
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "10.13",
+      "exceptionDomain": ""
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    }
   }
 }

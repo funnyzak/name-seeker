@@ -3,7 +3,9 @@ import { listen } from '@tauri-apps/api/event';
 import type {
   SearchUpdatePayload,
   SearchFinished,
-  SearchProgressPayload
+  SearchProgressPayload,
+  ExportOptions,
+  SearchType
 } from '../types';
 
 // Tauri API 服务类
@@ -44,10 +46,11 @@ export class TauriApiService {
   }
 
   /**
-   * 开始搜索用户名
+   * 开始搜索
    */
   async startSearch(
-    username: string,
+    query: string,
+    searchType: SearchType,
     options?: {
       maxConcurrentRequests?: number;
       timeoutSeconds?: number;
@@ -57,7 +60,8 @@ export class TauriApiService {
   ): Promise<void> {
     try {
       await invoke('start_search', {
-        username,
+        query,
+        searchType,
         maxConcurrentRequests: options?.maxConcurrentRequests,
         timeoutSeconds: options?.timeoutSeconds,
         excludeNsfw: options?.excludeNsfw,
@@ -197,7 +201,42 @@ export class TauriApiService {
       throw error;
     }
   }
+
+  /**
+   * 打开文件所在目录
+   */
+  async openDirectory(path: string): Promise<void> {
+    try {
+      await invoke('open_directory', { path });
+    } catch (error) {
+      console.error('Error opening directory:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 导出搜索结果
+   */
+  async exportResults(options: ExportOptions): Promise<string> {
+    try {
+      const filePath = await invoke<string>('export_results_cmd', {
+        options: {
+          format: options.format,
+          username: options.username,
+          results: options.results,
+          timestamp: options.timestamp
+        }
+      });
+      return filePath;
+    } catch (error) {
+      console.error('Error exporting results:', error);
+      throw error;
+    }
+  }
 }
 
 // 导出单例实例
 export const tauriApi = TauriApiService.getInstance();
+
+// 导出便捷函数
+export const exportResults = (options: ExportOptions) => tauriApi.exportResults(options);

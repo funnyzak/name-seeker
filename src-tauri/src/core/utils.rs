@@ -14,17 +14,17 @@ pub fn extract_json_data(path: &[String], data: &Value) -> AppResult<Option<Valu
     for segment in path {
         match current {
             Value::Object(map) => {
-                current = map.get(segment).ok_or_else(|| {
-                    AppError::SearchError(format!("路径段 '{}' 不存在", segment))
-                })?;
+                current = map
+                    .get(segment)
+                    .ok_or_else(|| AppError::SearchError(format!("路径段 '{}' 不存在", segment)))?;
             }
             Value::Array(arr) => {
-                let index = segment.parse::<usize>().map_err(|_| {
-                    AppError::SearchError(format!("无效的数组索引: {}", segment))
-                })?;
-                current = arr.get(index).ok_or_else(|| {
-                    AppError::SearchError(format!("数组索引 {} 越界", index))
-                })?;
+                let index = segment
+                    .parse::<usize>()
+                    .map_err(|_| AppError::SearchError(format!("无效的数组索引: {}", segment)))?;
+                current = arr
+                    .get(index)
+                    .ok_or_else(|| AppError::SearchError(format!("数组索引 {} 越界", index)))?;
             }
             _ => {
                 return Err(AppError::SearchError(
@@ -94,7 +94,9 @@ pub fn validate_username(username: &str) -> AppResult<()> {
     }
 
     if username.len() < 2 {
-        return Err(AppError::UserInputError("用户名至少需要2个字符".to_string()));
+        return Err(AppError::UserInputError(
+            "用户名至少需要2个字符".to_string(),
+        ));
     }
 
     if username.len() > 100 {
@@ -102,7 +104,10 @@ pub fn validate_username(username: &str) -> AppResult<()> {
     }
 
     // 基本字符检查（允许字母、数字、下划线、连字符、点）
-    if !username.chars().all(|c| c.is_alphanumeric() || matches!(c, '_' | '-' | '.')) {
+    if !username
+        .chars()
+        .all(|c| c.is_alphanumeric() || matches!(c, '_' | '-' | '.'))
+    {
         return Err(AppError::UserInputError("用户名包含无效字符".to_string()));
     }
 
@@ -185,7 +190,8 @@ pub fn extract_domain(url: &str) -> AppResult<String> {
     let url = normalize_url(url);
 
     if let Ok(parsed) = url::Url::parse(&url) {
-        Ok(parsed.host_str()
+        Ok(parsed
+            .host_str()
             .ok_or_else(|| AppError::SearchError("无法解析域名".to_string()))?
             .to_string())
     } else {
@@ -262,6 +268,9 @@ mod tests {
     fn test_normalize_url() {
         assert_eq!(normalize_url("example.com"), "https://example.com");
         assert_eq!(normalize_url("http://example.com/"), "http://example.com");
-        assert_eq!(normalize_url("https://example.com/path/"), "https://example.com/path");
+        assert_eq!(
+            normalize_url("https://example.com/path/"),
+            "https://example.com/path"
+        );
     }
 }

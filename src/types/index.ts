@@ -1,3 +1,9 @@
+// 搜索类型枚举
+export enum SearchType {
+  USERNAME = 'username',
+  EMAIL = 'email'
+}
+
 // 搜索结果状态枚举
 export enum SearchResultStatus {
   FOUND = 'Found',
@@ -55,6 +61,8 @@ export interface SearchUpdatePayload {
   status: SearchResultStatus;
   url: string | null;
   error?: string;
+  category?: string;
+  metadata?: MetadataItem[];
 }
 
 // 应用状态接口
@@ -62,7 +70,8 @@ export interface AppState {
   isFirstLaunch: boolean;
   disclaimerAccepted: boolean;
   isSearching: boolean;
-  username: string;
+  searchType: SearchType;
+  query: string;  // 用户名或邮箱
   results: SearchResult[];
   progress: SearchProgress;
 }
@@ -76,14 +85,24 @@ export interface DisclaimerModalProps {
 
 export interface SearchFormProps {
   isSearching: boolean;
-  onSubmit: (username: string) => void;
+  searchType: SearchType;
+  onSubmit: (query: string, searchType: SearchType) => void;
   onStopSearch?: () => void;
+  searchHistory?: string[];
+  onAddToHistory?: (query: string) => void;
+  onRemoveFromHistory?: (query: string) => void;
+  onClearHistory?: () => void;
+  onError?: (message: string) => void;
+  onWarning?: (message: string) => void;
 }
 
 export interface ResultsDisplayProps {
   results: SearchResult[];
   progress: SearchProgress;
   isSearching: boolean;
+  query: string;  // 用户名或邮箱
+  onExportSuccess?: (message: string) => void;
+  onExportError?: (message: string) => void;
 }
 
 export interface ResultItemProps {
@@ -98,4 +117,29 @@ export interface ProgressIndicatorProps {
 export interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+// 导出格式枚举
+export enum ExportFormat {
+  PDF = 'pdf',
+  CSV = 'csv',
+  JSON = 'json',
+  TXT = 'txt'
+}
+
+// 导出选项接口
+export interface ExportOptions {
+  format: ExportFormat;
+  username: string;  // 保持向后兼容，实际可以是用户名或邮箱
+  results: SearchResult[];
+  timestamp?: string;
+}
+
+// 导出按钮Props
+export interface ExportButtonProps {
+  results: SearchResult[];
+  username: string;  // 保持向后兼容，实际可以是用户名或邮箱
+  disabled?: boolean;
+  onExportSuccess?: (message: string) => void;
+  onExportError?: (message: string) => void;
 }

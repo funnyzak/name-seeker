@@ -3,6 +3,8 @@
   "specifiers": {
     "npm:@tauri-apps/api@2": "2.8.0",
     "npm:@tauri-apps/cli@2": "2.8.4",
+    "npm:@tauri-apps/plugin-clipboard-manager@2.3": "2.3.0",
+    "npm:@tauri-apps/plugin-dialog@2.4": "2.4.0",
     "npm:@tauri-apps/plugin-opener@2": "2.5.0",
     "npm:@types/react-dom@^19.1.6": "19.2.2_@types+react@19.2.2",
     "npm:@types/react@^19.1.8": "19.2.2",
@@ -495,6 +497,18 @@
       ],
       "bin": true
     },
+    "@tauri-apps/plugin-clipboard-manager@2.3.0": {
+      "integrity": "sha512-81NOBA2P+OTY8RLkBwyl9ZR/0CeggLub4F6zxcxUIfFOAqtky7J61+K/MkH2SC1FMxNBxrX0swDuKvkjkHadlA==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
+    "@tauri-apps/plugin-dialog@2.4.0": {
+      "integrity": "sha512-OvXkrEBfWwtd8tzVCEXIvRfNEX87qs2jv6SqmVPiHcJjBhSF/GUvjqUNIDmKByb5N8nvDqVUM7+g1sXwdC/S9w==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@tauri-apps/plugin-opener@2.5.0": {
       "integrity": "sha512-B0LShOYae4CZjN8leiNDbnfjSrTwoZakqKaWpfoH6nXiJwt6Rgj6RnVIffG3DoJiKsffRhMkjmBV9VeilSb4TA==",
       "dependencies": [
@@ -783,6 +797,8 @@
       "dependencies": [
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
+        "npm:@tauri-apps/plugin-clipboard-manager@2.3",
+        "npm:@tauri-apps/plugin-dialog@2.4",
         "npm:@tauri-apps/plugin-opener@2",
         "npm:@types/react-dom@^19.1.6",
         "npm:@types/react@^19.1.8",

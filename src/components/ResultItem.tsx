@@ -57,14 +57,17 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
   };
 
   return (
-    <div className={`result-item ${getStatusClass()}`}>
-      <div className="result-status">
-        <span className="status-icon">{getStatusIcon()}</span>
+    <div className={`result-item ${getStatusClass()}`} role="listitem">
+      <div className="result-status" aria-label={`状态: ${result.status}`}>
+        <span className="status-icon" aria-hidden="true">{getStatusIcon()}</span>
       </div>
 
       <div className="result-content">
         <div className="site-name">
           <h4>{result.site}</h4>
+          {result.category && (
+            <span className="category-tag">{result.category}</span>
+          )}
         </div>
 
         <div className="result-details">
@@ -95,6 +98,20 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
             <span className="result-message">正在检查...</span>
           )}
         </div>
+
+        {result.metadata && result.metadata.length > 0 && (
+          <div className="result-metadata">
+            <div className="metadata-title">详细信息:</div>
+            {result.metadata.map((item, index) => (
+              <div key={index} className="metadata-item">
+                <span className="metadata-name">{item.name}:</span>
+                <span className="metadata-value">
+                  {typeof item.value === 'string' ? item.value : JSON.stringify(item.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

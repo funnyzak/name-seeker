@@ -12,6 +12,7 @@ use tokio::sync::OnceCell;
 pub struct SitesManager {
     client: Client,
     sites_data: OnceCell<Vec<Site>>,
+    email_data: OnceCell<Vec<Site>>,
     metadata_config: OnceCell<HashMap<String, Vec<serde_json::Value>>>,
 }
 
@@ -24,12 +25,16 @@ impl SitesManager {
                 .build()
                 .expect("无法创建HTTP客户端"),
             sites_data: OnceCell::new(),
+            email_data: OnceCell::new(),
             metadata_config: OnceCell::new(),
         }
     }
 
-    /// 获取网站数据（如果需要会先下载）
-    pub async fn get_sites(&self, config: &crate::core::config::AppConfig) -> AppResult<&Vec<Site>> {
+    /// 获取用户名网站数据（如果需要会先下载）
+    pub async fn get_sites(
+        &self,
+        config: &crate::core::config::AppConfig,
+    ) -> AppResult<&Vec<Site>> {
         if let Some(sites) = self.sites_data.get() {
             return Ok(sites);
         }
@@ -39,10 +44,29 @@ impl SitesManager {
 
         // 从本地文件加载
         let sites = self.load_sites_from_file(&config.sites_data_path).await?;
-        self.sites_data.set(sites)
+        self.sites_data
+            .set(sites)
             .map_err(|_| AppError::SiteDataError("无法设置网站数据".to_string()))?;
 
         Ok(self.sites_data.get().unwrap())
+    }
+
+    /// 获取邮箱网站数据
+    pub async fn get_email_sites(
+        &self,
+        config: &crate::core::config::AppConfig,
+    ) -> AppResult<&Vec<Site>> {
+        if let Some(sites) = self.email_data.get() {
+            return Ok(sites);
+        }
+
+        // 从本地文件加载邮箱数据（邮箱数据不需要在线更新）
+        let sites = self.load_sites_from_file(&config.email_data_path).await?;
+        self.email_data
+            .set(sites)
+            .map_err(|_| AppError::SiteDataError("无法设置邮箱数据".to_string()))?;
+
+        Ok(self.email_data.get().unwrap())
     }
 
     /// 获取元数据配置
@@ -55,19 +79,25 @@ impl SitesManager {
         }
 
         let metadata = self.load_metadata_from_file(&config.metadata_path).await?;
-        self.metadata_config.set(metadata)
+        self.metadata_config
+            .set(metadata)
             .map_err(|_| AppError::SiteDataError("无法设置元数据配置".to_string()))?;
 
         Ok(self.metadata_config.get().unwrap())
     }
 
     /// 确保网站数据是最新的
-    async fn ensure_sites_data_up_to_date(&self, config: &crate::core::config::AppConfig) -> AppResult<()> {
-        const WMN_DATA_URL: &str = "https://raw.githubusercontent.com/WebBreacher/WhatsMyName/main/wmn-data.json";
+    async fn ensure_sites_data_up_to_date(
+        &self,
+        config: &crate::core::config::AppConfig,
+    ) -> AppResult<()> {
+        const WMN_DATA_URL: &str =
+            "https://raw.githubusercontent.com/WebBreacher/WhatsMyName/main/wmn-data.json";
 
         if !config.sites_data_path.exists() {
             log::info!("下载网站数据文件...");
-            self.download_sites_data(WMN_DATA_URL, &config.sites_data_path).await?;
+            self.download_sites_data(WMN_DATA_URL, &config.sites_data_path)
+                .await?;
             return Ok(());
         }
 
@@ -75,7 +105,8 @@ impl SitesManager {
         match self.check_for_updates(WMN_DATA_URL).await {
             Ok(Some(_)) => {
                 log::info!("检测到更新，重新下载网站数据...");
-                self.download_sites_data(WMN_DATA_URL, &config.sites_data_path).await?;
+                self.download_sites_data(WMN_DATA_URL, &config.sites_data_path)
+                    .await?;
             }
             Ok(None) => {
                 log::info!("网站数据已是最新");
@@ -105,7 +136,8 @@ impl SitesManager {
     /// 检查是否有更新
     async fn check_for_updates(&self, url: &str) -> AppResult<Option<String>> {
         let response = self.client.head(url).send().await?;
-        let remote_etag = response.headers()
+        let remote_etag = response
+            .headers()
             .get("etag")
             .and_then(|value| value.to_str().ok())
             .map(|s| s.to_string());
@@ -146,7 +178,8 @@ impl SitesManager {
         let data: SiteMetadataConfig = serde_json::from_str(&content)?;
 
         // 转换为HashMap<String, Vec<serde_json::Value>>
-        let metadata = data.sites
+        let metadata = data
+            .sites
             .into_iter()
             .map(|(key, value)| {
                 let json_value: Vec<serde_json::Value> = value
@@ -164,10 +197,16 @@ impl SitesManager {
     pub async fn get_filtered_sites(
         &self,
         config: &crate::core::config::AppConfig,
+        search_type: &crate::core::models::SearchType,
         exclude_nsfw: bool,
         category_filter: Option<&str>,
     ) -> AppResult<Vec<Site>> {
-        let sites = self.get_sites(config).await?;
+        // 根据搜索类型选择数据源
+        let sites = match search_type {
+            crate::core::models::SearchType::Username => self.get_sites(config).await?,
+            crate::core::models::SearchType::Email => self.get_email_sites(config).await?,
+        };
+
         let mut filtered_sites = sites.clone();
 
         // 排除NSFW网站
@@ -184,7 +223,10 @@ impl SitesManager {
     }
 
     /// 获取所有可用的类别
-    pub async fn get_categories(&self, config: &crate::core::config::AppConfig) -> AppResult<Vec<String>> {
+    pub async fn get_categories(
+        &self,
+        config: &crate::core::config::AppConfig,
+    ) -> AppResult<Vec<String>> {
         let sites = self.get_sites(config).await?;
         let mut categories: Vec<String> = sites
             .iter()
@@ -198,6 +240,5 @@ impl SitesManager {
 }
 
 /// 全局网站管理器实例
-pub static SITES_MANAGER: std::sync::LazyLock<SitesManager> = std::sync::LazyLock::new(|| {
-    SitesManager::new()
-});
+pub static SITES_MANAGER: std::sync::LazyLock<SitesManager> =
+    std::sync::LazyLock::new(|| SitesManager::new());

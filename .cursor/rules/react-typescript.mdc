@@ -1,0 +1,313 @@
+---
+globs: *.ts,*.tsx
+description: React 和 TypeScript 开发规则
+---
+
+# React + TypeScript 开发规则
+
+## 🎯 组件开发规范
+
+### 函数组件优先
+- 使用函数组件和 React Hooks
+- 避免使用类组件
+- 组件名使用 PascalCase
+
+```typescript
+// ✅ 正确
+const SearchForm: React.FC<SearchFormProps> = ({ onSubmit, isSearching }) => {
+  // 组件逻辑
+};
+
+// ❌ 避免
+class SearchForm extends React.Component<SearchFormProps> {
+  // 类组件逻辑
+}
+```
+
+### TypeScript 类型定义
+- 所有 props 必须定义类型
+- 使用接口定义复杂类型
+- 导出类型供其他组件使用
+
+```typescript
+// ✅ 正确的类型定义
+interface SearchFormProps {
+  onSubmit: (query: string, type: SearchType) => void;
+  isSearching: boolean;
+  searchType: SearchType;
+}
+
+// ✅ 使用联合类型
+type SearchType = 'username' | 'email';
+```
+
+## 🪝 Hook 开发规范
+
+### 自定义 Hook 命名
+- 以 `use` 开头
+- 描述 Hook 的功能
+- 返回对象而不是数组（除非是状态对）
+
+```typescript
+// ✅ 正确的 Hook 定义
+export const useSearch = () => {
+  const [isSearching, setIsSearching] = useState(false);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  
+  return {
+    isSearching,
+    results,
+    startSearch,
+    stopSearch
+  };
+};
+```
+
+### Hook 依赖管理
+- 使用 `useCallback` 优化函数引用
+- 使用 `useMemo` 优化计算值
+- 正确设置依赖数组
+
+```typescript
+// ✅ 正确的依赖管理
+const handleSubmit = useCallback((query: string, type: SearchType) => {
+  // 处理逻辑
+}, [onSubmit, isSearching]);
+
+const filteredResults = useMemo(() => {
+  return results.filter(result => result.status === 'found');
+}, [results]);
+```
+
+## 📦 组件组织
+
+### 组件文件结构
+- 一个组件一个文件
+- 相关组件放在同一目录
+- 使用 `index.ts` 统一导出
+
+```typescript
+// components/index.ts
+export { default as SearchForm } from './SearchForm';
+export { default as ResultsDisplay } from './ResultsDisplay';
+export { default as ProgressIndicator } from './ProgressIndicator';
+```
+
+### 组件职责分离
+- UI 组件只负责渲染
+- 业务逻辑放在 Hook 中
+- 数据获取放在 service 层
+
+```typescript
+// ✅ 组件只负责 UI
+const SearchForm: React.FC<SearchFormProps> = ({ onSubmit, isSearching }) => {
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* UI 逻辑 */}
+    </form>
+  );
+};
+
+// ✅ 业务逻辑在 Hook 中
+const useSearch = () => {
+  const startSearch = async (query: string) => {
+    // 业务逻辑
+  };
+  
+  return { startSearch };
+};
+```
+
+## 🎨 样式和 CSS
+
+### CSS 类命名
+- 使用 kebab-case
+- 语义化命名
+- 避免过深的嵌套
+
+```css
+/* ✅ 正确的类命名 */
+.search-form {
+  /* 样式 */
+}
+
+.search-form__input {
+  /* 子元素样式 */
+}
+
+.search-form--loading {
+  /* 修饰符样式 */
+}
+```
+
+### 响应式设计
+- 使用 CSS 变量定义主题
+- 支持移动端和桌面端
+- 使用媒体查询
+
+```css
+/* ✅ 响应式设计 */
+.app {
+  --primary-color: #007bff;
+  --spacing: 1rem;
+}
+
+@media (max-width: 768px) {
+  .search-form {
+    padding: var(--spacing);
+  }
+}
+```
+
+## 🔧 状态管理
+
+### 状态结构设计
+- 使用 `useState` 管理本地状态
+- 复杂状态使用 `useReducer`
+- 避免过度嵌套状态
+
+```typescript
+// ✅ 正确的状态结构
+interface SearchState {
+  isSearching: boolean;
+  results: SearchResult[];
+  progress: SearchProgress;
+  error: string | null;
+}
+
+const [searchState, setSearchState] = useState<SearchState>({
+  isSearching: false,
+  results: [],
+  progress: { percentage: 0, currentSite: null },
+  error: null
+});
+```
+
+### 状态更新模式
+- 使用函数式更新
+- 避免直接修改状态
+- 使用展开运算符
+
+```typescript
+// ✅ 正确的状态更新
+setSearchState(prev => ({
+  ...prev,
+  isSearching: true,
+  error: null
+}));
+```
+
+## 🚀 性能优化
+
+### 组件优化
+- 使用 `React.memo` 避免不必要的重渲染
+- 使用 `useCallback` 和 `useMemo` 优化性能
+- 避免在渲染中创建对象
+
+```typescript
+// ✅ 性能优化
+const SearchForm = React.memo<SearchFormProps>(({ onSubmit, isSearching }) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(query, type);
+  }, [onSubmit, query, type]);
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* 组件内容 */}
+    </form>
+  );
+});
+```
+
+### 异步操作
+- 使用 `useEffect` 处理副作用
+- 正确清理异步操作
+- 处理加载和错误状态
+
+```typescript
+// ✅ 正确的异步操作
+useEffect(() => {
+  let isCancelled = false;
+  
+  const fetchData = async () => {
+    try {
+      const data = await api.getData();
+      if (!isCancelled) {
+        setData(data);
+      }
+    } catch (error) {
+      if (!isCancelled) {
+        setError(error.message);
+      }
+    }
+  };
+  
+  fetchData();
+  
+  return () => {
+    isCancelled = true;
+  };
+}, []);
+```
+
+## 🧪 错误处理
+
+### 错误边界
+- 使用错误边界捕获组件错误
+- 提供友好的错误信息
+- 记录错误日志
+
+```typescript
+// ✅ 错误处理
+const [error, setError] = useState<string | null>(null);
+
+const handleError = useCallback((error: Error) => {
+  console.error('Search error:', error);
+  setError(error.message);
+}, []);
+```
+
+### 类型安全
+- 使用严格的 TypeScript 配置
+- 避免使用 `any` 类型
+- 使用类型断言时要谨慎
+
+```typescript
+// ✅ 类型安全
+interface SearchResult {
+  site: string;
+  url: string;
+  status: 'found' | 'not_found' | 'error';
+}
+
+const result: SearchResult = {
+  site: 'example.com',
+  url: 'https://example.com/user',
+  status: 'found'
+};
+```
+
+## 📝 代码质量
+
+### 代码风格
+- 使用 Prettier 格式化代码
+- 使用 ESLint 检查代码质量
+- 保持一致的缩进和命名
+
+### 注释规范
+- 为复杂逻辑添加注释
+- 使用 JSDoc 注释函数
+- 避免显而易见的注释
+
+```typescript
+/**
+ * 开始搜索操作
+ * @param query 搜索查询
+ * @param type 搜索类型
+ * @returns Promise<void>
+ */
+const startSearch = async (query: string, type: SearchType): Promise<void> => {
+  // 实现逻辑
+};
+```

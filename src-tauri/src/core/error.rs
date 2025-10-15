@@ -24,6 +24,9 @@ pub enum AppError {
     #[error("用户输入错误: {0}")]
     UserInputError(String),
 
+    #[error("导出错误: {0}")]
+    ExportError(String),
+
     #[error("内部错误: {0}")]
     InternalError(String),
 }

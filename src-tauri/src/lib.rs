@@ -1,10 +1,14 @@
 mod core;
 
 use core::config::APP_CONFIG;
-use core::models::{SearchUpdatePayload, SearchProgressPayload, SearchFinished};
-use core::search::{SearchEngine, SearchConfig as SearchConfigInner};
+use core::export::export_results;
+use core::models::{
+    ExportOptions, SearchConfig, SearchFinished, SearchProgressPayload, SearchType,
+    SearchUpdatePayload,
+};
+use core::search::SearchEngine;
 use core::sites::SITES_MANAGER;
-use core::utils::{validate_username, validate_email};
+use core::utils::{validate_email, validate_username};
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
@@ -24,33 +28,50 @@ async fn is_first_launch() -> Result<bool, String> {
 /// 设置免责声明已接受
 #[tauri::command]
 async fn set_disclaimer_accepted() -> Result<(), String> {
-    APP_CONFIG.set_disclaimer_accepted()
+    APP_CONFIG
+        .set_disclaimer_accepted()
         .map_err(|e| e.to_string())?;
     Ok(())
 }
 
-/// 开始搜索用户名
+/// 开始搜索
 #[tauri::command]
 async fn start_search(
     app: AppHandle,
-    username: String,
+    query: String,
+    search_type: Option<String>,
     max_concurrent_requests: Option<usize>,
     timeout_seconds: Option<u64>,
     exclude_nsfw: Option<bool>,
     category_filter: Option<String>,
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
-    // 验证用户名
-    validate_username(&username).map_err(|e| e.to_string())?;
+    // 解析搜索类型
+    let search_type = match search_type.as_deref() {
+        Some("email") => SearchType::Email,
+        _ => SearchType::Username,
+    };
 
-    log::info!("开始搜索用户名: {}", username);
+    // 根据搜索类型验证输入
+    match search_type {
+        SearchType::Username => {
+            validate_username(&query).map_err(|e| e.to_string())?;
+            log::info!("开始搜索用户名: {}", query);
+        }
+        SearchType::Email => {
+            validate_email(&query).map_err(|e| e.to_string())?;
+            log::info!("开始搜索邮箱: {}", query);
+        }
+    }
 
     // 创建搜索配置
-    let search_config = SearchConfigInner {
-        username: username.clone(),
+    let search_config = SearchConfig {
+        search_type,
+        query: query.clone(),
         max_concurrent_requests: max_concurrent_requests.unwrap_or(30),
         timeout_seconds: timeout_seconds.unwrap_or(30),
-        user_agent: APP_CONFIG.get_random_user_agent()
+        user_agent: APP_CONFIG
+            .get_random_user_agent()
             .await
             .map_err(|e| e.to_string())?,
         exclude_nsfw: exclude_nsfw.unwrap_or(true),
@@ -58,8 +79,8 @@ async fn start_search(
     };
 
     // 创建搜索引擎
-    let search_engine = std::sync::Arc::new(SearchEngine::new(search_config)
-        .map_err(|e| e.to_string())?);
+    let search_engine =
+        std::sync::Arc::new(SearchEngine::new(search_config).map_err(|e| e.to_string())?);
 
     // 创建单个结果更新回调
     let app_for_update = app.clone();
@@ -86,7 +107,6 @@ async fn start_search(
     // 克隆必要的数据
     let app_for_search = app.clone();
     let search_engine_clone = search_engine.clone();
-    let _username_clone = username.clone();
 
     // 启动搜索任务
     let search_handle = tauri::async_runtime::spawn(async move {
@@ -121,13 +141,21 @@ async fn start_search(
         }
 
         // 执行搜索
-        match search_engine_clone.search(&SITES_MANAGER, update_callback, progress_callback).await {
+        match search_engine_clone
+            .search(&SITES_MANAGER, update_callback, progress_callback)
+            .await
+        {
             Ok(results) => {
-                let found_count = results.iter()
+                let found_count = results
+                    .iter()
                     .filter(|r| r.status == core::models::SearchResultStatus::Found)
                     .count() as u32;
 
-                log::info!("搜索完成: {} 个网站，找到 {} 个账户", total_sites, found_count);
+                log::info!(
+                    "搜索完成: {} 个网站，找到 {} 个账户",
+                    total_sites,
+                    found_count
+                );
 
                 // 发送搜索完成事件
                 let finished = SearchFinished {
@@ -198,7 +226,8 @@ async fn get_search_stats() -> Result<serde_json::Value, String> {
 /// 获取可用网站类别
 #[tauri::command]
 async fn get_categories() -> Result<Vec<String>, String> {
-    SITES_MANAGER.get_categories(&APP_CONFIG)
+    SITES_MANAGER
+        .get_categories(&APP_CONFIG)
         .await
         .map_err(|e| e.to_string())
 }
@@ -224,6 +253,39 @@ async fn open_url(url: String) -> Result<(), String> {
     }
 }
 
+/// 打开文件所在目录
+#[tauri::command]
+async fn open_directory(path: String) -> Result<(), String> {
+    use std::path::Path;
+
+    let path = Path::new(&path);
+
+    // 如果传入的是文件路径，获取其父目录
+    let dir_path = if path.is_file() {
+        path.parent()
+            .ok_or_else(|| "无法获取文件的父目录".to_string())?
+    } else {
+        path
+    };
+
+    // 检查目录是否存在
+    if !dir_path.exists() {
+        return Err(format!("目录不存在: {}", dir_path.display()));
+    }
+
+    // 打开目录
+    match open::that(dir_path) {
+        Ok(_) => {
+            log::info!("已打开目录: {}", dir_path.display());
+            Ok(())
+        }
+        Err(e) => {
+            log::error!("打开目录失败: {}", e);
+            Err(format!("打开目录失败: {}", e))
+        }
+    }
+}
+
 /// 获取应用版本信息
 #[tauri::command]
 async fn get_app_info() -> Result<serde_json::Value, String> {
@@ -236,6 +298,12 @@ async fn get_app_info() -> Result<serde_json::Value, String> {
     }))
 }
 
+/// 导出搜索结果
+#[tauri::command]
+async fn export_results_cmd(options: ExportOptions) -> Result<String, String> {
+    export_results(options).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // 初始化日志
@@ -246,7 +314,9 @@ pub fn run() {
     log::info!("启动 Search My Name 应用");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
             is_first_launch,
@@ -258,7 +328,9 @@ pub fn run() {
             validate_username_format,
             validate_email_format,
             open_url,
-            get_app_info
+            open_directory,
+            get_app_info,
+            export_results_cmd
         ])
         .setup(|app| {
             // 这里可以进行应用初始化设置

@@ -1,0 +1,127 @@
+---
+alwaysApply: true
+description: 项目架构和文件组织规则
+---
+
+# Search My Name - 项目架构规则
+
+## 🏗️ 项目结构
+
+这是一个基于 **Tauri 2.x + React 19 + TypeScript** 的跨平台桌面应用，用于在数百个网站上搜索用户名和邮箱。
+
+### 核心架构
+- **前端**: React 19 + TypeScript + Vite (位于 `src/`)
+- **后端**: Rust + Tauri 2.x (位于 `src-tauri/src/`)
+- **通信**: Tauri 事件系统 + 命令调用
+- **数据源**: WhatsMyName 项目 (600+ 网站)
+
+### 关键目录结构
+
+```
+src/                              # React 前端
+├── components/                   # UI 组件
+│   ├── SearchForm.tsx           # 搜索表单
+│   ├── ResultsDisplay.tsx       # 结果显示
+│   ├── ProgressIndicator.tsx    # 进度指示器
+│   └── index.ts                 # 组件导出
+├── hooks/                       # React Hooks
+│   ├── useSearch.ts             # 搜索状态管理
+│   └── useDisclaimer.ts         # 免责声明管理
+├── services/                    # 服务层
+│   └── tauriApi.ts              # Tauri API 封装
+├── types/                       # TypeScript 类型
+│   └── index.ts                 # 类型定义
+└── App.tsx                      # 主应用组件
+
+src-tauri/src/                   # Rust 后端
+├── core/                        # 核心模块
+│   ├── search.rs               # 搜索引擎
+│   ├── sites.rs                # 网站数据管理
+│   ├── models.rs               # 数据模型
+│   └── export.rs               # 导出功能
+└── lib.rs                      # Tauri 主入口
+```
+
+## 📋 开发规范
+
+### 文件命名约定
+- **React 组件**: PascalCase (如 `SearchForm.tsx`)
+- **Hooks**: camelCase 以 `use` 开头 (如 `useSearch.ts`)
+- **Rust 模块**: snake_case (如 `search.rs`)
+- **类型文件**: `index.ts` 或 `types.ts`
+
+### 导入顺序
+1. React 相关导入
+2. 第三方库导入
+3. 本地组件导入
+4. 类型导入
+5. 样式导入
+
+### 组件组织
+- 每个组件一个文件
+- 相关组件放在同一目录
+- 使用 `index.ts` 进行统一导出
+- Hook 逻辑与 UI 组件分离
+
+## 🔧 技术栈要求
+
+### 前端技术
+- **React 19**: 使用函数组件和 Hooks
+- **TypeScript**: 严格类型检查
+- **Vite**: 构建工具和开发服务器
+- **CSS**: 现代 CSS 特性，支持响应式设计
+
+### 后端技术
+- **Rust**: 异步编程，使用 Tokio
+- **Tauri 2.x**: 最新版本，支持事件系统
+- **reqwest**: HTTP 客户端
+- **serde**: JSON 序列化
+
+## 🎯 核心功能模块
+
+### 搜索功能
+- 用户名搜索 (主要功能)
+- 邮箱搜索 (扩展功能)
+- 并发请求控制 (默认30个)
+- 实时进度反馈
+
+### 用户界面
+- 免责声明模态框
+- 搜索表单和验证
+- 实时结果显示
+- 导出功能 (CSV, JSON, PDF)
+
+### 数据管理
+- WhatsMyName 数据源集成
+- 本地缓存和更新
+- 搜索结果持久化
+- 搜索历史记录
+
+## 🚀 开发工作流
+
+### 开发命令
+```bash
+# 前端开发
+npm run dev
+
+# 完整应用开发 (推荐)
+npm run tauri dev
+
+# 构建生产版本
+npm run tauri build
+```
+
+### 代码质量
+- 使用 TypeScript 严格模式
+- Rust 代码遵循 clippy 建议
+- 组件使用函数式编程
+- 异步操作使用 async/await
+
+## 📁 文件引用格式
+
+使用以下格式引用项目文件：
+- [App.tsx](mdc:src/App.tsx) - 主应用组件
+- [SearchForm.tsx](mdc:src/components/SearchForm.tsx) - 搜索表单
+- [useSearch.ts](mdc:src/hooks/useSearch.ts) - 搜索 Hook
+- [lib.rs](mdc:src-tauri/src/lib.rs) - Tauri 主入口
+- [search.rs](mdc:src-tauri/src/core/search.rs) - 搜索引擎
