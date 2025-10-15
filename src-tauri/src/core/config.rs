@@ -28,7 +28,7 @@ pub struct AppConfig {
 impl AppConfig {
     /// 创建应用配置
     pub fn new() -> AppResult<Self> {
-        let proj_dirs = ProjectDirs::from("com", "searchmyname", "Search My Name")
+        let proj_dirs = ProjectDirs::from("com", "NameSeeker", "NameSeeker")
             .ok_or_else(|| AppError::ConfigError("无法获取应用数据目录".to_string()))?;
 
         let data_dir = proj_dirs.data_dir().to_path_buf();

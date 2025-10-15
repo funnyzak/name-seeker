@@ -155,7 +155,7 @@ pub fn format_duration(milliseconds: u64) -> String {
 /// 创建用户代理字符串
 pub fn create_user_agent() -> String {
     format!(
-        "search-my-name/1.0 ({}; {}; Rust)",
+        "name-seeker/1.0 ({}; {}; Rust)",
         std::env::consts::OS,
         std::env::consts::ARCH
     )

@@ -291,17 +291,14 @@ async fn open_directory(path: String) -> Result<(), String> {
 async fn copy_to_clipboard(app: AppHandle, text: String) -> Result<(), String> {
     use tauri_plugin_clipboard_manager::ClipboardExt;
 
-    app.clipboard()
-        .write_text(text.clone())
-        .map_err(|e| {
-            log::error!("复制到剪贴板失败: {}", e);
-            format!("复制失败: {}", e)
-        })?;
+    app.clipboard().write_text(text.clone()).map_err(|e| {
+        log::error!("复制到剪贴板失败: {}", e);
+        format!("复制失败: {}", e)
+    })?;
 
     log::info!("已复制文本到剪贴板 (长度: {})", text.len());
     Ok(())
 }
-
 
 /// 获取应用版本信息
 #[tauri::command]
@@ -309,7 +306,7 @@ async fn get_app_info(app: AppHandle) -> Result<serde_json::Value, String> {
     // 从 Tauri 配置获取 bundle 信息
     let config = app.config();
     let bundle = &config.bundle;
-    
+
     // 获取应用信息
     let app_info = serde_json::json!({
         "name": config.product_name,
@@ -324,7 +321,7 @@ async fn get_app_info(app: AppHandle) -> Result<serde_json::Value, String> {
         "tauri_version": tauri::VERSION,
         "build_profile": if cfg!(debug_assertions) { "debug" } else { "release" }
     });
-    
+
     Ok(app_info)
 }
 
@@ -341,9 +338,10 @@ pub fn run() {
         .filter_level(log::LevelFilter::Info)
         .init();
 
-    log::info!("启动 Search My Name 应用");
+    log::info!("启动 NameSeeker 应用");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

@@ -6,6 +6,7 @@
     "npm:@tauri-apps/plugin-clipboard-manager@2.3": "2.3.0",
     "npm:@tauri-apps/plugin-dialog@2.4": "2.4.0",
     "npm:@tauri-apps/plugin-opener@2": "2.5.0",
+    "npm:@tauri-apps/plugin-process@2.3": "2.3.0",
     "npm:@types/react-dom@^19.1.6": "19.2.2_@types+react@19.2.2",
     "npm:@types/react@^19.1.8": "19.2.2",
     "npm:@vitejs/plugin-react@^4.6.0": "4.7.0_vite@7.1.9__picomatch@4.0.3_@babel+core@7.28.4",
@@ -515,6 +516,12 @@
         "@tauri-apps/api"
       ]
     },
+    "@tauri-apps/plugin-process@2.3.0": {
+      "integrity": "sha512-0DNj6u+9csODiV4seSxxRbnLpeGYdojlcctCuLOCgpH9X3+ckVZIEj6H7tRQ7zqWr7kSTEWnrxtAdBb0FbtrmQ==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@types/babel__core@7.20.5": {
       "integrity": "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==",
       "dependencies": [
@@ -800,6 +807,7 @@
         "npm:@tauri-apps/plugin-clipboard-manager@2.3",
         "npm:@tauri-apps/plugin-dialog@2.4",
         "npm:@tauri-apps/plugin-opener@2",
+        "npm:@tauri-apps/plugin-process@2.3",
         "npm:@types/react-dom@^19.1.6",
         "npm:@types/react@^19.1.8",
         "npm:@vitejs/plugin-react@^4.6.0",

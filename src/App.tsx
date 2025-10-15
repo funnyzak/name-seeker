@@ -106,7 +106,7 @@ const App: React.FC = () => {
             <div className='app-toolbar'>
               <h1 className='toolbar-title'>
                 <span className='icon' aria-hidden="true">🔍</span>
-                Search My Name
+                NameSeeker
               </h1>
               <button 
                 className='about-button' 

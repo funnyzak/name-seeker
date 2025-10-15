@@ -1,10 +1,10 @@
-# CLAUDE.md - Development Guide for `search-my-name`
+# CLAUDE.md - Development Guide for `name-seeker`
 
-This file provides guidance for developing the `search-my-name` application.
+This file provides guidance for developing the `name-seeker` application.
 
 ## 🚀 Project Mission
 
-`search-my-name` is a cross-platform desktop application for discovering public profiles across hundreds of websites based on a username. It is built using Tauri (Rust + React) and is inspired by the capabilities of OSINT tools like `blackbird`. The primary goal is to provide a user-friendly graphical interface for a powerful search function, intended for educational and ethical self-research purposes.
+`name-seeker` is a cross-platform desktop application for discovering public profiles across hundreds of websites based on a username. It is built using Tauri (Rust + React) and is inspired by the capabilities of OSINT tools like `blackbird`. The primary goal is to provide a user-friendly graphical interface for a powerful search function, intended for educational and ethical self-research purposes.
 
 -----
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { tauriApi } from '../services/tauriApi';
+import { exit } from '@tauri-apps/plugin-process';
 
 export const useDisclaimer = () => {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
@@ -35,10 +36,9 @@ export const useDisclaimer = () => {
   }, []);
 
   // 拒绝免责声明
-  const declineDisclaimer = useCallback(() => {
-    // 用户拒绝时可以关闭应用或显示限制访问的页面
+  const declineDisclaimer = useCallback(async () => {
     setShowDisclaimer(false);
-    // 这里可以添加额外的逻辑，比如关闭应用窗口
+    await exit(0);
   }, []);
 
   // 组件挂载时检查

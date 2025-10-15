@@ -21,7 +21,7 @@ impl SitesManager {
     pub fn new() -> Self {
         Self {
             client: Client::builder()
-                .user_agent("search-my-name/1.0")
+                .user_agent("name-seeker/1.0")
                 .build()
                 .expect("无法创建HTTP客户端"),
             sites_data: OnceCell::new(),

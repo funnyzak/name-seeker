@@ -1,8 +1,8 @@
-# Search My Name - UI层实现说明
+# NameSeeker - UI层实现说明
 
 ## 📋 概述
 
-本文档描述了 `search-my-name` 应用前端UI层的实现结构和功能。
+本文档描述了 `name-seeker` 应用前端UI层的实现结构和功能。
 
 ## 🏗️ 文件结构
 

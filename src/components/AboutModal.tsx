@@ -54,7 +54,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                     <span className="app-version">v{appInfo.version}</span>
                   </div>
                   <p className="app-description">
-                    Search My Name 是一款强大的跨平台桌面应用，可以在数百个网站上搜索用户名和邮箱，帮助你快速发现你的数字足迹。基于 WhatsMyName 项目数据，支持导出搜索结果为 PDF、CSV、JSON 等格式。
+                    NameSeeker 是一款强大的跨平台桌面应用，可以在数百个网站上搜索用户名和邮箱，帮助你快速发现你的数字足迹。基于 WhatsMyName 项目数据，支持导出搜索结果为 PDF、CSV、JSON 等格式。
                   </p>
                   {appInfo.long_description && (
                     <p className="long-description">{appInfo.long_description}</p>
@@ -80,7 +80,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </>
               ) : (
-                <p>Search My Name v1.0.0</p>
+                <p>NameSeeker v1.0.0</p>
               )}
             </div>
 

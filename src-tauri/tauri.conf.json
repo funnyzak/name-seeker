@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "SearchMyName",
+  "productName": "NameSeeker",
   "version": "0.1.0",
-  "identifier": "com.leon.search-my-name",
+  "identifier": "com.leon.name-seeker",
   "build": {
     "beforeDevCommand": "deno task dev",
     "devUrl": "http://localhost:1420",
@@ -12,13 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "Search My Name",
+        "title": "NameSeeker",
         "minWidth": 520,
-        "minHeight": 650,
+        "minHeight": 700,
         "maxWidth": 700,
         "maxHeight": 900,
         "width": 520,
-        "height": 650,
+        "height": 700,
         "decorations": true,
         "resizable": true,
         "center": true,
@@ -44,7 +44,7 @@
     ],
     "category": "Utility",
     "shortDescription": "用户名和邮箱多平台搜索工具",
-    "longDescription": "Search My Name 是一款强大的跨平台桌面应用，可以在数百个网站上搜索用户名和邮箱，帮助你快速发现你的数字足迹。基于 WhatsMyName 项目数据，支持导出搜索结果为 PDF、CSV、JSON 等格式。",
+    "longDescription": "NameSeeker 是一款强大的跨平台桌面应用，可以在数百个网站上搜索用户名和邮箱，帮助你快速发现你的数字足迹。基于 WhatsMyName 项目数据，支持导出搜索结果为 PDF、CSV、JSON 等格式。",
     "copyright": "Copyright © 2025 Leon",
     "resources": [],
     "externalBin": [],

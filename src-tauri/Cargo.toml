@@ -1,5 +1,5 @@
 [package]
-name = "search-my-name"
+name = "name-seeker"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
@@ -44,4 +44,5 @@ dirs = "5.0"
 sha2 = "0.10"
 md-5 = "0.10"
 tauri-plugin-clipboard-manager = "2"
+tauri-plugin-process = "2"
 
