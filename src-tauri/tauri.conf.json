@@ -46,7 +46,7 @@
     "shortDescription": "Multi-platform search tool for usernames and emails",
     "longDescription": "NameSeeker is a powerful cross-platform desktop application that searches for usernames and email addresses across hundreds of websites to help you quickly discover your digital footprint. Based on WhatsMyName project data, it supports exporting search results to PDF, CSV, JSON and other formats.",
     "copyright": "Copyright © 2025 Funnyzak",
-    "resources": [],
+    "resources": ["data/*"],
     "externalBin": [],
     "macOS": {
       "frameworks": [],
@@ -57,6 +57,16 @@
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
       "timestampUrl": ""
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVDRTkwN0YyMDYwRDc3MDcKUldRSGR3MEc4Z2ZwWExRWWxvMjhudGFPTDJWV3NHUGN1WTl2TS9DMVpocnNXUFpmMVJUQVVlVEoK",
+      "endpoints": [
+        "https://github.com/funnyzak/name-seeker/releases/latest/download/latest.json"
+      ]
     }
   }
+
 }
