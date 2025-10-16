@@ -767,9 +767,9 @@ body {
 }
 
 .section-header {
-  padding: 1rem 1.5rem;
+  padding: 0.7rem 1.5rem;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   border-bottom: 1px solid var(--gray-200);
   cursor: pointer;
@@ -800,10 +800,22 @@ body {
   transform: rotate(-90deg);
 }
 
-.found-header { color: var(--success-color); background: rgba(22, 163, 74, 0.05); }
-.not-found-header { color: var(--gray-500); background: rgba(107, 114, 128, 0.05); }
-.error-header { color: var(--error-color); background: rgba(220, 38, 38, 0.05); }
-.pending-header { color: var(--warning-color); background: rgba(234, 88, 12, 0.05); }
+.found-header {
+  color: var(--success-color);
+  background: #e8f9e5; /* 不透明浅绿色 */
+}
+.not-found-header {
+  color: var(--gray-500);
+  background: #f4f6fa; /* 不透明浅灰蓝 */
+}
+.error-header {
+  color: var(--error-color);
+  background: #ffeaea; /* 不透明浅红 */
+}
+.pending-header {
+  color: var(--warning-color);
+  background: #fff8e6; /* 不透明浅黄橙 */
+}
 
 .results-list {
   /* 移除独立滚动，让内容自然流动 */
@@ -2051,9 +2063,6 @@ button,
   transition: all 0.2s ease;
 }
 
-.section-header:hover {
-  background: rgba(0, 0, 0, 0.03);
-}
 
 /* Smooth collapse animation */
 .results-list {
