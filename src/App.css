@@ -139,18 +139,137 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0.5rem;
+  padding: 0.3rem 0.5rem;
   border-bottom: 1px solid var(--gray-200);
   flex-shrink: 0; /* 防止被压缩 */
   background: var(--gray-50);
 }
 
+/* 标题按钮容器 - 可点击打开关于页面 */
+.toolbar-title-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border-radius: 0.5rem;
+}
+
+.toolbar-title-button:hover {
+  transform: translateY(-1px);
+}
+
+.toolbar-title-button:active {
+  transform: translateY(0);
+}
+
+.toolbar-title-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 4px;
+}
+
+/* 标题容器 */
 .toolbar-title {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   font-size: 1.8rem;
   font-weight: 600;
   color: var(--gray-800);
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.toolbar-title-button:hover .toolbar-title {
+  color: var(--primary-color);
+}
+
+/* Logo 图标 */
+.app-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+  transition: transform 0.3s ease-in-out;
+  animation: fadeInScale 0.5s ease-out;
+}
+
+.toolbar-title-button:hover .app-logo {
+  transform: rotate(5deg) scale(1.05);
+}
+
+/* 应用名称 */
+.app-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  animation: fadeInSlide 0.5s ease-out 0.1s both;
+}
+
+/* Logo 渐入缩放动画 */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* 文字渐入滑动动画 */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 响应式设计 - 平板 */
+@media (max-width: 768px) {
+  .toolbar-title {
+    font-size: 1.5rem;
+    gap: 0.5rem;
+  }
+  
+  .app-logo {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .app-name {
+    font-size: 1.5rem;
+  }
+}
+
+/* 响应式设计 - 移动端 */
+@media (max-width: 480px) {
+  .toolbar-title {
+    font-size: 1.25rem;
+    gap: 0.5rem;
+  }
+  
+  .app-logo {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  
+  .app-name {
+    font-size: 1.25rem;
+  }
+}
+
+/* 移动端 - 超小屏幕优化 */
+@media (max-width: 360px) {
+  .app-name {
+    /* 在超小屏幕上可以考虑缩短名称 */
+    font-size: 1.125rem;
+  }
 }
 
 .toolbar-title .icon {
@@ -1715,7 +1834,7 @@ kbd {
   }
 
   .app-toolbar {
-    padding: 0.1rem 0;
+    padding: 0.3rem 0;
   }
 
   .toolbar-title {

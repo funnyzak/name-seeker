@@ -43,7 +43,7 @@
     }
   },
   "about": {
-    "title": "About NameSeeker",
+    "title": "About",
     "version": "Version {{version}}",
     "description": "A cross-platform desktop application for discovering public profiles across hundreds of websites.",
     "loading": "Loading...",
@@ -51,6 +51,7 @@
     "buildDate": "Build Date",
     "author": "Author",
     "copyright": "Copyright",
+    "repository": "Repository",
     "features": {
       "title": "Key Features",
       "search": "Username and email search across 600+ websites",

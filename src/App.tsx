@@ -12,6 +12,7 @@ import { useToast } from './hooks/useToast';
 import { useSearchHistory } from './hooks/useSearchHistory';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { SearchType } from './types';
+import logoImage from './assets/logo.png';
 import './App.css';
 
 const App: React.FC = () => {
@@ -106,10 +107,22 @@ const App: React.FC = () => {
           {/* Top toolbar */}
           <header role="banner">
             <div className='app-toolbar'>
-              <h1 className='toolbar-title'>
-                {/* <span className='icon' aria-hidden="true">🔍</span> */}
-                {t('common:app.name')}
-              </h1>
+              <button 
+                className='toolbar-title-button'
+                onClick={() => setShowAbout(true)}
+                aria-label={`${t('common:app.name')} - ${t('common:label.about')}`}
+                title={t('common:label.about')}
+              >
+                <h1 className='toolbar-title'>
+                  <img 
+                    src={logoImage}
+                    alt={`${t('common:app.name')} Logo`}
+                    className='app-logo'
+                    aria-hidden="true"
+                  />
+                  <span className='app-name'>{t('common:app.name')}</span>
+                </h1>
+              </button>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                 {import.meta.env.DEV && (
                   <LanguageSwitcher 

@@ -67,6 +67,15 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                       <span className="info-value">{appInfo.build_date}</span>
                     </div>
                     <div className="info-item">
+                      <span className="info-label">{t('about.repository')}</span>
+                      <button
+                        className="info-link"
+                        onClick={() => handleOpenUrl('https://github.com/funnyzak/name-seeker')}
+                      >
+                        funnyzak/name-seeker
+                      </button>
+                    </div>
+                    <div className="info-item">
                       <span className="info-label">{t('about.author')}</span>
                       <button
                         className="info-link"

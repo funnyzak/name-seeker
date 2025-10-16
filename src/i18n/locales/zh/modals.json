@@ -43,7 +43,7 @@
     }
   },
   "about": {
-    "title": "关于 NameSeeker",
+    "title": "关于",
     "version": "版本 {{version}}",
     "description": "一个跨平台桌面应用程序，用于在数百个网站中发现公开个人资料。",
     "loading": "加载中...",
@@ -51,6 +51,7 @@
     "buildDate": "构建日期",
     "author": "作者",
     "copyright": "版权",
+    "repository": "源代码",
     "features": {
       "title": "主要功能",
       "search": "在600+个网站中搜索用户名和邮箱",
