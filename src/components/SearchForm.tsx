@@ -79,10 +79,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
     setQuery(e.target.value);
   };
 
-  const handleSearchTypeChange = (type: SearchType) => {
-    setSearchType(type);
-    setQuery('');
-  };
+  // const handleSearchTypeChange = (type: SearchType) => {
+  //   setSearchType(type);
+  //   setQuery('');
+  // };
 
   const handleInputFocus = () => {
     if (searchHistory && searchHistory.length > 0) {
