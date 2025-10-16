@@ -1,7 +1,7 @@
 {
   "name": "name-seeker",
   "version": "0.1.2",
-  "description": "基于 Tauri 2.x + React 19 + TypeScript 的跨平台桌面应用，用于在数百个网站上搜索用户名和邮箱",
+  "description": "Name Seeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.",
   "type": "module",
   "private": false,
   "author": "Leon <silenceace@gmail.com>",
