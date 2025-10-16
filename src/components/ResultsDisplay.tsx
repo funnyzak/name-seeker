@@ -94,7 +94,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   return (
     <div className="results-container" role="region" aria-label={t('results:empty.resultsAriaLabel')}>
       {/* 结果头部：标题和导出按钮 */}
-      {results.length > 0 && (
         <div className="results-header">
           <h3 className="results-title" id="results-heading">
             {t('results:title')} <span className="results-count" aria-label={t('results:actions.resultsCount', { filtered: filteredResults.length, total: results.length })}>({filteredResults.length}/{results.length})</span>
@@ -104,8 +103,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               onFilterChange={setFilterText}
               resultsCount={filteredResults.length}
             />
-            {!isSearching && (
-              <>
                 <ExportButton 
                   results={results} 
                   username={query}
@@ -113,22 +110,18 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                   onExportSuccess={onExportSuccess}
                   onExportError={onExportError}
                 />
-                {onClearResults && (
+                {onClearResults && !isSearching && (
                   <button
                     className="btn btn-clear"
                     onClick={onClearResults}
                     aria-label={t('results:actions.clearAriaLabel')}
-                    title={t('results:actions.clearTitle')}
                   >
                     <span className="btn-icon" aria-hidden="true">🗑️</span>
-                    <span className="btn-text">{t('results:actions.clear')}</span>
+                    <span className="btn-text">{t('results:actions.reset')}</span>
                   </button>
                 )}
-              </>
-            )}
           </div>
         </div>
-      )}
 
       {/* 进度指示器 */}
       <ProgressIndicator progress={progress} isSearching={isSearching} />

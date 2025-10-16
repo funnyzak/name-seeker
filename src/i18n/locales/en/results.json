@@ -74,6 +74,7 @@
     "deselectAll": "Deselect All",
     "refresh": "Refresh Results",
     "clear": "Clear Results",
+    "reset": "Reset",
     "clearAriaLabel": "Clear search results",
     "clearTitle": "Clear all search results",
     "resultsCount": "Showing {{filtered}} of {{total}} results"
