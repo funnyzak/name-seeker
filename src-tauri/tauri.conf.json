@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "NameSeeker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.leon.name-seeker",
   "build": {
     "beforeDevCommand": "deno task dev",
@@ -46,7 +46,9 @@
     "shortDescription": "Multi-platform search tool for usernames and emails",
     "longDescription": "NameSeeker is a powerful cross-platform desktop application that searches for usernames and email addresses across hundreds of websites to help you quickly discover your digital footprint. Based on WhatsMyName project data, it supports exporting search results to PDF, CSV, JSON and other formats.",
     "copyright": "Copyright © 2025 Funnyzak",
-    "resources": ["data/*"],
+    "resources": [
+      "data/*"
+    ],
     "externalBin": [],
     "macOS": {
       "frameworks": [],
@@ -68,5 +70,4 @@
       ]
     }
   }
-
 }

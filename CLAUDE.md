@@ -1,25 +1,47 @@
-# CLAUDE.md - Development Guide for `name-seeker`
+# CLAUDE.md - Development Guide for `NameSeeker`
 
-This file provides guidance for developing the `name-seeker` application.
+This comprehensive guide provides development standards, best practices, and architectural guidance for the `NameSeeker` application.
 
-## 🚀 Project Mission
+## 🚀 Project Mission & Vision
 
-`name-seeker` is a cross-platform desktop application for discovering public profiles across hundreds of websites based on a username. It is built using Tauri (Rust + React) and is inspired by the capabilities of OSINT tools like `blackbird`. The primary goal is to provide a user-friendly graphical interface for a powerful search function, intended for educational and ethical self-research purposes.
+`NameSeeker` is a sophisticated cross-platform desktop application built for discovering public profiles across hundreds of websites based on usernames or email addresses. Built with **Tauri 2.x + React 19 + TypeScript**, the application provides a user-friendly interface for powerful search capabilities, designed for educational purposes, security research, and personal online presence management.
+
+### Core Values
+
+- **Privacy-First**: All processing occurs locally with no data sent to external servers
+- **Performance-Optimized**: Rust backend ensures maximum speed and resource efficiency
+- **User-Centric**: Intuitive interface with real-time feedback and comprehensive features
+- **Open Source**: Transparent codebase for community trust and contribution
+- **Accessibility**: Full WCAG compliance with multi-language support
 
 -----
 
 ## 🏗️ Architecture & Implementation
 
-This project uses a **complete Rust implementation** with no Python sidecar. The core username searching logic is implemented directly in Rust for maximum performance, a smaller application bundle, and greater stability.
+This project implements a **complete Rust-based architecture** with no Python sidecar, ensuring optimal performance, minimal bundle size, and enhanced stability.
 
-### Technology Stack
+### Modern Technology Stack
 
-  * **Frontend**: React 19 with TypeScript, built with Vite
-  * **Backend**: Rust with Tauri 2.x framework
-  * **Core Crates**: `reqwest` for HTTP requests, `tokio` for async runtime, `serde` for JSON serialization
-  * **Data Source**: WhatsMyName project (600+ websites)
-  * **Communication**: Tauri's event system with real-time updates
-  * **Internationalization**: react-i18next for multi-language support (English/Chinese)
+#### Frontend Layer
+- **React 19.1.0**: Latest version with concurrent features, Suspense, and modern hooks
+- **TypeScript 5.8.3**: Strict type checking with comprehensive type definitions
+- **Vite 7.0.4**: Ultra-fast build tool with HMR and optimized bundling
+- **react-i18next 16.0.1**: Production-ready internationalization with namespace support
+- **@tauri-apps/api 2**: Type-safe Tauri integration with modern event handling
+
+#### Backend Layer
+- **Tauri 2.x**: Latest desktop framework with enhanced security and performance
+- **Tokio 1.x**: Production-grade async runtime with efficient concurrency
+- **reqwest 0.12**: Feature-rich HTTP client with TLS, cookies, and redirect handling
+- **Serde 1.x**: High-performance JSON serialization/deserialization
+- **anyhow/thiserror**: Comprehensive error handling with context preservation
+- **printpdf 0.7**: PDF generation for advanced export capabilities
+
+#### Data & Infrastructure
+- **WhatsMyName Integration**: 9,904+ websites with automated updates
+- **LocalStorage**: Persistent search history and user preferences
+- **Event-Driven Architecture**: Real-time updates via Tauri events
+- **Anti-Detection**: User agent rotation and smart request throttling
 
 ### Project Structure
 
@@ -77,14 +99,22 @@ src/                              # React Frontend
 
 src-tauri/src/                    # Rust Backend
 ├── core/                        # Core Business Logic
-│   ├── config.rs                # Application configuration
-│   ├── error.rs                 # Error handling
-│   ├── models.rs                # Data models
-│   ├── search.rs                # Search engine core
-│   ├── sites.rs                 # Website data management
-│   └── utils.rs                 # Utility functions
-├── lib.rs                       # Tauri commands and setup
-└── main.rs                      # Application entry point
+│   ├── config.rs                # Application configuration and persistence
+│   ├── error.rs                 # Comprehensive error handling with context
+│   ├── models.rs                # Data structures and serialization schemas
+│   ├── search.rs                # High-performance search engine with concurrency
+│   ├── sites.rs                 # Website data management and updates
+│   ├── export.rs                # Multi-format export functionality (PDF, CSV, JSON, TXT)
+│   ├── utils.rs                 # HTTP utilities and metadata extraction
+│   └── mod.rs                   # Module organization and public exports
+├── lib.rs                       # Tauri commands, events, and application setup
+└── main.rs                      # Application entry point with logging configuration
+
+src-tauri/data/                   # Data Resources
+├── wmn-data.json               # websites from WhatsMyName project
+├── email-data.json              # Email search configuration and patterns
+├── wmn-metadata.json            # Metadata extraction rules and patterns
+└── useragents.txt              # User agent rotation for anti-detection
 ```
 
 -----
@@ -440,6 +470,6 @@ npm run tauri build
 - `src/i18n/locales/zh/` - Chinese translation files organized by namespace
 
 ### Configuration Files
-- `src-tauri/tauri.conf.json` - Tauri application configuration
-- `package.json` - Frontend dependencies and scripts
-- `src-tauri/Cargo.toml` - Rust dependencies and metadata
+- `src-tauri/tauri.conf.json` - Tauri application configuration and permissions
+- `package.json` - Frontend dependencies, scripts, and build configuration
+- `src-tauri/Cargo.toml` - Rust dependencies, features, and metadata
