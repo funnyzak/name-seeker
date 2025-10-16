@@ -20,10 +20,10 @@ export const useLanguage = (): UseLanguageReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 规范化当前语言代码
+  // Normalize current language code
   const currentLanguage = normalizeLanguage(i18n.language || 'en');
 
-  // 使用 useMemo 缓存可用语言列表
+  // Use useMemo to cache available languages list
   const availableLanguages = useMemo(() => 
     Object.entries(LANGUAGE_CONFIG).map(([code, config]) => ({
       code: code as SupportedLanguage,
@@ -40,8 +40,8 @@ export const useLanguage = (): UseLanguageReturn => {
     setError(null);
     
     try {
-      // i18n.changeLanguage 会自动触发 languageChanged 事件
-      // index.ts 中的监听器会处理 localStorage 和 HTML lang 属性的更新
+      // i18n.changeLanguage will automatically trigger languageChanged event
+      // The listener in index.ts will handle localStorage and HTML lang attribute updates
       await i18n.changeLanguage(language);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to change language';
@@ -52,7 +52,7 @@ export const useLanguage = (): UseLanguageReturn => {
     }
   };
 
-  // 监听语言变化，重置加载状态
+  // Listen for language changes, reset loading state
   useEffect(() => {
     const handleLanguageChange = () => {
       setIsLoading(false);

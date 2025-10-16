@@ -1,4 +1,7 @@
 {
+  "app": {
+    "name": "NameSeeker"
+  },
   "button": {
     "search": "Search",
     "stop": "Stop",

@@ -6,7 +6,7 @@ const MAX_HISTORY_ITEMS = 10;
 export const useSearchHistory = () => {
   const [history, setHistory] = useState<string[]>([]);
 
-  // 从 localStorage 加载历史记录
+  // Load search history from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -21,19 +21,19 @@ export const useSearchHistory = () => {
     }
   }, []);
 
-  // 添加搜索记录
+  // Add search record
   const addToHistory = useCallback((username: string) => {
     if (!username.trim()) return;
 
     setHistory((prev) => {
-      // 移除重复项
+      // Remove duplicate items
       const filtered = prev.filter(item => item !== username);
-      // 添加到开头
+      // Add to the beginning
       const updated = [username, ...filtered];
-      // 限制数量
+      // Limit the number of items
       const limited = updated.slice(0, MAX_HISTORY_ITEMS);
       
-      // 保存到 localStorage
+      // Save to localStorage
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(limited));
       } catch (error) {
@@ -44,7 +44,7 @@ export const useSearchHistory = () => {
     });
   }, []);
 
-  // 清除历史记录
+  // Clear search history
   const clearHistory = useCallback(() => {
     setHistory([]);
     try {
@@ -54,7 +54,7 @@ export const useSearchHistory = () => {
     }
   }, []);
 
-  // 删除单个记录
+  // Remove single record
   const removeFromHistory = useCallback((username: string) => {
     setHistory((prev) => {
       const updated = prev.filter(item => item !== username);

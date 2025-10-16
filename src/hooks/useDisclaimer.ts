@@ -7,7 +7,7 @@ export const useDisclaimer = () => {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 检查是否为首次启动
+  // Check if it's the first launch
   const checkFirstLaunch = useCallback(async () => {
     try {
       const firstLaunch = await tauriApi.isFirstLaunch();
@@ -15,14 +15,13 @@ export const useDisclaimer = () => {
       setShowDisclaimer(firstLaunch);
     } catch (error) {
       console.error('Error checking first launch:', error);
-      // 出错时默认显示免责声明以确保用户安全
       setShowDisclaimer(true);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // 接受免责声明
+  // Accept disclaimer
   const acceptDisclaimer = useCallback(async () => {
     try {
       await tauriApi.setDisclaimerAccepted();
@@ -30,18 +29,17 @@ export const useDisclaimer = () => {
       setIsFirstLaunch(false);
     } catch (error) {
       console.error('Error accepting disclaimer:', error);
-      // 即使出错也关闭对话框，避免用户卡住
       setShowDisclaimer(false);
     }
   }, []);
 
-  // 拒绝免责声明
+  // Decline disclaimer
   const declineDisclaimer = useCallback(async () => {
     setShowDisclaimer(false);
     await exit(0);
   }, []);
 
-  // 组件挂载时检查
+  // Check when component mounts
   useEffect(() => {
     checkFirstLaunch();
   }, [checkFirstLaunch]);

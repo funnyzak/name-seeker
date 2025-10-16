@@ -23,7 +23,7 @@ export const useSearch = () => {
     current_site: undefined
   });
 
-  // 更新单个搜索结果
+  // Update single search result
   const updateResult = useCallback((payload: SearchUpdatePayload) => {
     setResults(prevResults => {
       const existingIndex = prevResults.findIndex(r => r.site === payload.site);
@@ -47,7 +47,7 @@ export const useSearch = () => {
     });
   }, []);
 
-  // 更新搜索进度
+  // Update search progress
   const updateProgress = useCallback((payload: SearchProgressPayload) => {
     setProgress({
       total_sites: payload.total_sites,
@@ -58,27 +58,25 @@ export const useSearch = () => {
     });
   }, []);
 
-  // 完成搜索
   const finishSearch = useCallback((payload: SearchFinished) => {
     setIsSearching(false);
 
-    // 使用后端提供的准确数据更新进度
     setProgress(prev => ({
       ...prev,
       total_sites: payload.total_sites,
-      checked_sites: payload.total_sites, // 搜索完成时，所有网站都已检查
+      checked_sites: payload.total_sites, 
       found_count: payload.found_count,
-      current_site: undefined // 清除当前正在检查的网站
+      current_site: undefined
     }));
 
-    // 确保所有剩余的 Pending 状态都被正确处理
+    // Ensure all remaining Pending statuses are handled correctly
     setResults(prevResults =>
       prevResults.map(result => {
         if (result.status === 'Pending') {
           return {
             ...result,
             status: 'NotFound' as SearchResultStatus,
-            error: '检查完成，未找到用户'
+            error: 'Check completed, user not found'
           };
         }
         return result;
@@ -86,39 +84,39 @@ export const useSearch = () => {
     );
   }, []);
 
-  // 搜索错误处理
+  // Search error handling
   const handleSearchError = useCallback((error: string) => {
     console.error('Search error:', error);
     setIsSearching(false);
-    // 这里可以添加错误通知逻辑
+    // Error notification logic can be added here
   }, []);
 
-  // 搜索停止处理
+  // Search stop handling
   const handleSearchStopped = useCallback(() => {
     setIsSearching(false);
 
-    // 将所有 Pending 状态的结果标记为未完成，让用户知道这些网站没有被检查
+
     setResults(prevResults =>
       prevResults.map(result => {
         if (result.status === 'Pending') {
           return {
             ...result,
             status: 'Error' as SearchResultStatus,
-            error: '搜索被用户停止'
+            error: 'Search stopped by user'
           };
         }
         return result;
       })
     );
 
-    // 更新进度显示，显示搜索已停止
+    // Update progress display to show search has stopped
     setProgress(prev => ({
       ...prev,
       current_site: undefined
     }));
   }, []);
 
-  // 开始搜索
+  // Start search
   const startSearch = useCallback(async (
     searchQuery: string,
     type: SearchType,
@@ -130,19 +128,19 @@ export const useSearch = () => {
     }
   ) => {
     if (!searchQuery.trim()) {
-      throw new Error(type === SearchType.USERNAME ? '用户名不能为空' : '邮箱不能为空');
+      throw new Error(type === SearchType.USERNAME ? 'Username cannot be empty' : 'Email cannot be empty');
     }
 
-    // 根据类型验证格式
+    // Validate format based on type
     const isValid = type === SearchType.USERNAME
       ? await tauriApi.validateUsername(searchQuery.trim())
       : await tauriApi.validateEmail(searchQuery.trim());
     
     if (!isValid) {
-      throw new Error(type === SearchType.USERNAME ? '用户名格式无效' : '邮箱格式无效');
+      throw new Error(type === SearchType.USERNAME ? 'Invalid username format' : 'Invalid email format');
     }
 
-    // 重置状态
+    // Reset state
     setSearchType(type);
     setQuery(searchQuery.trim());
     setResults([]);
@@ -164,7 +162,7 @@ export const useSearch = () => {
     }
   }, []);
 
-  // 停止搜索
+  // Stop search
   const stopSearch = useCallback(async () => {
     try {
       const stopped = await tauriApi.stopSearch();
@@ -175,7 +173,7 @@ export const useSearch = () => {
     }
   }, []);
 
-  // 设置事件监听器
+  // Setup event listeners
   useEffect(() => {
     let unsubscribers: (() => void)[] = [];
 
@@ -200,12 +198,12 @@ export const useSearch = () => {
     };
   }, [updateResult, updateProgress, finishSearch, handleSearchError, handleSearchStopped]);
 
-  // 根据状态过滤结果
+  // Filter results by status
   const getResultsByStatus = useCallback((status: SearchResultStatus) => {
     return results.filter(result => result.status === status);
   }, [results]);
 
-  // 获取统计信息
+  // Get statistics
   const getStats = useCallback(() => {
     const found = results.filter(r => r.status === 'Found').length;
     const notFound = results.filter(r => r.status === 'NotFound').length;
@@ -215,7 +213,7 @@ export const useSearch = () => {
     return { found, notFound, errors, pending, total: results.length };
   }, [results]);
 
-  // 清除搜索结果
+  // Clear search results
   const clearResults = useCallback(() => {
     setResults([]);
     setProgress({

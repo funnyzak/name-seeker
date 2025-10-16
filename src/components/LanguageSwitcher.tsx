@@ -23,7 +23,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   
   const currentConfig = LANGUAGE_CONFIG[currentLanguage];
 
-  // 关闭下拉菜单当点击外部
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -35,7 +35,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 监听错误并通知父组件
+  // Listen for errors and notify parent component
   useEffect(() => {
     if (error && onError) {
       onError(error);

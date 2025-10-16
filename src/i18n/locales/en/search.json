@@ -8,8 +8,8 @@
     "searchTypeLabel": "Search Type",
     "searchTypeUsername": "Username",
     "searchTypeEmail": "Email",
-    "searchButton": "Start Search",
-    "stopButton": "Stop Search",
+    "searchButton": "Search",
+    "stopButton": "Stop",
     "clearButton": "Clear",
     "historyButton": "Search History"
   },

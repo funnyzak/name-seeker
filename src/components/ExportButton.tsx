@@ -15,12 +15,12 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 只导出 Found 状态的结果
+  // Only export results with Found status
   const foundResults = results.filter(r => r.status === SearchResultStatus.FOUND);
   const hasResults = foundResults.length > 0;
   const isDisabled = disabled || !hasResults || isExporting;
 
-  // 点击外部关闭下拉菜单
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -71,7 +71,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     setIsExporting(true);
 
     try {
-      // 格式化结果为文本
+      // Format results as text
       const resultText = foundResults
         .map(r => `${r.site}: ${r.url || 'N/A'}`)
         .join('\n');

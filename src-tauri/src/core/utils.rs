@@ -1,10 +1,9 @@
 use crate::core::error::{AppError, AppResult};
 use serde_json::Value;
-use std::collections::HashMap;
 
-/// 实用工具函数集合
+/// Collection of utility functions
 
-/// 从JSON值中提取数据
+/// Extract data from JSON values
 pub fn extract_json_data(path: &[String], data: &Value) -> AppResult<Option<Value>> {
     if path.is_empty() {
         return Ok(Some(data.clone()));
@@ -16,19 +15,19 @@ pub fn extract_json_data(path: &[String], data: &Value) -> AppResult<Option<Valu
             Value::Object(map) => {
                 current = map
                     .get(segment)
-                    .ok_or_else(|| AppError::SearchError(format!("路径段 '{}' 不存在", segment)))?;
+                    .ok_or_else(|| AppError::SearchError(format!("Path segment '{}' does not exist", segment)))?;
             }
             Value::Array(arr) => {
                 let index = segment
                     .parse::<usize>()
-                    .map_err(|_| AppError::SearchError(format!("无效的数组索引: {}", segment)))?;
+                    .map_err(|_| AppError::SearchError(format!("Invalid array index: {}", segment)))?;
                 current = arr
                     .get(index)
-                    .ok_or_else(|| AppError::SearchError(format!("数组索引 {} 越界", index)))?;
+                    .ok_or_else(|| AppError::SearchError(format!("Array index {} out of bounds", index)))?;
             }
             _ => {
                 return Err(AppError::SearchError(
-                    "路径遍历遇到非对象/数组值".to_string(),
+                    "Path traversal encountered non-object/array value".to_string(),
                 ));
             }
         }
@@ -37,14 +36,14 @@ pub fn extract_json_data(path: &[String], data: &Value) -> AppResult<Option<Valu
     Ok(Some(current.clone()))
 }
 
-/// 从HTML内容中提取数据（使用简单的正则表达式）
+/// Extract data from HTML content (using simple regex patterns)
 pub fn extract_html_data(pattern: &str, content: &str) -> AppResult<Option<String>> {
-    // 这是一个简单的实现，实际项目中可能需要更复杂的HTML解析
-    // 这里我们使用基本的字符串匹配来模拟正则表达式
+    // This is a simple implementation, real projects might need more complex HTML parsing
+    // Here we use basic string matching to simulate regex patterns
     if pattern.contains("href=") {
-        // 简单的链接提取
+        // Simple link extraction
         if let Some(start) = content.find("href=") {
-            let start = start + 6; // "href=" 的长度
+            let start = start + 6; // Length of "href="
             if let Some(end_pos) = content[start..].find('"') {
                 let end = start + end_pos;
                 let url = &content[start..end];
@@ -53,10 +52,10 @@ pub fn extract_html_data(pattern: &str, content: &str) -> AppResult<Option<Strin
         }
     }
 
-    // 简单的标题提取
+    // Simple title extraction
     if pattern.contains("<title>") {
         if let Some(start) = content.find("<title>") {
-            let start = start + 7; // "<title>" 的长度
+            let start = start + 7; // Length of "<title>"
             if let Some(end) = content[start..].find("</title>") {
                 let end = start + end;
                 let title = &content[start..end];
@@ -65,7 +64,7 @@ pub fn extract_html_data(pattern: &str, content: &str) -> AppResult<Option<Strin
         }
     }
 
-    // 简单的h1-h6标题提取
+    // Simple h1-h6 heading extraction
     for tag in ["h1", "h2", "h3", "h4", "h5", "h6"] {
         if pattern.contains(&format!("<{}", tag)) {
             let open_tag = format!("<{} ", tag);
@@ -87,72 +86,72 @@ pub fn extract_html_data(pattern: &str, content: &str) -> AppResult<Option<Strin
     Ok(None)
 }
 
-/// 验证用户名格式
+/// Validate username format
 pub fn validate_username(username: &str) -> AppResult<()> {
     if username.trim().is_empty() {
-        return Err(AppError::UserInputError("用户名不能为空".to_string()));
+        return Err(AppError::UserInputError("Username cannot be empty".to_string()));
     }
 
     if username.len() < 2 {
         return Err(AppError::UserInputError(
-            "用户名至少需要2个字符".to_string(),
+            "Username must be at least 2 characters".to_string(),
         ));
     }
 
     if username.len() > 100 {
-        return Err(AppError::UserInputError("用户名过长".to_string()));
+        return Err(AppError::UserInputError("Username is too long".to_string()));
     }
 
-    // 基本字符检查（允许字母、数字、下划线、连字符、点）
+    // Basic character validation (allow letters, numbers, underscores, hyphens, dots)
     if !username
         .chars()
         .all(|c| c.is_alphanumeric() || matches!(c, '_' | '-' | '.'))
     {
-        return Err(AppError::UserInputError("用户名包含无效字符".to_string()));
+        return Err(AppError::UserInputError("Username contains invalid characters".to_string()));
     }
 
     Ok(())
 }
 
-/// 验证邮箱格式
+/// Validate email format
 pub fn validate_email(email: &str) -> AppResult<()> {
     if email.trim().is_empty() {
-        return Err(AppError::UserInputError("邮箱不能为空".to_string()));
+        return Err(AppError::UserInputError("Email cannot be empty".to_string()));
     }
 
-    // 简单的邮箱格式验证
+    // Simple email format validation
     if !email.contains('@') || !email.contains('.') {
-        return Err(AppError::UserInputError("邮箱格式无效".to_string()));
+        return Err(AppError::UserInputError("Invalid email format".to_string()));
     }
 
     let parts: Vec<&str> = email.split('@').collect();
     if parts.len() != 2 {
-        return Err(AppError::UserInputError("邮箱格式无效".to_string()));
+        return Err(AppError::UserInputError("Invalid email format".to_string()));
     }
 
     if parts[0].is_empty() || parts[1].is_empty() {
-        return Err(AppError::UserInputError("邮箱格式无效".to_string()));
+        return Err(AppError::UserInputError("Invalid email format".to_string()));
     }
 
     Ok(())
 }
 
-/// 格式化持续时间
+/// Format duration
 pub fn format_duration(milliseconds: u64) -> String {
     let seconds = milliseconds / 1000;
     let minutes = seconds / 60;
     let hours = minutes / 60;
 
     if hours > 0 {
-        format!("{}小时{}分钟{}秒", hours, minutes % 60, seconds % 60)
+        format!("{}h {}m {}s", hours, minutes % 60, seconds % 60)
     } else if minutes > 0 {
-        format!("{}分钟{}秒", minutes, seconds % 60)
+        format!("{}m {}s", minutes, seconds % 60)
     } else {
-        format!("{}秒", seconds)
+        format!("{}s", seconds)
     }
 }
 
-/// 创建用户代理字符串
+/// Create user agent string
 pub fn create_user_agent() -> String {
     format!(
         "name-seeker/1.0 ({}; {}; Rust)",
@@ -161,23 +160,23 @@ pub fn create_user_agent() -> String {
     )
 }
 
-/// 生成随机延迟（毫秒）
+/// Generate random delay (milliseconds)
 pub fn random_delay_ms(min: u64, max: u64) -> u64 {
     use rand::Rng;
     let mut rng = rand::thread_rng();
     rng.gen_range(min..=max)
 }
 
-/// 清理和标准化URL
+/// Clean and normalize URL
 pub fn normalize_url(url: &str) -> String {
     let mut normalized = url.trim().to_string();
 
-    // 确保协议存在
+    // Ensure protocol exists
     if !normalized.starts_with("http://") && !normalized.starts_with("https://") {
         normalized = format!("https://{}", normalized);
     }
 
-    // 移除末尾的斜杠（除非是根路径）
+    // Remove trailing slash (unless it's root path)
     if normalized.ends_with('/') && normalized.matches('/').count() > 3 {
         normalized.pop();
     }
@@ -185,17 +184,17 @@ pub fn normalize_url(url: &str) -> String {
     normalized
 }
 
-/// 从URL中提取域名
+/// Extract domain from URL
 pub fn extract_domain(url: &str) -> AppResult<String> {
     let url = normalize_url(url);
 
     if let Ok(parsed) = url::Url::parse(&url) {
         Ok(parsed
             .host_str()
-            .ok_or_else(|| AppError::SearchError("无法解析域名".to_string()))?
+            .ok_or_else(|| AppError::SearchError("Unable to parse domain".to_string()))?
             .to_string())
     } else {
-        // 简单的字符串解析作为后备
+        // Simple string parsing as fallback
         if let Some(start) = url.find("://") {
             let start = start + 3;
             if let Some(end) = url[start..].find('/') {
@@ -204,17 +203,17 @@ pub fn extract_domain(url: &str) -> AppResult<String> {
                 Ok(url[start..].to_string())
             }
         } else {
-            Err(AppError::SearchError("无效的URL格式".to_string()))
+            Err(AppError::SearchError("Invalid URL format".to_string()))
         }
     }
 }
 
-/// 检查字符串是否包含另一个字符串（不区分大小写）
+/// Check if string contains another string (case insensitive)
 pub fn contains_case_insensitive(haystack: &str, needle: &str) -> bool {
     haystack.to_lowercase().contains(&needle.to_lowercase())
 }
 
-/// 移除重复项，保持原始顺序
+/// Remove duplicates while preserving original order
 pub fn remove_duplicates<T: Clone + Eq + std::hash::Hash>(items: Vec<T>) -> Vec<T> {
     let mut seen = std::collections::HashSet::new();
     let mut result = Vec::new();
@@ -258,10 +257,10 @@ mod tests {
 
     #[test]
     fn test_format_duration() {
-        assert_eq!(format_duration(500), "0秒");
-        assert_eq!(format_duration(1500), "1秒");
-        assert_eq!(format_duration(65000), "1分钟5秒");
-        assert_eq!(format_duration(3665000), "1小时1分钟5秒");
+        assert_eq!(format_duration(500), "0s");
+        assert_eq!(format_duration(1500), "1s");
+        assert_eq!(format_duration(65000), "1m 5s");
+        assert_eq!(format_duration(3665000), "1h 1m 5s");
     }
 
     #[test]

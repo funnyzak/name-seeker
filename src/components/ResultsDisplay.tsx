@@ -25,13 +25,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   const { t } = useTranslation(['results', 'common']);
   const [collapsed, setCollapsed] = useState<CollapsedSections>({
     found: false,
-    notFound: true,  // 默认折叠 Not Found
+    notFound: true,  // Default collapse Not Found
     error: false,
     pending: false
   });
   const [filterText, setFilterText] = useState('');
 
-  // 使用 useMemo 缓存筛选后的结果
+  // Use useMemo to cache filtered results
   const filteredResults = useMemo(() => {
     if (!filterText.trim()) {
       return results;
@@ -93,7 +93,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
   return (
     <div className="results-container" role="region" aria-label={t('results:empty.resultsAriaLabel')}>
-      {/* 结果头部：标题和导出按钮 */}
+      {/* Results header: title and export buttons */}
         <div className="results-header">
           <h3 className="results-title" id="results-heading">
             {t('results:title')} <span className="results-count" aria-label={t('results:actions.resultsCount', { filtered: filteredResults.length, total: results.length })}>({filteredResults.length}/{results.length})</span>
@@ -123,10 +123,10 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           </div>
         </div>
 
-      {/* 进度指示器 */}
-      <ProgressIndicator progress={progress} isSearching={isSearching} />
+      {/* Progress indicator */}
+      {isSearching && <ProgressIndicator progress={progress} isSearching={isSearching} />}
 
-      {/* 结果区域滚动容器 */}
+      {/* Results area scroll container */}
       <div className="section-wrapper" role="main" aria-labelledby="results-heading">
         {foundResults.length > 0 && (
           <div className="results-section">
@@ -225,7 +225,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           {/* {progress.current_site === undefined && progress.checked_sites < progress.total_sites && (
             <div className="search-stopped-notice">
               <span className="stopped-icon">⏸️</span>
-              搜索已被停止，显示已完成检查的结果
+              Search was stopped, showing completed checked results
             </div>
           )} */}
           <div className="summary-stats">

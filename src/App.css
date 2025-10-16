@@ -2,7 +2,7 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.2;
   font-weight: 400;
 
   color: #2c2c2c;
@@ -139,7 +139,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1rem;
+  padding: 0 0.5rem;
   border-bottom: 1px solid var(--gray-200);
   flex-shrink: 0; /* 防止被压缩 */
   background: var(--gray-50);
@@ -148,7 +148,7 @@ body {
 .toolbar-title {
   display: flex;
   align-items: center;
-  font-size: 1.2rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: var(--gray-800);
 }
@@ -1715,11 +1715,11 @@ kbd {
   }
 
   .app-toolbar {
-    padding: 0.75rem 0;
+    padding: 0.1rem 0;
   }
 
   .toolbar-title {
-    font-size: 1rem;
+    font-size: 1.5rem;
   }
 
   .toolbar-title .icon {

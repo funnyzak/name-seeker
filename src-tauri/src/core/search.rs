@@ -13,14 +13,14 @@ use std::time::{Duration, Instant};
 use tokio::sync::Semaphore;
 use tokio::time::timeout;
 
-/// 搜索引擎
+/// Search engine
 pub struct SearchEngine {
     client: Client,
     config: SearchConfig,
 }
 
 impl SearchEngine {
-    /// 创建新的搜索引擎实例
+    /// Create a new search engine instance
     pub fn new(config: SearchConfig) -> AppResult<Self> {
         let client = Client::builder()
             .user_agent(&config.user_agent)
@@ -30,7 +30,7 @@ impl SearchEngine {
         Ok(Self { client, config })
     }
 
-    /// 获取要搜索的网站总数
+    /// Get the total number of websites to search
     pub async fn get_total_sites(&self, sites_manager: &SitesManager) -> AppResult<u32> {
         let sites = sites_manager
             .get_filtered_sites(
@@ -44,7 +44,7 @@ impl SearchEngine {
         Ok(sites.len() as u32)
     }
 
-    /// 执行搜索
+    /// Execute search
     pub async fn search<F, P>(
         &self,
         sites_manager: &SitesManager,
@@ -56,12 +56,12 @@ impl SearchEngine {
         P: Fn(crate::core::models::SearchProgressPayload) + Send + Sync + 'static,
     {
         let search_type_desc = match self.config.search_type {
-            SearchType::Username => "用户名",
-            SearchType::Email => "邮箱",
+            SearchType::Username => "username",
+            SearchType::Email => "email",
         };
-        log::info!("开始搜索{}: {}", search_type_desc, self.config.query);
+        log::info!("Starting search for {}: {}", search_type_desc, self.config.query);
 
-        // 获取网站列表
+        // Get website list
         let sites = sites_manager
             .get_filtered_sites(
                 &crate::core::config::APP_CONFIG,
@@ -71,9 +71,9 @@ impl SearchEngine {
             )
             .await?;
 
-        log::info!("准备检查 {} 个网站", sites.len());
+        log::info!("Preparing to check {} websites", sites.len());
 
-        // 获取元数据配置
+        // Get metadata configuration
         let metadata_config = sites_manager
             .get_metadata_config(&crate::core::config::APP_CONFIG)
             .await?;
@@ -86,7 +86,7 @@ impl SearchEngine {
         let update_callback = Arc::new(update_callback);
         let progress_callback = Arc::new(progress_callback);
 
-        // 创建搜索任务
+        // Create search tasks
         let tasks: Vec<_> = sites
             .into_iter()
             .map(|site| {
@@ -101,7 +101,7 @@ impl SearchEngine {
                     let _permit = semaphore.acquire().await?;
                     let result = engine.check_site(&site, &metadata_config).await?;
 
-                    // 更新进度
+                    // Update progress
                     {
                         let mut p = progress.lock().await;
                         p.increment_checked();
@@ -111,7 +111,7 @@ impl SearchEngine {
                             _ => {}
                         }
 
-                        // 发送单个结果更新
+                        // Send individual result update
                         let update_payload = SearchUpdatePayload {
                             site: result.site.clone(),
                             status: result.status.clone(),
@@ -122,7 +122,7 @@ impl SearchEngine {
                         };
                         update_callback(update_payload);
 
-                        // 发送整体进度更新
+                        // Send overall progress update
                         let progress_payload = crate::core::models::SearchProgressPayload {
                             total_sites: p.total_sites,
                             checked_sites: p.checked_sites,
@@ -139,7 +139,7 @@ impl SearchEngine {
             })
             .collect();
 
-        // 等待所有任务完成
+        // Wait for all tasks to complete
         let results = join_all(tasks).await;
         let mut search_results = Vec::new();
 
@@ -147,15 +147,15 @@ impl SearchEngine {
             match result {
                 Ok(search_result) => search_results.push(search_result),
                 Err(e) => {
-                    log::error!("搜索任务失败: {}", e);
-                    // 继续处理其他结果
+                    log::error!("Search task failed: {}", e);
+                    // Continue processing other results
                 }
             }
         }
 
         let duration = start_time.elapsed();
         log::info!(
-            "搜索完成，耗时: {}ms，找到 {} 个账户",
+            "Search completed in {}ms, found {} accounts",
             duration.as_millis(),
             search_results
                 .iter()
@@ -166,20 +166,20 @@ impl SearchEngine {
         Ok(search_results)
     }
 
-    /// 检查单个网站
+    /// Check a single website
     async fn check_site(
         &self,
         site: &crate::core::models::Site,
         metadata_config: &std::collections::HashMap<String, Vec<Value>>,
     ) -> AppResult<SearchResult> {
-        // 处理输入操作（如邮箱哈希）
+        // Process input operations (such as email hashing)
         let processed_query =
             self.process_input(&self.config.query, site.input_operation.as_deref())?;
 
-        // 替换URL中的占位符
+        // Replace placeholders in URL
         let url = site.uri_check.replace("{account}", &processed_query);
 
-        // 处理POST数据
+        // Process POST data
         let post_data = site
             .data
             .as_ref()
@@ -194,11 +194,11 @@ impl SearchEngine {
             metadata: None,
         };
 
-        // 添加随机延迟以避免被检测
+        // Add random delay to avoid detection
         let delay_ms = random_delay_ms(100, 500);
         tokio::time::sleep(Duration::from_millis(delay_ms)).await;
 
-        // 构建HTTP请求
+        // Build HTTP request
         let mut request_builder = match site.method.to_uppercase().as_str() {
             "POST" => {
                 let mut builder = self.client.post(&url);
@@ -210,7 +210,7 @@ impl SearchEngine {
             _ => self.client.get(&url),
         };
 
-        // 添加自定义请求头
+        // Add custom request headers
         if let Some(headers) = &site.headers {
             if let Some(headers_obj) = headers.as_object() {
                 for (key, value) in headers_obj {
@@ -221,7 +221,7 @@ impl SearchEngine {
             }
         }
 
-        // 发送HTTP请求
+        // Send HTTP request
         let response_result = timeout(
             Duration::from_secs(self.config.timeout_seconds),
             request_builder.send(),
@@ -233,14 +233,14 @@ impl SearchEngine {
             Ok(Err(e)) => {
                 return Ok(SearchResult {
                     status: SearchResultStatus::Error,
-                    error: Some(format!("HTTP请求失败: {}", e)),
+                    error: Some(format!("HTTP request failed: {}", e)),
                     ..result
                 });
             }
             Err(_) => {
                 return Ok(SearchResult {
                     status: SearchResultStatus::Error,
-                    error: Some("请求超时".to_string()),
+                    error: Some("Request timeout".to_string()),
                     ..result
                 });
             }
@@ -254,13 +254,13 @@ impl SearchEngine {
             Err(e) => {
                 return Ok(SearchResult {
                     status: SearchResultStatus::Error,
-                    error: Some(format!("读取响应内容失败: {}", e)),
+                    error: Some(format!("Failed to read response content: {}", e)),
                     ..result
                 });
             }
         };
 
-        // 检查账户是否存在
+        // Check if account exists
         let (status, metadata) = self
             .analyze_response(site, &content, status_code, metadata_config)
             .await?;
@@ -276,7 +276,7 @@ impl SearchEngine {
         })
     }
 
-    /// 分析响应内容
+    /// Analyze response content
     async fn analyze_response(
         &self,
         site: &crate::core::models::Site,
@@ -284,7 +284,7 @@ impl SearchEngine {
         status_code: u16,
         metadata_config: &std::collections::HashMap<String, Vec<Value>>,
     ) -> AppResult<(SearchResultStatus, Vec<MetadataItem>)> {
-        // 检查账户是否存在（基于blackbird的逻辑）
+        // Check if account exists
         let account_exists = (content.contains(&site.e_string) && status_code == site.e_code)
             && (!content.contains(&site.m_string) || status_code != site.m_code);
 
@@ -292,7 +292,7 @@ impl SearchEngine {
             return Ok((SearchResultStatus::NotFound, Vec::new()));
         }
 
-        // 账户存在，尝试提取元数据
+        // Account exists, try to extract metadata
         let mut metadata = Vec::new();
 
         if let Some(site_metadata) = metadata_config.get(&site.name) {
@@ -309,7 +309,7 @@ impl SearchEngine {
         Ok((SearchResultStatus::Found, metadata))
     }
 
-    /// 提取元数据项
+    /// Extract metadata item
     async fn extract_metadata_item(
         &self,
         _site: &crate::core::models::Site,
@@ -318,7 +318,7 @@ impl SearchEngine {
     ) -> AppResult<Vec<MetadataItem>> {
         let mut results = Vec::new();
 
-        // 获取配置
+        // Get configuration
         let schema = metadata_config["schema"].as_str().unwrap_or("unknown");
         let data_type = metadata_config["type"].as_str().unwrap_or("string");
         let name = metadata_config["name"].as_str().unwrap_or("unknown");
@@ -326,7 +326,7 @@ impl SearchEngine {
 
         match schema {
             "JSON" => {
-                // 尝试解析JSON响应
+                // Try to parse JSON response
                 if let Ok(json_value) = serde_json::from_str::<Value>(content) {
                     if let Ok(path_array) = self.extract_path_array(path) {
                         if let Some(extracted_value) = extract_json_data(&path_array, &json_value)?
@@ -342,7 +342,7 @@ impl SearchEngine {
                 }
             }
             "HTML" => {
-                // HTML解析
+                // HTML parsing
                 if let Some(path_str) = path.as_str() {
                     if let Some(extracted_value) = extract_html_data(path_str, content)? {
                         let metadata_item = MetadataItem {
@@ -355,14 +355,14 @@ impl SearchEngine {
                 }
             }
             _ => {
-                log::warn!("不支持的元数据schema: {}", schema);
+                log::warn!("Unsupported metadata schema: {}", schema);
             }
         }
 
         Ok(results)
     }
 
-    /// 从配置中提取路径数组
+    /// Extract path array from configuration
     fn extract_path_array(&self, path: &Value) -> AppResult<Vec<String>> {
         match path {
             Value::Array(arr) => {
@@ -371,7 +371,7 @@ impl SearchEngine {
                     .map(|v| {
                         v.as_str()
                             .ok_or_else(|| {
-                                AppError::SearchError("路径元素必须是字符串".to_string())
+                                AppError::SearchError("Path elements must be strings".to_string())
                             })
                             .map(|s| s.to_string())
                     })
@@ -379,14 +379,14 @@ impl SearchEngine {
                 path_array
             }
             Value::String(s) => {
-                // 如果是字符串，尝试解析为路径
+                // If it's a string, try to parse as path
                 Ok(vec![s.to_string()])
             }
-            _ => Err(AppError::SearchError("无效的路径格式".to_string())),
+            _ => Err(AppError::SearchError("Invalid path format".to_string())),
         }
     }
 
-    /// 处理输入操作（如邮箱哈希）
+    /// Process input operations (such as email hashing)
     fn process_input(&self, input: &str, operation: Option<&str>) -> AppResult<String> {
         match operation {
             Some("hash-sha256") => {
@@ -406,7 +406,7 @@ impl SearchEngine {
             Some("lowercase") => Ok(input.to_lowercase()),
             Some("uppercase") => Ok(input.to_uppercase()),
             Some(op) => {
-                log::warn!("不支持的输入操作: {}", op);
+                log::warn!("Unsupported input operation: {}", op);
                 Ok(input.to_string())
             }
             None => Ok(input.to_string()),

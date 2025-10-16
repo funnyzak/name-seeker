@@ -13,19 +13,19 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
 
-// 应用状态
+// Application state
 #[derive(Default)]
 pub struct AppState {
     pub search_handle: Arc<Mutex<Option<tauri::async_runtime::JoinHandle<()>>>>,
 }
 
-/// 检查是否为首次启动
+/// Check if this is the first launch
 #[tauri::command]
 async fn is_first_launch() -> Result<bool, String> {
     Ok(APP_CONFIG.is_first_launch())
 }
 
-/// 设置免责声明已接受
+/// Set disclaimer as accepted
 #[tauri::command]
 async fn set_disclaimer_accepted() -> Result<(), String> {
     APP_CONFIG
@@ -34,7 +34,7 @@ async fn set_disclaimer_accepted() -> Result<(), String> {
     Ok(())
 }
 
-/// 开始搜索
+/// Start search
 #[tauri::command]
 async fn start_search(
     app: AppHandle,
@@ -46,25 +46,25 @@ async fn start_search(
     category_filter: Option<String>,
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
-    // 解析搜索类型
+    // Parse search type
     let search_type = match search_type.as_deref() {
         Some("email") => SearchType::Email,
         _ => SearchType::Username,
     };
 
-    // 根据搜索类型验证输入
+    // Validate input based on search type
     match search_type {
         SearchType::Username => {
             validate_username(&query).map_err(|e| e.to_string())?;
-            log::info!("开始搜索用户名: {}", query);
+            log::info!("Starting username search: {}", query);
         }
         SearchType::Email => {
             validate_email(&query).map_err(|e| e.to_string())?;
-            log::info!("开始搜索邮箱: {}", query);
+            log::info!("Starting email search: {}", query);
         }
     }
 
-    // 创建搜索配置
+    // Create search configuration
     let search_config = SearchConfig {
         search_type,
         query: query.clone(),
@@ -78,55 +78,55 @@ async fn start_search(
         category_filter,
     };
 
-    // 创建搜索引擎
+    // Create search engine
     let search_engine =
         std::sync::Arc::new(SearchEngine::new(search_config).map_err(|e| e.to_string())?);
 
-    // 创建单个结果更新回调
+    // Create single result update callback
     let app_for_update = app.clone();
     let update_callback = move |payload: SearchUpdatePayload| {
         let app = app_for_update.clone();
         tauri::async_runtime::spawn(async move {
             if let Err(e) = app.emit("search-update", &payload) {
-                log::error!("发送搜索更新事件失败: {}", e);
+                log::error!("Failed to emit search update event: {}", e);
             }
         });
     };
 
-    // 创建进度更新回调
+    // Create progress update callback
     let app_for_progress = app.clone();
     let progress_callback = move |payload: SearchProgressPayload| {
         let app = app_for_progress.clone();
         tauri::async_runtime::spawn(async move {
             if let Err(e) = app.emit("search-progress", &payload) {
-                log::error!("发送进度更新事件失败: {}", e);
+                log::error!("Failed to emit progress update event: {}", e);
             }
         });
     };
 
-    // 克隆必要的数据
+    // Clone necessary data
     let app_for_search = app.clone();
     let search_engine_clone = search_engine.clone();
 
-    // 启动搜索任务
+    // Start search task
     let search_handle = tauri::async_runtime::spawn(async move {
         let start_time = std::time::Instant::now();
 
-        // 获取要搜索的网站总数
+        // Get total number of sites to search
         let total_sites = match search_engine_clone.get_total_sites(&SITES_MANAGER).await {
             Ok(count) => count,
             Err(e) => {
-                log::error!("获取网站总数失败: {}", e);
+                log::error!("Failed to get total sites count: {}", e);
                 if let Err(e) = app_for_search.emit("search-error", &e.to_string()) {
-                    log::error!("发送搜索错误事件失败: {}", e);
+                    log::error!("Failed to emit search error event: {}", e);
                 }
                 return;
             }
         };
 
-        log::info!("准备搜索 {} 个网站", total_sites);
+        log::info!("Preparing to search {} sites", total_sites);
 
-        // 发送初始进度
+        // Send initial progress
         let initial_progress = SearchProgressPayload {
             total_sites,
             checked_sites: 0,
@@ -137,10 +137,10 @@ async fn start_search(
         };
 
         if let Err(e) = app_for_search.emit("search-progress", &initial_progress) {
-            log::error!("发送初始进度事件失败: {}", e);
+            log::error!("Failed to emit initial progress event: {}", e);
         }
 
-        // 执行搜索
+        // Execute search
         match search_engine_clone
             .search(&SITES_MANAGER, update_callback, progress_callback)
             .await
@@ -152,12 +152,12 @@ async fn start_search(
                     .count() as u32;
 
                 log::info!(
-                    "搜索完成: {} 个网站，找到 {} 个账户",
+                    "Search completed: {} sites, found {} accounts",
                     total_sites,
                     found_count
                 );
 
-                // 发送搜索完成事件
+                // Send search completion event
                 let finished = SearchFinished {
                     total_sites,
                     found_count,
@@ -165,24 +165,24 @@ async fn start_search(
                 };
 
                 if let Err(e) = app_for_search.emit("search-finished", &finished) {
-                    log::error!("发送搜索完成事件失败: {}", e);
+                    log::error!("Failed to emit search completion event: {}", e);
                 }
             }
             Err(e) => {
-                log::error!("搜索失败: {}", e);
+                log::error!("Search failed: {}", e);
 
-                // 发送错误事件
+                // Send error event
                 if let Err(e) = app_for_search.emit("search-error", &e.to_string()) {
-                    log::error!("发送搜索错误事件失败: {}", e);
+                    log::error!("Failed to emit search error event: {}", e);
                 }
             }
         }
 
-        // 搜索完成后清理句柄
-        log::debug!("搜索任务完成，句柄将被自动清理");
+        // Clean up handle after search completion
+        log::debug!("Search task completed, handle will be automatically cleaned up");
     });
 
-    // 保存搜索句柄
+    // Save search handle
     {
         let mut search_handle_guard = state.search_handle.lock().await;
         *search_handle_guard = Some(search_handle);
@@ -191,7 +191,7 @@ async fn start_search(
     Ok(())
 }
 
-/// 停止当前搜索
+/// Stop current search
 #[tauri::command]
 async fn stop_search(app: AppHandle, state: tauri::State<'_, AppState>) -> Result<bool, String> {
     let mut search_handle_guard = state.search_handle.lock().await;
@@ -199,22 +199,21 @@ async fn stop_search(app: AppHandle, state: tauri::State<'_, AppState>) -> Resul
     if let Some(search_handle) = search_handle_guard.take() {
         search_handle.abort();
 
-        // 发送搜索停止事件
+        // Send search stopped event
         if let Err(e) = app.emit("search-stopped", &()) {
-            log::error!("发送搜索停止事件失败: {}", e);
+            log::error!("Failed to emit search stopped event: {}", e);
         }
 
-        log::info!("搜索已被用户停止");
+        log::info!("Search stopped by user");
         Ok(true)
     } else {
         Ok(false)
     }
 }
 
-/// 获取搜索统计信息
+/// Get search statistics
 #[tauri::command]
 async fn get_search_stats() -> Result<serde_json::Value, String> {
-    // 这里可以实现获取搜索统计信息的功能
     Ok(serde_json::json!({
         "total_searches": 0,
         "total_accounts_found": 0,
@@ -223,7 +222,7 @@ async fn get_search_stats() -> Result<serde_json::Value, String> {
     }))
 }
 
-/// 获取可用网站类别
+/// Get available website categories
 #[tauri::command]
 async fn get_categories() -> Result<Vec<String>, String> {
     SITES_MANAGER
@@ -232,19 +231,19 @@ async fn get_categories() -> Result<Vec<String>, String> {
         .map_err(|e| e.to_string())
 }
 
-/// 验证用户名格式
+/// Validate username format
 #[tauri::command]
 async fn validate_username_format(username: String) -> Result<bool, String> {
     Ok(validate_username(&username).is_ok())
 }
 
-/// 验证邮箱格式
+/// Validate email format
 #[tauri::command]
 async fn validate_email_format(email: String) -> Result<bool, String> {
     Ok(validate_email(&email).is_ok())
 }
 
-/// 打开外部URL
+/// Open external URL
 #[tauri::command]
 async fn open_url(url: String) -> Result<(), String> {
     match open::that(&url) {
@@ -253,61 +252,61 @@ async fn open_url(url: String) -> Result<(), String> {
     }
 }
 
-/// 打开文件所在目录
+/// Open file directory
 #[tauri::command]
 async fn open_directory(path: String) -> Result<(), String> {
     use std::path::Path;
 
     let path = Path::new(&path);
 
-    // 如果传入的是文件路径，获取其父目录
+    // If it's a file path, get its parent directory
     let dir_path = if path.is_file() {
         path.parent()
-            .ok_or_else(|| "无法获取文件的父目录".to_string())?
+            .ok_or_else(|| "Unable to get parent directory".to_string())?
     } else {
         path
     };
 
-    // 检查目录是否存在
+    // Check if directory exists
     if !dir_path.exists() {
-        return Err(format!("目录不存在: {}", dir_path.display()));
+        return Err(format!("Directory does not exist: {}", dir_path.display()));
     }
 
-    // 打开目录
+    // Open directory
     match open::that(dir_path) {
         Ok(_) => {
-            log::info!("已打开目录: {}", dir_path.display());
+            log::info!("Opened directory: {}", dir_path.display());
             Ok(())
         }
         Err(e) => {
-            log::error!("打开目录失败: {}", e);
-            Err(format!("打开目录失败: {}", e))
+            log::error!("Failed to open directory: {}", e);
+            Err(format!("Failed to open directory: {}", e))
         }
     }
 }
 
-/// 复制文本到剪贴板
+/// Copy text to clipboard
 #[tauri::command]
 async fn copy_to_clipboard(app: AppHandle, text: String) -> Result<(), String> {
     use tauri_plugin_clipboard_manager::ClipboardExt;
 
     app.clipboard().write_text(text.clone()).map_err(|e| {
-        log::error!("复制到剪贴板失败: {}", e);
-        format!("复制失败: {}", e)
+        log::error!("Failed to copy to clipboard: {}", e);
+        format!("Copy failed: {}", e)
     })?;
 
-    log::info!("已复制文本到剪贴板 (长度: {})", text.len());
+    log::info!("Copied text to clipboard (length: {})", text.len());
     Ok(())
 }
 
-/// 获取应用版本信息
+/// Get application version information
 #[tauri::command]
 async fn get_app_info(app: AppHandle) -> Result<serde_json::Value, String> {
-    // 从 Tauri 配置获取 bundle 信息
+    // Get bundle information from Tauri configuration
     let config = app.config();
     let bundle = &config.bundle;
 
-    // 获取应用信息
+    // Get application information
     let app_info = serde_json::json!({
         "name": config.product_name,
         "version": config.version,
@@ -316,8 +315,8 @@ async fn get_app_info(app: AppHandle) -> Result<serde_json::Value, String> {
         "long_description": bundle.long_description,
         "copyright": bundle.copyright,
         "category": bundle.category,
-        "authors": env!("CARGO_PKG_AUTHORS"), // 这个还是从 Cargo.toml 获取
-        "build_date": env!("VERGEN_BUILD_DATE"), // 构建时间
+        "authors": env!("CARGO_PKG_AUTHORS"),
+        "build_date": env!("VERGEN_BUILD_DATE"), // Build time
         "tauri_version": tauri::VERSION,
         "build_profile": if cfg!(debug_assertions) { "debug" } else { "release" }
     });
@@ -325,7 +324,7 @@ async fn get_app_info(app: AppHandle) -> Result<serde_json::Value, String> {
     Ok(app_info)
 }
 
-/// 导出搜索结果
+/// Export search results
 #[tauri::command]
 async fn export_results_cmd(options: ExportOptions) -> Result<String, String> {
     export_results(options).map_err(|e| e.to_string())
@@ -333,12 +332,12 @@ async fn export_results_cmd(options: ExportOptions) -> Result<String, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // 初始化日志
+    // Initialize logging
     env_logger::Builder::from_default_env()
         .filter_level(log::LevelFilter::Info)
         .init();
 
-    log::info!("启动 NameSeeker 应用");
+    log::info!("Starting NameSeeker application");
 
     tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
@@ -362,7 +361,7 @@ pub fn run() {
             export_results_cmd
         ])
         .setup(|app| {
-            log::info!("Tauri应用初始化完成");
+            log::info!("Tauri application initialization completed");
             Ok(())
         })
         .run(tauri::generate_context!())

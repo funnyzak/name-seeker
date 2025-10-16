@@ -38,7 +38,7 @@ const App: React.FC = () => {
     }
   };
 
-  // 快捷键配置
+  // Keyboard shortcuts configuration
   useKeyboardShortcuts([
     {
       key: '/',
@@ -82,17 +82,17 @@ const App: React.FC = () => {
 
   return (
     <div className='app'>
-      {/* Toast通知容器 */}
+      {/* Toast notification container */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
 
-      {/* 免责声明模态框 */}
+      {/* Disclaimer modal */}
       <DisclaimerModal
         isOpen={showDisclaimer}
         onAccept={acceptDisclaimer}
         onDecline={declineDisclaimer}
       />
 
-      {/* 关于模态框 */}
+      {/* About modal */}
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
 
       {/* Skip to main content link for accessibility */}
@@ -100,15 +100,15 @@ const App: React.FC = () => {
         {t('common:action.continue')}
       </a>
 
-      {/* 主应用内容 */}
+      {/* Main application content */}
       <main className='app-main' id="main-content">
         <div className='container'>
-          {/* 顶部工具栏 */}
+          {/* Top toolbar */}
           <header role="banner">
             <div className='app-toolbar'>
               <h1 className='toolbar-title'>
-                <span className='icon' aria-hidden="true">🔍</span>
-                NameSeeker
+                {/* <span className='icon' aria-hidden="true">🔍</span> */}
+                {t('common:app.name')}
               </h1>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                 {import.meta.env.DEV && (
@@ -127,7 +127,7 @@ const App: React.FC = () => {
                 </button>
               </div>
             </div>
-            {/* 搜索表单 */}
+            {/* Search form */}
             <section className='search-section'>
               <SearchForm
                 isSearching={isSearching}
@@ -144,7 +144,7 @@ const App: React.FC = () => {
             </section>
           </header>
 
-          {/* 结果显示 */}
+          {/* Results display */}
           <ResultsDisplay
             results={results}
             progress={progress}

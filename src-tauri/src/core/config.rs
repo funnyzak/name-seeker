@@ -6,34 +6,34 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use tokio::fs as async_fs;
 
-/// 应用程序配置
+/// Application configuration
 #[derive(Debug, Clone)]
 pub struct AppConfig {
-    /// 应用数据目录
+    /// Application data directory
     pub app_data_dir: PathBuf,
-    /// 用户名网站数据文件路径
+    /// Username website data file path
     pub sites_data_path: PathBuf,
-    /// 邮箱网站数据文件路径
+    /// Email website data file path
     pub email_data_path: PathBuf,
-    /// 元数据配置文件路径
+    /// Metadata configuration file path
     pub metadata_path: PathBuf,
-    /// 用户代理列表文件路径
+    /// User agent list file path
     pub user_agents_path: PathBuf,
-    /// 首次启动标记文件路径
+    /// First launch flag file path
     pub first_launch_flag_path: PathBuf,
-    /// 日志文件路径
+    /// Log file path
     pub log_path: PathBuf,
 }
 
 impl AppConfig {
-    /// 创建应用配置
+    /// Create application configuration
     pub fn new() -> AppResult<Self> {
         let proj_dirs = ProjectDirs::from("com", "NameSeeker", "NameSeeker")
-            .ok_or_else(|| AppError::ConfigError("无法获取应用数据目录".to_string()))?;
+            .ok_or_else(|| AppError::ConfigError("Unable to get application data directory".to_string()))?;
 
         let data_dir = proj_dirs.data_dir().to_path_buf();
 
-        // 确保数据目录存在
+        // Ensure data directory exists
         fs::create_dir_all(&data_dir)?;
 
         let config = Self {
@@ -46,18 +46,18 @@ impl AppConfig {
             log_path: data_dir.join("app.log"),
         };
 
-        // 确保必要的文件存在
+        // Ensure necessary files exist
         config.ensure_data_files_exist()?;
 
         Ok(config)
     }
 
-    /// 确保数据文件存在
+    /// Ensure data files exist
     fn ensure_data_files_exist(&self) -> AppResult<()> {
-        // 复制内置的数据文件到用户数据目录（作为初始缓存）
+        // Copy built-in data files to user data directory (as initial cache)
         self.copy_bundled_data_files()?;
 
-        // 创建用户代理文件（如果不存在）
+        // Create user agent file (if it doesn't exist)
         if !self.user_agents_path.exists() {
             let default_user_agents = vec![
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -73,88 +73,88 @@ impl AppConfig {
         Ok(())
     }
 
-    /// 复制内置数据文件到用户目录
+    /// Copy built-in data files to user directory
     fn copy_bundled_data_files(&self) -> AppResult<()> {
-        // 获取内置数据文件路径（相对于可执行文件）
+        // Get built-in data file path (relative to executable)
         let exe_dir = std::env::current_exe()
             .ok()
             .and_then(|p| p.parent().map(|p| p.to_path_buf()));
 
         if let Some(exe_dir) = exe_dir {
-            // 尝试多个可能的位置
+            // Try multiple possible locations
             let possible_data_dirs = vec![
-                exe_dir.join("data"),          // Release 模式
-                exe_dir.join("../../../data"), // Debug 模式（target/debug）
-                exe_dir.join("../../data"),    // 其他情况
+                exe_dir.join("data"),          // Release mode
+                exe_dir.join("../../../data"), // Debug mode (target/debug)
+                exe_dir.join("../../data"),    // Other cases
             ];
 
             for bundled_data_dir in possible_data_dirs {
                 if bundled_data_dir.exists() {
-                    log::info!("找到内置数据目录: {:?}", bundled_data_dir);
+                    log::info!("Found built-in data directory: {:?}", bundled_data_dir);
 
-                    // 复制邮箱数据文件
+                    // Copy email data file
                     let bundled_email = bundled_data_dir.join("email-data.json");
                     if bundled_email.exists() && !self.email_data_path.exists() {
                         fs::copy(&bundled_email, &self.email_data_path)?;
-                        log::info!("已复制邮箱数据文件");
+                        log::info!("Copied email data file");
                     }
 
-                    // 复制元数据配置文件
+                    // Copy metadata configuration file
                     let bundled_metadata = bundled_data_dir.join("wmn-metadata.json");
                     if bundled_metadata.exists() && !self.metadata_path.exists() {
                         fs::copy(&bundled_metadata, &self.metadata_path)?;
-                        log::info!("已复制元数据配置文件");
+                        log::info!("Copied metadata configuration file");
                     }
 
-                    // 复制用户代理文件
+                    // Copy user agent file
                     let bundled_useragents = bundled_data_dir.join("useragents.txt");
                     if bundled_useragents.exists() && !self.user_agents_path.exists() {
                         fs::copy(&bundled_useragents, &self.user_agents_path)?;
-                        log::info!("已复制用户代理文件");
+                        log::info!("Copied user agent file");
                     }
 
-                    // 复制用户名数据文件
+                    // Copy username data file
                     let bundled_wmn = bundled_data_dir.join("wmn-data.json");
                     if bundled_wmn.exists() && !self.sites_data_path.exists() {
                         fs::copy(&bundled_wmn, &self.sites_data_path)?;
-                        log::info!("已复制用户名数据文件");
+                        log::info!("Copied username data file");
                     }
 
                     return Ok(());
                 }
             }
 
-            log::warn!("未找到内置数据目录，将使用在线下载");
+            log::warn!("Built-in data directory not found, will use online download");
         }
 
         Ok(())
     }
 
-    /// 检查是否为首次启动
+    /// Check if this is the first launch
     pub fn is_first_launch(&self) -> bool {
         !self.first_launch_flag_path.exists()
     }
 
-    /// 设置免责声明已接受
+    /// Set disclaimer as accepted
     pub fn set_disclaimer_accepted(&self) -> AppResult<()> {
         fs::write(&self.first_launch_flag_path, "accepted")?;
         Ok(())
     }
 
-    /// 读取用户代理列表
+    /// Read user agent list
     pub async fn read_user_agents(&self) -> AppResult<Vec<String>> {
         if self.user_agents_path.exists() {
             let content = async_fs::read_to_string(&self.user_agents_path).await?;
             Ok(content.lines().map(|line| line.to_string()).collect())
         } else {
-            // 如果文件不存在，返回默认用户代理
+            // If file doesn't exist, return default user agent
             Ok(vec![
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36".to_string(),
             ])
         }
     }
 
-    /// 获取随机用户代理
+    /// Get random user agent
     pub async fn get_random_user_agent(&self) -> AppResult<String> {
         let user_agents = self.read_user_agents().await?;
         if user_agents.is_empty() {
@@ -170,6 +170,6 @@ impl AppConfig {
     }
 }
 
-/// 全局应用配置实例
+/// Global application configuration instance
 pub static APP_CONFIG: Lazy<AppConfig> =
-    Lazy::new(|| AppConfig::new().expect("无法初始化应用配置"));
+    Lazy::new(|| AppConfig::new().expect("Failed to initialize application configuration"));

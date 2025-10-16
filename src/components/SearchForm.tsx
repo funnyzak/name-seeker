@@ -23,7 +23,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 点击外部关闭历史记录
+  // Close history when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -50,7 +50,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
       return;
     }
 
-    // 基本长度验证
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(query.trim())) {
+     setSearchType(SearchType.EMAIL);
+    } else {
+      setSearchType(SearchType.USERNAME);
+    }
+
+    // Basic length validation
     if (searchType === SearchType.USERNAME && query.trim().length < 2) {
       if (onWarning) {
         onWarning(t('search:validation.usernameTooShort'));
@@ -58,17 +65,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
       return;
     }
 
-    // 简单的邮箱格式检查
-    if (searchType === SearchType.EMAIL && !query.includes('@')) {
-      if (onError) {
-        onError(t('search:validation.invalidEmail'));
-      }
-      return;
-    }
-
     setShowHistory(false);
     
-    // 添加到历史记录
+    // Add to search history
     if (onAddToHistory) {
       onAddToHistory(query.trim());
     }
@@ -119,8 +118,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
   return (
     <div className="search-form-container" ref={containerRef}>
       <form onSubmit={handleSubmit} className="search-form-compact">
-        {/* 搜索类型选择下拉 */}
-        <select 
+        {/* Search type selection dropdown */}
+        {/* <select 
           className="type-selector-dropdown"
           value={searchType}
           onChange={(e) => handleSearchTypeChange(e.target.value as SearchType)}
@@ -129,9 +128,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
         >
           <option value={SearchType.USERNAME}>👤 {t('search:form.searchTypeUsername')}</option>
           <option value={SearchType.EMAIL}>📧 {t('search:form.searchTypeEmail')}</option>
-        </select>
+        </select> */}
 
-        {/* 输入框容器 */}
+        {/* Input field container */}
         <div className="input-wrapper">
           <div className="input-group">
             <input
@@ -147,7 +146,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
               aria-label={searchType === SearchType.USERNAME ? t('search:form.inputLabel') : t('search:form.inputLabel')}
             />
             
-            {/* 搜索历史下拉 */}
+            {/* Search history dropdown */}
             <SearchHistory
               history={searchHistory || []}
               onSelect={handleHistorySelect}
@@ -158,7 +157,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
           </div>
         </div>
 
-        {/* 按钮组 */}
+        {/* Button group */}
         <div className="button-group-compact">
          { !isSearching && <button
             type="submit"

@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { detectLanguage, setStoredLanguage } from './types';
 
-// 导入翻译资源
+// Import translation resources
 import enCommon from './locales/en/common.json';
 import enSearch from './locales/en/search.json';
 import enResults from './locales/en/results.json';
@@ -19,7 +19,7 @@ import zhModals from './locales/zh/modals.json';
 import zhToast from './locales/zh/toast.json';
 import zhErrors from './locales/zh/errors.json';
 
-// 配置翻译资源
+// Configure translation resources
 const resources = {
   en: {
     common: enCommon,
@@ -41,10 +41,10 @@ const resources = {
   },
 };
 
-// 检测初始语言
+// Detect initial language
 const initialLanguage = detectLanguage();
 
-// 初始化 i18next
+// Initialize i18next
 i18n
   .use(initReactI18next)
   .init({
@@ -55,21 +55,21 @@ i18n
     ns: ['common', 'search', 'results', 'export', 'modals', 'toast', 'errors'],
     supportedLngs: ['en', 'zh'],
     
-    // 插值配置
+    // Interpolation configuration
     interpolation: {
-      escapeValue: false, // React 已经防止 XSS
+      escapeValue: false, // React already prevents XSS
     },
     
-    // 调试模式（开发环境）
+    // Debug mode (development environment)
     debug: process.env.NODE_ENV === 'development',
     
-    // React 配置
+    // React configuration
     react: {
       useSuspense: false,
     },
   });
 
-// 监听语言变化，自动持久化和更新 HTML lang 属性
+// Listen for language changes, auto-persist and update HTML lang attribute
 i18n.on('languageChanged', (lng: string) => {
   setStoredLanguage(lng as 'en' | 'zh');
   document.documentElement.lang = lng;
@@ -79,10 +79,10 @@ i18n.on('languageChanged', (lng: string) => {
   }
 });
 
-// 设置初始 HTML lang 属性
+// Set initial HTML lang attribute
 document.documentElement.lang = initialLanguage;
 
-// 开发环境日志
+// Development environment logging
 if (process.env.NODE_ENV === 'development') {
   console.log('✅ i18n initialized successfully');
   console.log('📍 Current language:', i18n.language);

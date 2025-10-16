@@ -35,13 +35,13 @@ export const useKeyboardShortcuts = (shortcuts: KeyboardShortcut[]) => {
   }, [shortcuts]);
 };
 
-// 常用快捷键定义
+// Common shortcut definitions
 export const SHORTCUTS = {
-  FOCUS_SEARCH: { key: '/', description: '聚焦到搜索框' },
-  START_SEARCH: { key: 'Enter', description: '开始搜索' },
-  STOP_SEARCH: { key: 'Escape', description: '停止搜索' },
-  EXPORT: { key: 'e', ctrl: true, description: '导出结果 (Ctrl+E)' },
-  CLEAR_RESULTS: { key: 'k', ctrl: true, description: '清除结果 (Ctrl+K)' },
-  TOGGLE_ABOUT: { key: 'h', ctrl: true, description: '显示帮助 (Ctrl+H)' },
+  FOCUS_SEARCH: { key: '/', description: 'Focus search input' },
+  START_SEARCH: { key: 'Enter', description: 'Start search' },
+  STOP_SEARCH: { key: 'Escape', description: 'Stop search' },
+  EXPORT: { key: 'e', ctrl: true, description: 'Export results (Ctrl+E)' },
+  CLEAR_RESULTS: { key: 'k', ctrl: true, description: 'Clear results (Ctrl+K)' },
+  TOGGLE_ABOUT: { key: 'h', ctrl: true, description: 'Show help (Ctrl+H)' },
 };
 

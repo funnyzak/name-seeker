@@ -9,7 +9,7 @@ import type {
   AppInfo
 } from '../types';
 
-// Tauri API 服务类
+// Tauri API service class
 export class TauriApiService {
   private static instance: TauriApiService;
 
@@ -23,7 +23,7 @@ export class TauriApiService {
   }
 
   /**
-   * 检查是否为首次启动
+   * Check if it's the first launch
    */
   async isFirstLaunch(): Promise<boolean> {
     try {
@@ -35,7 +35,7 @@ export class TauriApiService {
   }
 
   /**
-   * 设置用户已接受免责声明
+   * Set user disclaimer acceptance
    */
   async setDisclaimerAccepted(): Promise<void> {
     try {
@@ -47,7 +47,7 @@ export class TauriApiService {
   }
 
   /**
-   * 开始搜索
+   * Start search
    */
   async startSearch(
     query: string,
@@ -75,7 +75,7 @@ export class TauriApiService {
   }
 
   /**
-   * 停止当前搜索
+   * Stop current search
    */
   async stopSearch(): Promise<boolean> {
     try {
@@ -87,7 +87,7 @@ export class TauriApiService {
   }
 
   /**
-   * 获取搜索统计信息
+   * Get search statistics
    */
   async getSearchStats(): Promise<any> {
     try {
@@ -99,7 +99,7 @@ export class TauriApiService {
   }
 
   /**
-   * 获取可用网站类别
+   * Get available website categories
    */
   async getCategories(): Promise<string[]> {
     try {
@@ -111,7 +111,7 @@ export class TauriApiService {
   }
 
   /**
-   * 验证用户名格式
+   * Validate username format
    */
   async validateUsername(username: string): Promise<boolean> {
     try {
@@ -123,7 +123,7 @@ export class TauriApiService {
   }
 
   /**
-   * 验证邮箱格式
+   * Validate email format
    */
   async validateEmail(email: string): Promise<boolean> {
     try {
@@ -135,7 +135,7 @@ export class TauriApiService {
   }
 
   /**
-   * 获取应用信息
+   * Get application information
    */
   async getAppInfo(): Promise<AppInfo | null> {
     try {
@@ -147,7 +147,7 @@ export class TauriApiService {
   }
 
   /**
-   * 监听搜索更新事件
+   * Listen for search update events
    */
   onSearchUpdate(callback: (payload: SearchUpdatePayload) => void): Promise<() => void> {
     return listen('search-update', (event) => {
@@ -156,7 +156,7 @@ export class TauriApiService {
   }
 
   /**
-   * 监听搜索完成事件
+   * Listen for search completion events
    */
   onSearchFinished(callback: (payload: SearchFinished) => void): Promise<() => void> {
     return listen('search-finished', (event) => {
@@ -165,7 +165,7 @@ export class TauriApiService {
   }
 
   /**
-   * 监听搜索进度事件
+   * Listen for search progress events
    */
   onSearchProgress(callback: (payload: SearchProgressPayload) => void): Promise<() => void> {
     return listen('search-progress', (event) => {
@@ -174,7 +174,7 @@ export class TauriApiService {
   }
 
   /**
-   * 监听搜索错误事件
+   * Listen for search error events
    */
   onSearchError(callback: (error: string) => void): Promise<() => void> {
     return listen('search-error', (event) => {
@@ -183,7 +183,7 @@ export class TauriApiService {
   }
 
   /**
-   * 监听搜索停止事件
+   * Listen for search stop events
    */
   onSearchStopped(callback: () => void): Promise<() => void> {
     return listen('search-stopped', () => {
@@ -192,7 +192,7 @@ export class TauriApiService {
   }
 
   /**
-   * 打开外部链接
+   * Open external link
    */
   async openUrl(url: string): Promise<void> {
     try {
@@ -204,7 +204,7 @@ export class TauriApiService {
   }
 
   /**
-   * 打开文件所在目录
+   * Open file directory
    */
   async openDirectory(path: string): Promise<void> {
     try {
@@ -216,7 +216,7 @@ export class TauriApiService {
   }
 
   /**
-   * 导出搜索结果
+   * Export search results
    */
   async exportResults(options: ExportOptions): Promise<string> {
     try {
@@ -236,7 +236,7 @@ export class TauriApiService {
   }
 
   /**
-   * 复制文本到剪贴板
+   * Copy text to clipboard
    */
   async copyToClipboard(text: string): Promise<void> {
     try {
@@ -248,8 +248,8 @@ export class TauriApiService {
   }
 }
 
-// 导出单例实例
+// Export singleton instance
 export const tauriApi = TauriApiService.getInstance();
 
-// 导出便捷函数
+// Export convenience functions
 export const exportResults = (options: ExportOptions) => tauriApi.exportResults(options);

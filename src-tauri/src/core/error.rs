@@ -1,37 +1,37 @@
 use thiserror::Error;
 
-/// 应用程序错误类型
+/// Application error types
 #[derive(Error, Debug)]
 pub enum AppError {
-    #[error("HTTP请求错误: {0}")]
+    #[error("HTTP request error: {0}")]
     HttpError(#[from] reqwest::Error),
 
-    #[error("JSON解析错误: {0}")]
+    #[error("JSON parsing error: {0}")]
     JsonError(#[from] serde_json::Error),
 
-    #[error("IO错误: {0}")]
+    #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
 
-    #[error("配置错误: {0}")]
+    #[error("Configuration error: {0}")]
     ConfigError(String),
 
-    #[error("搜索错误: {0}")]
+    #[error("Search error: {0}")]
     SearchError(String),
 
-    #[error("网站数据错误: {0}")]
+    #[error("Site data error: {0}")]
     SiteDataError(String),
 
-    #[error("用户输入错误: {0}")]
+    #[error("User input error: {0}")]
     UserInputError(String),
 
-    #[error("导出错误: {0}")]
+    #[error("Export error: {0}")]
     ExportError(String),
 
-    #[error("内部错误: {0}")]
+    #[error("Internal error: {0}")]
     InternalError(String),
 }
 
-/// 应用程序结果类型
+/// Application result type
 pub type AppResult<T> = Result<T, AppError>;
 
 impl From<String> for AppError {

@@ -14,7 +14,6 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
         await tauriApi.openUrl(result.url);
       } catch (error) {
         console.error('Failed to open URL:', error);
-        // 可以在这里添加用户友好的错误提示
       } finally {
         setIsOpening(false);
       }
@@ -92,7 +91,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
 
           {result.status === 'Error' && (
             <span className="result-message error-text">
-              {result.error === '搜索被用户停止' ? '⏸️ ' + t('item.searchStopped') : (result.error || t('item.checking'))}
+              {result.error === 'Search stopped by user' ? '⏸️ ' + t('item.searchStopped') : (result.error || t('item.checking'))}
             </span>
           )}
 

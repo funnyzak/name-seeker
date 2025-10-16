@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// 搜索类型
+/// Search type
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum SearchType {
@@ -15,7 +15,7 @@ impl Default for SearchType {
     }
 }
 
-/// 搜索结果状态
+/// Search result status
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub enum SearchResultStatus {
@@ -31,7 +31,7 @@ impl Default for SearchResultStatus {
     }
 }
 
-/// 单个搜索结果
+/// Individual search result
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchResult {
     pub site: String,
@@ -42,7 +42,7 @@ pub struct SearchResult {
     pub metadata: Option<Vec<MetadataItem>>,
 }
 
-/// 元数据项
+/// Metadata item
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MetadataItem {
     pub name: String,
@@ -50,7 +50,7 @@ pub struct MetadataItem {
     pub data_type: String,
 }
 
-/// 搜索进度
+/// Search progress
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchProgress {
     pub total_sites: u32,
@@ -90,7 +90,7 @@ impl SearchProgress {
     }
 }
 
-/// 搜索完成信息
+/// Search completion information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchFinished {
     pub total_sites: u32,
@@ -98,7 +98,7 @@ pub struct SearchFinished {
     pub duration_ms: u64,
 }
 
-/// 网站配置
+/// Website configuration
 #[derive(Debug, Clone, Deserialize)]
 pub struct Site {
     pub name: String,
@@ -110,19 +110,19 @@ pub struct Site {
     #[serde(default)]
     pub known: Vec<String>,
     pub cat: String,
-    /// HTTP 请求方法（默认 GET）
+    /// HTTP request method (default: GET)
     #[serde(default = "default_method")]
     pub method: String,
-    /// 请求数据（用于 POST 请求）
+    /// Request data (for POST requests)
     #[serde(default)]
     pub data: Option<String>,
-    /// 请求头
+    /// Request headers
     #[serde(default)]
     pub headers: Option<serde_json::Value>,
-    /// 输入操作（如 hash-sha256）
+    /// Input operations (e.g., hash-sha256)
     #[serde(default)]
     pub input_operation: Option<String>,
-    /// 预检查配置
+    /// Pre-check configuration
     #[serde(default)]
     pub pre_check: Option<serde_json::Value>,
 }
@@ -131,7 +131,7 @@ fn default_method() -> String {
     "GET".to_string()
 }
 
-/// 元数据提取配置
+/// Metadata extraction configuration
 #[derive(Debug, Clone, Deserialize, serde::Serialize)]
 pub struct MetadataExtraction {
     pub schema: String,
@@ -146,17 +146,17 @@ pub struct MetadataExtraction {
     pub item_path: Option<Vec<String>>,
 }
 
-/// 网站元数据配置
+/// Website metadata configuration
 #[derive(Debug, Clone, Deserialize)]
 pub struct SiteMetadataConfig {
     pub sites: HashMap<String, Vec<MetadataExtraction>>,
 }
 
-/// 搜索配置
+/// Search configuration
 #[derive(Debug, Clone)]
 pub struct SearchConfig {
     pub search_type: SearchType,
-    pub query: String, // 用户名或邮箱
+    pub query: String, // Username or email
     pub max_concurrent_requests: usize,
     pub timeout_seconds: u64,
     pub user_agent: String,
@@ -178,7 +178,7 @@ impl Default for SearchConfig {
     }
 }
 
-/// Tauri事件载荷
+/// Tauri event payload
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchUpdatePayload {
     pub site: String,
@@ -199,7 +199,7 @@ pub struct SearchProgressPayload {
     pub current_site: Option<String>,
 }
 
-/// 导出格式
+/// Export format
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ExportFormat {
@@ -209,7 +209,7 @@ pub enum ExportFormat {
     Txt,
 }
 
-/// 导出选项
+/// Export options
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExportOptions {
     pub format: ExportFormat,

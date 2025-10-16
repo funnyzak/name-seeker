@@ -22,10 +22,10 @@ declare module 'react-i18next' {
   }
 }
 
-// 支持的语言类型
+// Supported language types
 export type SupportedLanguage = 'en' | 'zh';
 
-// 语言配置
+// Language configuration
 export const LANGUAGE_CONFIG = {
   en: {
     code: 'en',
@@ -41,7 +41,7 @@ export const LANGUAGE_CONFIG = {
   },
 } as const;
 
-// 语言切换器选项
+// Language switcher options
 export type LanguageOption = {
   code: SupportedLanguage;
   name: string;
@@ -50,37 +50,37 @@ export type LanguageOption = {
 };
 
 /**
- * 规范化语言代码
- * 将 "zh-CN", "zh-TW" 等转换为 "zh"
- * 将 "en-US", "en-GB" 等转换为 "en"
+ * Normalize language code
+ * Convert "zh-CN", "zh-TW" etc. to "zh"
+ * Convert "en-US", "en-GB" etc. to "en"
  */
 export const normalizeLanguage = (language: string): SupportedLanguage => {
-  // 提取语言代码的前两位
+  // Extract first two characters of language code
   const languageCode = language.toLowerCase().split('-')[0];
   
-  // 检查是否为支持的语言
+  // Check if it's a supported language
   if (languageCode === 'zh' || languageCode === 'en') {
     return languageCode as SupportedLanguage;
   }
   
-  // 默认返回英语
+  // Default to English
   return 'en';
 };
 
 /**
- * 验证语言代码是否有效
+ * Validate if language code is valid
  */
 export const isValidLanguage = (language: string): language is SupportedLanguage => {
   return language === 'zh' || language === 'en';
 };
 
 /**
- * 语言持久化存储 key
+ * Language persistence storage key
  */
 export const LANGUAGE_STORAGE_KEY = 'i18nextLng';
 
 /**
- * 从 localStorage 读取语言设置
+ * Read language settings from localStorage
  */
 export const getStoredLanguage = (): SupportedLanguage | null => {
   const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
@@ -91,14 +91,14 @@ export const getStoredLanguage = (): SupportedLanguage | null => {
 };
 
 /**
- * 保存语言设置到 localStorage
+ * Save language settings to localStorage
  */
 export const setStoredLanguage = (language: SupportedLanguage): void => {
   localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
 };
 
 /**
- * 从浏览器获取首选语言
+ * Get preferred language from browser
  */
 export const getBrowserLanguage = (): SupportedLanguage => {
   const browserLang = navigator.language || (navigator as any).userLanguage || '';
@@ -106,8 +106,8 @@ export const getBrowserLanguage = (): SupportedLanguage => {
 };
 
 /**
- * 检测并返回应该使用的语言
- * 优先级: localStorage > 浏览器语言 > 默认英语
+ * Detect and return the language that should be used
+ * Priority: localStorage > browser language > default English
  */
 export const detectLanguage = (): SupportedLanguage => {
   return getStoredLanguage() || getBrowserLanguage() || 'en';
