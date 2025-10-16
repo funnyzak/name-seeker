@@ -61,7 +61,7 @@ i18n
     },
     
     // Debug mode (development environment)
-    debug: process.env.NODE_ENV === 'development',
+    debug: import.meta.env.DEV,
     
     // React configuration
     react: {
@@ -74,7 +74,7 @@ i18n.on('languageChanged', (lng: string) => {
   setStoredLanguage(lng as 'en' | 'zh');
   document.documentElement.lang = lng;
   
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.log('🌍 Language changed to:', lng);
   }
 });
@@ -83,7 +83,7 @@ i18n.on('languageChanged', (lng: string) => {
 document.documentElement.lang = initialLanguage;
 
 // Development environment logging
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   console.log('✅ i18n initialized successfully');
   console.log('📍 Current language:', i18n.language);
   console.log('📚 Available namespaces:', i18n.options.ns);
