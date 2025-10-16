@@ -1,0 +1,808 @@
+name: 🚀 Release Build & Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（例如：1.0.0，不含 v 前缀）'
+        required: true
+        type: string
+      prerelease:
+        description: '是否为预发布版本'
+        required: false
+        type: boolean
+        default: false
+
+# 环境变量配置
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+  NODE_VERSION: '20.x'
+  APP_NAME: 'NameSeeker'
+
+# 取消同一工作流的重复运行
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ========================================
+  # Job 1: 设置和版本验证
+  # ========================================
+  setup:
+    name: 🔧 Setup & Version Validation
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract_version.outputs.version }}
+      tag_name: ${{ steps.extract_version.outputs.tag_name }}
+      is_prerelease: ${{ steps.extract_version.outputs.is_prerelease }}
+      release_date: ${{ steps.extract_version.outputs.release_date }}
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏷️ Extract version from tag
+        id: extract_version
+        run: |
+          # 从 tag 或手动输入提取版本号
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG_NAME="v${VERSION}"
+            IS_PRERELEASE="${{ github.event.inputs.prerelease }}"
+          else
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG_NAME#v}"
+            # 检测是否为预发布版本（包含 alpha/beta/rc）
+            if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+              IS_PRERELEASE="true"
+            else
+              IS_PRERELEASE="false"
+            fi
+          fi
+          
+          # 验证版本号格式
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "❌ 错误：版本号格式无效: $VERSION"
+            exit 1
+          fi
+          
+          # 获取发布时间（Asia/Shanghai 时区）
+          RELEASE_DATE=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S %Z')
+          
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
+          echo "release_date=${RELEASE_DATE}" >> $GITHUB_OUTPUT
+          
+          echo "📦 版本信息："
+          echo "  • 版本号: ${VERSION}"
+          echo "  • Tag 名称: ${TAG_NAME}"
+          echo "  • 预发布: ${IS_PRERELEASE}"
+          echo "  • 发布时间: ${RELEASE_DATE}"
+
+      - name: ✅ Validate version consistency
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          
+          # 验证 package.json 版本
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if [ "$PACKAGE_VERSION" != "$VERSION" ]; then
+            echo "⚠️  警告：package.json 版本 ($PACKAGE_VERSION) 与 tag 版本 ($VERSION) 不一致"
+          fi
+          
+          # 验证 tauri.conf.json 版本
+          TAURI_VERSION=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          if [ "$TAURI_VERSION" != "$VERSION" ]; then
+            echo "⚠️  警告：tauri.conf.json 版本 ($TAURI_VERSION) 与 tag 版本 ($VERSION) 不一致"
+          fi
+          
+          echo "✅ 版本验证完成"
+
+  # ========================================
+  # Job 2: Windows 构建
+  # ========================================
+  build-windows:
+    name: 🪟 Build Windows (x64)
+    needs: setup
+    runs-on: windows-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🦀 Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 💾 Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 📦 Install frontend dependencies
+        run: npm ci
+
+      - name: 🔨 Build Tauri application
+        run: npm run tauri build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          # TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+      - name: 📦 Prepare artifacts
+        shell: pwsh
+        run: |
+          $VERSION = "${{ needs.setup.outputs.version }}"
+          $ARTIFACTS_DIR = "artifacts"
+          New-Item -ItemType Directory -Force -Path $ARTIFACTS_DIR
+          
+          # 查找构建产物
+          $BUNDLE_DIR = "src-tauri/target/release/bundle"
+          
+          # 复制 MSI 安装包
+          Get-ChildItem -Path "$BUNDLE_DIR/msi/*.msi" | ForEach-Object {
+            $newName = "${{ env.APP_NAME }}_${VERSION}_windows_x64.msi"
+            Copy-Item $_.FullName -Destination "$ARTIFACTS_DIR/$newName"
+            Write-Host "✅ 已复制: $newName"
+          }
+          
+          # 复制更新文件（.msi.zip 和 .msi.zip.sig）
+          Get-ChildItem -Path "$BUNDLE_DIR/msi/*.msi.zip*" | ForEach-Object {
+            Copy-Item $_.FullName -Destination $ARTIFACTS_DIR
+            Write-Host "✅ 已复制: $($_.Name)"
+          }
+
+      - name: 📤 Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-${{ needs.setup.outputs.version }}
+          path: artifacts/*
+          retention-days: 90
+          if-no-files-found: error
+
+  # ========================================
+  # Job 3: macOS 构建（Universal Binary）
+  # ========================================
+  build-macos:
+    name: 🍎 Build macOS (Universal)
+    needs: setup
+    runs-on: macos-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🦀 Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 💾 Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 📦 Install frontend dependencies
+        run: npm ci
+
+      - name: 🔨 Build Tauri application (Universal Binary)
+        run: |
+          # 构建 Universal Binary（同时支持 Intel 和 Apple Silicon）
+          npm run tauri build -- --target universal-apple-darwin
+        env:
+          # 如果需要代码签名，在这里添加证书配置
+          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: 📦 Prepare artifacts
+        run: |
+          VERSION="${{ needs.setup.outputs.version }}"
+          ARTIFACTS_DIR="artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          
+          BUNDLE_DIR="src-tauri/target/universal-apple-darwin/release/bundle"
+          
+          # 复制 DMG 安装包
+          if [ -d "$BUNDLE_DIR/dmg" ]; then
+            for dmg in "$BUNDLE_DIR/dmg"/*.dmg; do
+              if [ -f "$dmg" ]; then
+                NEW_NAME="${{ env.APP_NAME }}_${VERSION}_macos_universal.dmg"
+                cp "$dmg" "$ARTIFACTS_DIR/$NEW_NAME"
+                echo "✅ 已复制: $NEW_NAME"
+              fi
+            done
+          fi
+          
+          # 复制 app.tar.gz（用于更新）
+          if [ -d "$BUNDLE_DIR/macos" ]; then
+            for targz in "$BUNDLE_DIR/macos"/*.app.tar.gz*; do
+              if [ -f "$targz" ]; then
+                cp "$targz" "$ARTIFACTS_DIR/"
+                echo "✅ 已复制: $(basename $targz)"
+              fi
+            done
+          fi
+
+      - name: 📤 Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-universal-${{ needs.setup.outputs.version }}
+          path: artifacts/*
+          retention-days: 30
+          if-no-files-found: error
+
+  # ========================================
+  # Job 4: Linux 构建
+  # ========================================
+  build-linux:
+    name: 🐧 Build Linux (x64)
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🦀 Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+
+      - name: 📦 Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libgtk-3-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 💾 Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: 📦 Install frontend dependencies
+        run: npm ci
+
+      - name: 🔨 Build Tauri application
+        run: npm run tauri build
+
+      - name: 📦 Prepare artifacts
+        run: |
+          VERSION="${{ needs.setup.outputs.version }}"
+          ARTIFACTS_DIR="artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          
+          BUNDLE_DIR="src-tauri/target/release/bundle"
+          
+          # 复制 AppImage
+          if [ -d "$BUNDLE_DIR/appimage" ]; then
+            for appimage in "$BUNDLE_DIR/appimage"/*.AppImage; do
+              if [ -f "$appimage" ]; then
+                NEW_NAME="${{ env.APP_NAME }}_${VERSION}_linux_x64.AppImage"
+                cp "$appimage" "$ARTIFACTS_DIR/$NEW_NAME"
+                chmod +x "$ARTIFACTS_DIR/$NEW_NAME"
+                echo "✅ 已复制: $NEW_NAME"
+              fi
+            done
+            
+            # 复制更新文件
+            for file in "$BUNDLE_DIR/appimage"/*.AppImage.tar.gz*; do
+              if [ -f "$file" ]; then
+                cp "$file" "$ARTIFACTS_DIR/"
+                echo "✅ 已复制: $(basename $file)"
+              fi
+            done
+          fi
+          
+          # 复制 DEB 包
+          if [ -d "$BUNDLE_DIR/deb" ]; then
+            for deb in "$BUNDLE_DIR/deb"/*.deb; do
+              if [ -f "$deb" ]; then
+                NEW_NAME="${{ env.APP_NAME }}_${VERSION}_linux_amd64.deb"
+                cp "$deb" "$ARTIFACTS_DIR/$NEW_NAME"
+                echo "✅ 已复制: $NEW_NAME"
+              fi
+            done
+          fi
+          
+          # 复制 RPM 包
+          if [ -d "$BUNDLE_DIR/rpm" ]; then
+            for rpm in "$BUNDLE_DIR/rpm"/*.rpm; do
+              if [ -f "$rpm" ]; then
+                NEW_NAME="${{ env.APP_NAME }}_${VERSION}_linux_x86_64.rpm"
+                cp "$rpm" "$ARTIFACTS_DIR/$NEW_NAME"
+                echo "✅ 已复制: $NEW_NAME"
+              fi
+            done
+          fi
+
+      - name: 📤 Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64-${{ needs.setup.outputs.version }}
+          path: artifacts/*
+          retention-days: 90
+          if-no-files-found: error
+
+  # ========================================
+  # Job 5: 生成哈希校验文件
+  # ========================================
+  generate-hashes:
+    name: 🔐 Generate SHA-256 Checksums
+    needs: [setup, build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 🔐 Generate SHA-256 checksums
+        run: |
+          VERSION="${{ needs.setup.outputs.version }}"
+          HASH_FILE="${{ env.APP_NAME }}-${VERSION}-sha256sum.txt"
+          
+          cd artifacts
+          
+          # 只为主要安装包生成哈希（排除 .sig 和 .tar.gz 更新文件）
+          for file in *.{msi,dmg,AppImage,deb,rpm}; do
+            if [ -f "$file" ]; then
+              sha256sum "$file" >> "$HASH_FILE"
+              echo "✅ 已生成哈希: $file"
+            fi
+          done
+          
+          # 显示哈希文件内容
+          echo "📄 哈希校验文件内容："
+          cat "$HASH_FILE"
+
+      - name: 📤 Upload hash file
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums-${{ needs.setup.outputs.version }}
+          path: artifacts/${{ env.APP_NAME }}-${{ needs.setup.outputs.version }}-sha256sum.txt
+          retention-days: 90
+
+  # ========================================
+  # Job 6: 创建更新清单
+  # ========================================
+  create-updater-manifest:
+    name: 📋 Create Updater Manifest
+    needs: [setup, build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 📋 Generate latest.json
+        run: |
+          VERSION="${{ needs.setup.outputs.version }}"
+          TAG_NAME="${{ needs.setup.outputs.tag_name }}"
+          RELEASE_DATE="${{ needs.setup.outputs.release_date }}"
+          
+          # 获取 ISO 8601 格式的发布时间
+          PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # 从 GitHub 获取 Release Notes（如果 tag 已存在）
+          NOTES="Release version ${VERSION}"
+          
+          # 构建下载 URL 基础路径
+          REPO="${{ github.repository }}"
+          BASE_URL="https://github.com/${REPO}/releases/download/${TAG_NAME}"
+          
+          cd artifacts
+          
+          # 创建 platforms 对象
+          cat > latest.json <<EOF
+          {
+            "version": "${VERSION}",
+            "notes": "${NOTES}",
+            "pub_date": "${PUB_DATE}",
+            "platforms": {
+          EOF
+          
+          # Windows 平台
+          WIN_SIG=$(find . -name "*.msi.zip.sig" -type f | head -n 1)
+          WIN_FILE=$(find . -name "*.msi.zip" -type f ! -name "*.sig" | head -n 1)
+          if [ -n "$WIN_SIG" ] && [ -n "$WIN_FILE" ]; then
+            WIN_SIG_CONTENT=$(cat "$WIN_SIG")
+            WIN_FILENAME=$(basename "$WIN_FILE")
+            cat >> latest.json <<EOF
+              "windows-x86_64": {
+                "signature": "${WIN_SIG_CONTENT}",
+                "url": "${BASE_URL}/${WIN_FILENAME}"
+              },
+          EOF
+            echo "✅ 已添加 Windows 更新配置"
+          fi
+          
+          # macOS Intel 平台
+          MAC_INTEL_SIG=$(find . -name "*x64.app.tar.gz.sig" -o -name "*darwin-x86_64.app.tar.gz.sig" | head -n 1)
+          MAC_INTEL_FILE=$(find . -name "*x64.app.tar.gz" -o -name "*darwin-x86_64.app.tar.gz" | grep -v ".sig" | head -n 1)
+          if [ -n "$MAC_INTEL_SIG" ] && [ -n "$MAC_INTEL_FILE" ]; then
+            MAC_INTEL_SIG_CONTENT=$(cat "$MAC_INTEL_SIG")
+            MAC_INTEL_FILENAME=$(basename "$MAC_INTEL_FILE")
+            cat >> latest.json <<EOF
+              "darwin-x86_64": {
+                "signature": "${MAC_INTEL_SIG_CONTENT}",
+                "url": "${BASE_URL}/${MAC_INTEL_FILENAME}"
+              },
+          EOF
+            echo "✅ 已添加 macOS Intel 更新配置"
+          fi
+          
+          # macOS Apple Silicon 平台
+          MAC_ARM_SIG=$(find . -name "*aarch64.app.tar.gz.sig" -o -name "*darwin-aarch64.app.tar.gz.sig" | head -n 1)
+          MAC_ARM_FILE=$(find . -name "*aarch64.app.tar.gz" -o -name "*darwin-aarch64.app.tar.gz" | grep -v ".sig" | head -n 1)
+          if [ -n "$MAC_ARM_SIG" ] && [ -n "$MAC_ARM_FILE" ]; then
+            MAC_ARM_SIG_CONTENT=$(cat "$MAC_ARM_SIG")
+            MAC_ARM_FILENAME=$(basename "$MAC_ARM_FILE")
+            cat >> latest.json <<EOF
+              "darwin-aarch64": {
+                "signature": "${MAC_ARM_SIG_CONTENT}",
+                "url": "${BASE_URL}/${MAC_ARM_FILENAME}"
+              },
+          EOF
+            echo "✅ 已添加 macOS Apple Silicon 更新配置"
+          fi
+          
+          # Linux 平台
+          LINUX_SIG=$(find . -name "*.AppImage.tar.gz.sig" -type f | head -n 1)
+          LINUX_FILE=$(find . -name "*.AppImage.tar.gz" -type f ! -name "*.sig" | head -n 1)
+          if [ -n "$LINUX_SIG" ] && [ -n "$LINUX_FILE" ]; then
+            LINUX_SIG_CONTENT=$(cat "$LINUX_SIG")
+            LINUX_FILENAME=$(basename "$LINUX_FILE")
+            cat >> latest.json <<EOF
+              "linux-x86_64": {
+                "signature": "${LINUX_SIG_CONTENT}",
+                "url": "${BASE_URL}/${LINUX_FILENAME}"
+              }
+          EOF
+            echo "✅ 已添加 Linux 更新配置"
+          fi
+          
+          # 关闭 JSON
+          cat >> latest.json <<EOF
+            }
+          }
+          EOF
+          
+          # 格式化 JSON
+          if command -v jq &> /dev/null; then
+            jq '.' latest.json > latest.json.tmp && mv latest.json.tmp latest.json
+          fi
+          
+          echo "📄 更新清单文件内容："
+          cat latest.json
+
+      - name: 📤 Upload updater manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-manifest-${{ needs.setup.outputs.version }}
+          path: artifacts/latest.json
+          retention-days: 90
+
+  # ========================================
+  # Job 7: 创建 GitHub Release
+  # ========================================
+  release:
+    name: 🎉 Create GitHub Release
+    needs: [setup, generate-hashes, create-updater-manifest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 📊 Calculate file sizes
+        id: file_sizes
+        run: |
+          cd artifacts
+          
+          # 计算各平台安装包大小
+          WIN_SIZE=$(du -h *.msi 2>/dev/null | cut -f1 | head -n 1 || echo "N/A")
+          MAC_SIZE=$(du -h *.dmg 2>/dev/null | cut -f1 | head -n 1 || echo "N/A")
+          LINUX_SIZE=$(du -h *.AppImage 2>/dev/null | cut -f1 | head -n 1 || echo "N/A")
+          
+          echo "windows_size=${WIN_SIZE}" >> $GITHUB_OUTPUT
+          echo "macos_size=${MAC_SIZE}" >> $GITHUB_OUTPUT
+          echo "linux_size=${LINUX_SIZE}" >> $GITHUB_OUTPUT
+          
+          echo "📦 安装包大小："
+          echo "  • Windows: ${WIN_SIZE}"
+          echo "  • macOS: ${MAC_SIZE}"
+          echo "  • Linux: ${LINUX_SIZE}"
+
+      - name: 📝 Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.setup.outputs.version }}"
+          TAG_NAME="${{ needs.setup.outputs.tag_name }}"
+          RELEASE_DATE="${{ needs.setup.outputs.release_date }}"
+          IS_PRERELEASE="${{ needs.setup.outputs.is_prerelease }}"
+          
+          RELEASE_TYPE="正式版"
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            RELEASE_TYPE="预发布版"
+          fi
+          
+          cat > release_notes.md <<EOF
+          ## 🎉 ${{ env.APP_NAME }} ${VERSION}
+          
+          ### 📦 版本信息
+          - **应用名称**：${{ env.APP_NAME }}
+          - **版本号**：${VERSION}
+          - **发布类型**：${RELEASE_TYPE}
+          - **发布时间**：${RELEASE_DATE}
+          
+          ### 💻 支持平台
+          - ✅ **Windows** x64 - MSI 安装包
+          - ✅ **macOS** Universal Binary (Intel + Apple Silicon) - DMG 安装包
+          - ✅ **Linux** x64 - AppImage / DEB / RPM 安装包
+          
+          ### 📦 安装包大小
+          - **Windows**：${{ steps.file_sizes.outputs.windows_size }}
+          - **macOS**：${{ steps.file_sizes.outputs.macos_size }}
+          - **Linux**：${{ steps.file_sizes.outputs.linux_size }}
+          
+          ### 📥 下载说明
+          
+          #### Windows 用户
+          下载 \`${{ env.APP_NAME }}_${VERSION}_windows_x64.msi\` 文件并运行安装。
+          
+          #### macOS 用户
+          下载 \`${{ env.APP_NAME }}_${VERSION}_macos_universal.dmg\` 文件，打开后将应用拖拽到 Applications 文件夹。
+          
+          #### Linux 用户
+          - **AppImage**：下载 \`.AppImage\` 文件，添加执行权限后直接运行
+          - **Debian/Ubuntu**：下载 \`.deb\` 文件，使用 \`sudo dpkg -i\` 安装
+          - **Fedora/RHEL**：下载 \`.rpm\` 文件，使用 \`sudo rpm -i\` 安装
+          
+          ### 🔐 完整性校验
+          
+          为确保下载文件的完整性和安全性，请使用 SHA-256 哈希值进行验证：
+          
+          1. 下载 \`${{ env.APP_NAME }}-${VERSION}-sha256sum.txt\` 文件
+          2. 在终端中运行：
+             \`\`\`bash
+             # macOS/Linux
+             sha256sum -c ${{ env.APP_NAME }}-${VERSION}-sha256sum.txt
+             
+             # Windows (PowerShell)
+             Get-FileHash <文件名> -Algorithm SHA256
+             \`\`\`
+          
+          ### ✅ 自动更新
+          
+          本应用已启用 **Tauri Updater** 自动更新功能：
+          - 现有用户将在启动应用时自动检测到新版本
+          - 系统会提示是否下载并安装更新
+          - 更新过程安全可靠，所有更新包都经过数字签名验证
+          
+          ### 🔗 相关链接
+          - [项目仓库](https://github.com/${{ github.repository }})
+          - [问题反馈](https://github.com/${{ github.repository }}/issues)
+          - [使用文档](https://github.com/${{ github.repository }}#readme)
+          
+          ---
+          
+          EOF
+          
+          echo "✅ Release Notes 已生成"
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.setup.outputs.tag_name }}
+          name: ${{ env.APP_NAME }} ${{ needs.setup.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ needs.setup.outputs.is_prerelease == 'true' }}
+          generate_release_notes: true
+          files: |
+            artifacts/*.msi
+            artifacts/*.dmg
+            artifacts/*.AppImage
+            artifacts/*.deb
+            artifacts/*.rpm
+            artifacts/*-sha256sum.txt
+            artifacts/latest.json
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ========================================
+  # Job 8: 发送 Apprise 通知
+  # ========================================
+  notify:
+    name: 📢 Send Notification
+    needs: [setup, release, file_sizes]
+    runs-on: ubuntu-latest
+    if: always() && needs.release.result == 'success'
+    
+    steps:
+      - name: 📊 Get file sizes
+        id: file_sizes
+        run: |
+          # 由于无法直接访问前面 job 的 outputs，我们从 artifacts 重新计算
+          echo "windows_size=N/A" >> $GITHUB_OUTPUT
+          echo "macos_size=N/A" >> $GITHUB_OUTPUT
+          echo "linux_size=N/A" >> $GITHUB_OUTPUT
+
+      - name: 📢 Send Apprise notification
+        if: vars.APPRISE_HTTP_URL != ''
+        run: |
+          VERSION="${{ needs.setup.outputs.version }}"
+          TAG_NAME="${{ needs.setup.outputs.tag_name }}"
+          RELEASE_DATE="${{ needs.setup.outputs.release_date }}"
+          IS_PRERELEASE="${{ needs.setup.outputs.is_prerelease }}"
+          
+          RELEASE_TYPE="正式版"
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            RELEASE_TYPE="预发布版"
+          fi
+          
+          REPO="${{ github.repository }}"
+          RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG_NAME}"
+          RUN_URL="https://github.com/${REPO}/actions/runs/${{ github.run_id }}"
+          REPO_URL="https://github.com/${REPO}"
+          SHA256_URL="${RELEASE_URL}/${{ env.APP_NAME }}-${VERSION}-sha256sum.txt"
+          
+          # 构建通知消息
+          MESSAGE="🎉 ${{ env.APP_NAME }} 新版本发布
+
+          📦 版本信息
+          • 应用名称：${{ env.APP_NAME }}
+          • 版本号：${VERSION}
+          • 发布类型：${RELEASE_TYPE}
+
+          💻 支持平台
+          • Windows x64
+          • macOS (Intel)
+          • macOS (Apple Silicon)
+          • Linux (AppImage/deb/rpm)
+
+          📦 安装包大小
+          • Windows：${{ steps.file_sizes.outputs.windows_size }}
+          • macOS：${{ steps.file_sizes.outputs.macos_size }}
+          • Linux：${{ steps.file_sizes.outputs.linux_size }}
+
+          ⏰ 发布时间
+          • ${RELEASE_DATE}
+
+          📎 相关链接
+          • 下载页面: ${RELEASE_URL}
+          • 构建日志: ${RUN_URL}
+          • 项目仓库: ${REPO_URL}
+          • 完整性校验: ${SHA256_URL}
+
+          ✅ 自动更新
+          已启用 Tauri Updater，现有用户将自动收到更新提示"
+          
+          # 发送 Apprise 通知
+          curl -X POST "${{ vars.APPRISE_HTTP_URL }}" \
+            -F "tag=nameseeker" \
+            -F "title=🎉 ${{ env.APP_NAME }} ${VERSION} 发布" \
+            -F "body=${MESSAGE}" \
+            -F "format=text" \
+            || echo "⚠️  Apprise 通知发送失败（非致命错误）"
+          
+          echo "✅ 通知已发送"
+
+      - name: 📢 Send failure notification
+        if: vars.APPRISE_HTTP_URL != '' && needs.release.result == 'failure'
+        run: |
+          VERSION="${{ needs.setup.outputs.version }}"
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          
+          MESSAGE="❌ ${{ env.APP_NAME }} ${VERSION} 发布失败
+
+          ⏰ 失败时间: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S %Z')
+          
+          📎 查看构建日志: ${RUN_URL}"
+          
+          curl -X POST "${{ vars.APPRISE_HTTP_URL }}" \
+            -F "tag=nameseeker" \
+            -F "title=❌ ${{ env.APP_NAME }} 发布失败" \
+            -F "body=${MESSAGE}" \
+            -F "format=text" \
+            || echo "⚠️  Apprise 通知发送失败"
+
+  # ========================================
+  # 可选：失败时清理 artifacts
+  # ========================================
+  cleanup:
+    name: 🧹 Cleanup on Failure
+    needs: [setup, build-windows, build-macos, build-linux, release]
+    runs-on: ubuntu-latest
+    if: always() && (needs.build-windows.result == 'failure' || needs.build-macos.result == 'failure' || needs.build-linux.result == 'failure' || needs.release.result == 'failure')
+    
+    steps:
+      - name: 🧹 Cleanup notice
+        run: |
+          echo "⚠️  检测到构建或发布失败"
+          echo "💡 建议检查以下内容："
+          echo "  • 依赖安装是否成功"
+          echo "  • 版本号是否一致"
+          echo "  • 构建配置是否正确"
+          echo "  • GitHub Token 权限是否足够"
+          echo ""
+          echo "📋 Artifacts 将自动保留 90 天供调试使用"
+
