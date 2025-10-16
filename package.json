@@ -1,13 +1,37 @@
 {
   "name": "name-seeker",
-  "private": true,
   "version": "0.1.2",
+  "description": "基于 Tauri 2.x + React 19 + TypeScript 的跨平台桌面应用，用于在数百个网站上搜索用户名和邮箱",
   "type": "module",
+  "private": false,
+  "author": "Leon <silenceace@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/funnyzak/name-seeker",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:funnyzak/name-seeker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/funnyzak/name-seeker/issues"
+  },
+  "keywords": [
+    "tauri",
+    "react",
+    "typescript",
+    "desktop",
+    "username-search",
+    "email-search",
+    "whatsmyname",
+    "osint",
+    "cross-platform"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
     "update-version": "bash scripts/update-version.sh"
   },
   "dependencies": {
@@ -29,5 +53,9 @@
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "~5.8.3",
     "vite": "^7.0.4"
+  },
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.9.0"
   }
 }
