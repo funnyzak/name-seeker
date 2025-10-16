@@ -1,19 +1,19 @@
 ---
 globs: *.css,*.tsx,*.ts
-description: UI/UX 设计和用户体验规则
+description: UI/UX Design and User Experience Rules
 ---
 
-# UI/UX 设计规则
+# UI/UX Design Rules
 
-## 🎨 设计系统
+## 🎨 Design System
 
-### 颜色主题
-- 使用 CSS 变量定义主题颜色
-- 支持深色和浅色主题
-- 确保颜色对比度符合可访问性标准
+### Color Theme
+- Use CSS variables to define theme colors
+- Support both dark and light themes
+- Ensure color contrast meets accessibility standards
 
 ```css
-/* ✅ 正确的颜色主题 */
+/* ✅ Correct color theme */
 :root {
   --primary-color: #007bff;
   --primary-hover: #0056b3;
@@ -23,25 +23,25 @@ description: UI/UX 设计和用户体验规则
   --danger-color: #dc3545;
   --info-color: #17a2b8;
   
-  /* 背景色 */
+  /* Background colors */
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
   --bg-dark: #343a40;
   
-  /* 文本色 */
+  /* Text colors */
   --text-primary: #212529;
   --text-secondary: #6c757d;
   --text-muted: #adb5bd;
 }
 ```
 
-### 间距系统
-- 使用一致的间距单位
-- 基于 8px 网格系统
-- 使用 CSS 变量定义间距
+### Spacing System
+- Use consistent spacing units
+- Based on 8px grid system
+- Use CSS variables to define spacing
 
 ```css
-/* ✅ 正确的间距系统 */
+/* ✅ Correct spacing system */
 :root {
   --spacing-xs: 0.25rem;   /* 4px */
   --spacing-sm: 0.5rem;    /* 8px */
@@ -52,15 +52,15 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-## 🎯 组件设计
+## 🎯 Component Design
 
-### 按钮组件
-- 使用一致的按钮样式
-- 支持不同状态（hover, active, disabled）
-- 提供清晰的视觉反馈
+### Button Components
+- Use consistent button styles
+- Support different states (hover, active, disabled)
+- Provide clear visual feedback
 
 ```css
-/* ✅ 正确的按钮样式 */
+/* ✅ Correct button styles */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -94,13 +94,13 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-### 表单组件
-- 使用一致的输入框样式
-- 提供清晰的标签和占位符
-- 支持验证状态显示
+### Form Components
+- Use consistent input styles
+- Provide clear labels and placeholders
+- Support validation state display
 
 ```css
-/* ✅ 正确的表单样式 */
+/* ✅ Correct form styles */
 .form-group {
   margin-bottom: var(--spacing-md);
 }
@@ -136,37 +136,37 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-## 📱 响应式设计
+## 📱 Responsive Design
 
-### 断点系统
-- 使用移动优先的设计方法
-- 定义清晰的断点
-- 确保在所有设备上都有良好的体验
+### Breakpoint System
+- Use mobile-first design approach
+- Define clear breakpoints
+- Ensure good experience on all devices
 
 ```css
-/* ✅ 正确的响应式设计 */
-/* 移动端优先 */
+/* ✅ Correct responsive design */
+/* Mobile first */
 .container {
   width: 100%;
   padding: 0 var(--spacing-md);
   margin: 0 auto;
 }
 
-/* 平板端 */
+/* Tablet */
 @media (min-width: 768px) {
   .container {
     max-width: 750px;
   }
 }
 
-/* 桌面端 */
+/* Desktop */
 @media (min-width: 992px) {
   .container {
     max-width: 970px;
   }
 }
 
-/* 大屏幕 */
+/* Large screens */
 @media (min-width: 1200px) {
   .container {
     max-width: 1170px;
@@ -174,13 +174,13 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-### 网格系统
-- 使用 CSS Grid 或 Flexbox
-- 支持不同屏幕尺寸
-- 保持布局的一致性
+### Grid System
+- Use CSS Grid or Flexbox
+- Support different screen sizes
+- Maintain layout consistency
 
 ```css
-/* ✅ 正确的网格系统 */
+/* ✅ Correct grid system */
 .grid {
   display: grid;
   gap: var(--spacing-md);
@@ -206,15 +206,15 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-## 🎭 动画和过渡
+## 🎭 Animations and Transitions
 
-### 过渡效果
-- 使用一致的过渡时间
-- 提供平滑的用户体验
-- 避免过度动画
+### Transition Effects
+- Use consistent transition timing
+- Provide smooth user experience
+- Avoid excessive animations
 
 ```css
-/* ✅ 正确的过渡效果 */
+/* ✅ Correct transition effects */
 .transition {
   transition: all 0.15s ease-in-out;
 }
@@ -227,13 +227,13 @@ description: UI/UX 设计和用户体验规则
   transition: all 0.3s ease-in-out;
 }
 
-/* 悬停效果 */
+/* Hover effects */
 .hover-lift:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 加载动画 */
+/* Loading animation */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -244,13 +244,13 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-### 微交互
-- 提供即时的视觉反馈
-- 使用适当的动画时长
-- 保持动画的一致性
+### Micro-interactions
+- Provide immediate visual feedback
+- Use appropriate animation duration
+- Maintain animation consistency
 
 ```css
-/* ✅ 正确的微交互 */
+/* ✅ Correct micro-interactions */
 .btn {
   transition: all 0.15s ease-in-out;
 }
@@ -259,7 +259,7 @@ description: UI/UX 设计和用户体验规则
   transform: translateY(1px);
 }
 
-/* 加载状态 */
+/* Loading state */
 .btn-loading {
   position: relative;
   color: transparent;
@@ -280,21 +280,21 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-## ♿ 可访问性
+## ♿ Accessibility
 
-### 键盘导航
-- 支持 Tab 键导航
-- 提供清晰的焦点指示器
-- 支持键盘快捷键
+### Keyboard Navigation
+- Support Tab key navigation
+- Provide clear focus indicators
+- Support keyboard shortcuts
 
 ```css
-/* ✅ 正确的键盘导航 */
+/* ✅ Correct keyboard navigation */
 .focusable:focus {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
 
-/* 跳过链接 */
+/* Skip links */
 .skip-to-content {
   position: absolute;
   top: -40px;
@@ -312,51 +312,51 @@ description: UI/UX 设计和用户体验规则
 }
 ```
 
-### 屏幕阅读器支持
-- 使用语义化的 HTML 标签
-- 提供适当的 ARIA 属性
-- 确保内容结构清晰
+### Screen Reader Support
+- Use semantic HTML tags
+- Provide appropriate ARIA attributes
+- Ensure clear content structure
 
 ```tsx
-// ✅ 正确的可访问性支持
+// ✅ Correct accessibility support
 const SearchForm: React.FC<SearchFormProps> = ({ onSubmit, isSearching }) => {
   return (
-    <form onSubmit={handleSubmit} role="search" aria-label="搜索表单">
+    <form onSubmit={handleSubmit} role="search" aria-label="Search form">
       <label htmlFor="search-input" className="sr-only">
-        搜索查询
+        Search query
       </label>
       <input
         id="search-input"
         type="text"
-        placeholder="输入用户名或邮箱"
+        placeholder="Enter username or email"
         aria-describedby="search-help"
         className="form-control"
       />
       <div id="search-help" className="form-text">
-        输入要搜索的用户名或邮箱地址
+        Enter the username or email address to search
       </div>
       <button
         type="submit"
         disabled={isSearching}
-        aria-label={isSearching ? "搜索中..." : "开始搜索"}
+        aria-label={isSearching ? "Searching..." : "Start search"}
         className="btn btn-primary"
       >
-        {isSearching ? "搜索中..." : "搜索"}
+        {isSearching ? "Searching..." : "Search"}
       </button>
     </form>
   );
 };
 ```
 
-## 🎨 视觉层次
+## 🎨 Visual Hierarchy
 
-### 排版系统
-- 使用一致的字体大小和行高
-- 建立清晰的视觉层次
-- 确保文本可读性
+### Typography System
+- Use consistent font sizes and line heights
+- Establish clear visual hierarchy
+- Ensure text readability
 
 ```css
-/* ✅ 正确的排版系统 */
+/* ✅ Correct typography system */
 :root {
   --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-family-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
@@ -391,13 +391,13 @@ h2 { font-size: var(--font-size-xl); }
 h3 { font-size: var(--font-size-lg); }
 ```
 
-### 阴影系统
-- 使用一致的阴影深度
-- 建立视觉层次
-- 提供深度感
+### Shadow System
+- Use consistent shadow depths
+- Establish visual hierarchy
+- Provide depth perception
 
 ```css
-/* ✅ 正确的阴影系统 */
+/* ✅ Correct shadow system */
 :root {
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -418,19 +418,19 @@ h3 { font-size: var(--font-size-lg); }
 }
 ```
 
-## 🎯 用户体验
+## 🎯 User Experience
 
-### 加载状态
-- 提供清晰的加载指示器
-- 使用骨架屏或进度条
-- 避免长时间的无反馈状态
+### Loading States
+- Provide clear loading indicators
+- Use skeleton screens or progress bars
+- Avoid long periods of no feedback
 
 ```tsx
-// ✅ 正确的加载状态
+// ✅ Correct loading states
 const LoadingSpinner: React.FC = () => (
   <div className="loading-spinner" role="status" aria-live="polite">
     <div className="spinner" aria-hidden="true"></div>
-    <span className="sr-only">加载中...</span>
+    <span className="sr-only">Loading...</span>
   </div>
 );
 
@@ -450,13 +450,13 @@ const ProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
 );
 ```
 
-### 错误处理
-- 提供友好的错误信息
-- 使用适当的错误图标
-- 提供恢复操作的建议
+### Error Handling
+- Provide friendly error messages
+- Use appropriate error icons
+- Provide recovery action suggestions
 
 ```tsx
-// ✅ 正确的错误处理
+// ✅ Correct error handling
 const ErrorMessage: React.FC<{ error: string; onRetry?: () => void }> = ({ 
   error, 
   onRetry 
@@ -464,11 +464,11 @@ const ErrorMessage: React.FC<{ error: string; onRetry?: () => void }> = ({
   <div className="error-message" role="alert">
     <div className="error-icon" aria-hidden="true">⚠️</div>
     <div className="error-content">
-      <h3>出现错误</h3>
+      <h3>Error occurred</h3>
       <p>{error}</p>
       {onRetry && (
         <button onClick={onRetry} className="btn btn-outline-primary">
-          重试
+          Retry
         </button>
       )}
     </div>
@@ -476,13 +476,13 @@ const ErrorMessage: React.FC<{ error: string; onRetry?: () => void }> = ({
 );
 ```
 
-### 成功反馈
-- 提供清晰的成功状态
-- 使用适当的成功图标
-- 提供下一步操作的建议
+### Success Feedback
+- Provide clear success states
+- Use appropriate success icons
+- Provide next step suggestions
 
 ```tsx
-// ✅ 正确的成功反馈
+// ✅ Correct success feedback
 const SuccessMessage: React.FC<{ message: string; onAction?: () => void }> = ({ 
   message, 
   onAction 
@@ -493,7 +493,7 @@ const SuccessMessage: React.FC<{ message: string; onAction?: () => void }> = ({
       <p>{message}</p>
       {onAction && (
         <button onClick={onAction} className="btn btn-success">
-          查看结果
+          View Results
         </button>
       )}
     </div>
@@ -501,29 +501,29 @@ const SuccessMessage: React.FC<{ message: string; onAction?: () => void }> = ({
 );
 ```
 
-## 📱 移动端优化
+## 📱 Mobile Optimization
 
-### 触摸友好
-- 使用足够大的触摸目标
-- 避免悬停状态依赖
-- 支持手势操作
+### Touch Friendly
+- Use sufficiently large touch targets
+- Avoid hover state dependencies
+- Support gesture operations
 
 ```css
-/* ✅ 正确的移动端优化 */
+/* ✅ Correct mobile optimization */
 .touch-target {
   min-height: 44px;
   min-width: 44px;
   padding: var(--spacing-sm);
 }
 
-/* 移动端悬停效果 */
+/* Mobile hover effects */
 @media (hover: hover) {
   .hover-effect:hover {
     background-color: var(--bg-secondary);
   }
 }
 
-/* 触摸设备 */
+/* Touch devices */
 @media (hover: none) {
   .touch-effect:active {
     background-color: var(--bg-secondary);
@@ -531,19 +531,19 @@ const SuccessMessage: React.FC<{ message: string; onAction?: () => void }> = ({
 }
 ```
 
-### 性能优化
-- 使用 CSS 变量减少重复
-- 避免复杂的动画
-- 优化图片和资源
+### Performance Optimization
+- Use CSS variables to reduce repetition
+- Avoid complex animations
+- Optimize images and resources
 
 ```css
-/* ✅ 正确的性能优化 */
-/* 使用 will-change 优化动画 */
+/* ✅ Correct performance optimization */
+/* Use will-change to optimize animations */
 .animated-element {
   will-change: transform, opacity;
 }
 
-/* 使用 transform 而不是改变位置属性 */
+/* Use transform instead of changing position properties */
 .slide-in {
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
@@ -553,7 +553,7 @@ const SuccessMessage: React.FC<{ message: string; onAction?: () => void }> = ({
   transform: translateX(0);
 }
 
-/* 避免重排和重绘 */
+/* Avoid reflow and repaint */
 .optimized-animation {
   transform: translateZ(0);
   backface-visibility: hidden;

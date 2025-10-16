@@ -1,24 +1,24 @@
 ---
 globs: *.rs
-description: Rust 和 Tauri 后端开发规则
+description: Rust and Tauri Backend Development Rules
 ---
 
-# Rust + Tauri 后端开发规则
+# Rust + Tauri Backend Development Rules
 
-## 🦀 Rust 代码规范
+## 🦀 Rust Code Standards
 
-### 错误处理
-- 使用 `Result<T, E>` 处理可能失败的操作
-- 自定义错误类型，实现 `Display` 和 `Error` trait
-- 使用 `?` 操作符传播错误
+### Error Handling
+- Use `Result<T, E>` to handle operations that may fail
+- Define custom error types implementing `Display` and `Error` traits
+- Use `?` operator for error propagation
 
 ```rust
-// ✅ 正确的错误处理
+// ✅ Correct error handling
 #[derive(Debug, thiserror::Error)]
 pub enum SearchError {
-    #[error("网络请求失败: {0}")]
+    #[error("Network request failed: {0}")]
     NetworkError(#[from] reqwest::Error),
-    #[error("解析错误: {0}")]
+    #[error("Parse error: {0}")]
     ParseError(String),
 }
 
@@ -29,13 +29,13 @@ pub async fn search_username(query: &str) -> Result<Vec<SearchResult>, SearchErr
 }
 ```
 
-### 异步编程
-- 使用 `async/await` 语法
-- 合理使用 `tokio::spawn` 进行并发
-- 使用 `Arc<Mutex<T>>` 处理共享状态
+### Async Programming
+- Use `async/await` syntax
+- Use `tokio::spawn` appropriately for concurrency
+- Use `Arc<Mutex<T>>` to handle shared state
 
 ```rust
-// ✅ 正确的异步编程
+// ✅ Correct async programming
 pub struct SearchEngine {
     config: SearchConfig,
     client: reqwest::Client,
@@ -58,7 +58,7 @@ impl SearchEngine {
             handles.push(handle);
         }
         
-        // 等待所有任务完成
+        // Wait for all tasks to complete
         let mut results = Vec::new();
         for handle in handles {
             if let Ok(result) = handle.await? {
@@ -71,15 +71,15 @@ impl SearchEngine {
 }
 ```
 
-## 🎯 Tauri 命令开发
+## 🎯 Tauri Command Development
 
-### 命令函数规范
-- 使用 `#[tauri::command]` 宏
-- 函数名使用 snake_case
-- 返回 `Result<T, String>` 类型
+### Command Function Standards
+- Use `#[tauri::command]` macro
+- Use snake_case for function names
+- Return `Result<T, String>` type
 
 ```rust
-// ✅ 正确的 Tauri 命令
+// ✅ Correct Tauri commands
 #[tauri::command]
 async fn start_search(
     app: AppHandle,
@@ -87,15 +87,15 @@ async fn start_search(
     search_type: Option<String>,
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
-    // 验证输入
+    // Validate input
     validate_input(&query)?;
     
-    // 执行搜索
+    // Execute search
     let search_engine = SearchEngine::new(config)?;
     let results = search_engine.search(&sites).await
         .map_err(|e| e.to_string())?;
     
-    // 发送事件到前端
+    // Send event to frontend
     app.emit("search-update", &results)
         .map_err(|e| e.to_string())?;
     
@@ -103,13 +103,13 @@ async fn start_search(
 }
 ```
 
-### 状态管理
-- 使用 `tauri::State` 管理应用状态
-- 使用 `Arc<Mutex<T>>` 处理并发访问
-- 合理使用生命周期
+### State Management
+- Use `tauri::State` to manage application state
+- Use `Arc<Mutex<T>>` to handle concurrent access
+- Use lifetimes appropriately
 
 ```rust
-// ✅ 正确的状态管理
+// ✅ Correct state management
 #[derive(Default)]
 pub struct AppState {
     pub search_handle: Arc<Mutex<Option<JoinHandle<()>>>>,
@@ -125,12 +125,12 @@ async fn get_search_results(
 }
 ```
 
-## 🔧 模块组织
+## 🔧 Module Organization
 
-### 模块结构
-- 使用 `mod.rs` 文件组织模块
-- 每个模块有明确的职责
-- 使用 `pub` 控制可见性
+### Module Structure
+- Use `mod.rs` files to organize modules
+- Each module has clear responsibilities
+- Use `pub` to control visibility
 
 ```rust
 // src-tauri/src/core/mod.rs
@@ -147,13 +147,13 @@ pub use error::*;
 pub use models::*;
 ```
 
-### 数据模型
-- 使用 `serde` 进行序列化
-- 实现 `Clone` 和 `Debug` trait
-- 使用枚举表示状态
+### Data Models
+- Use `serde` for serialization
+- Implement `Clone` and `Debug` traits
+- Use enums to represent states
 
 ```rust
-// ✅ 正确的数据模型
+// ✅ Correct data models
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchResult {
     pub site: String,
@@ -172,15 +172,15 @@ pub enum SearchResultStatus {
 }
 ```
 
-## 🚀 性能优化
+## 🚀 Performance Optimization
 
-### 并发控制
-- 使用 `Semaphore` 限制并发数
-- 使用 `tokio::spawn` 进行异步任务
-- 合理设置超时时间
+### Concurrency Control
+- Use `Semaphore` to limit concurrency
+- Use `tokio::spawn` for async tasks
+- Set appropriate timeout values
 
 ```rust
-// ✅ 正确的并发控制
+// ✅ Correct concurrency control
 pub async fn search_with_concurrency(
     sites: &[Site],
     max_concurrent: usize,
@@ -192,13 +192,13 @@ pub async fn search_with_concurrency(
         let semaphore = semaphore.clone();
         let handle = tokio::spawn(async move {
             let _permit = semaphore.acquire().await?;
-            // 执行搜索逻辑
+            // Execute search logic
             Ok::<_, SearchError>(())
         });
         handles.push(handle);
     }
     
-    // 等待所有任务完成
+    // Wait for all tasks to complete
     let mut results = Vec::new();
     for handle in handles {
         if let Ok(result) = handle.await? {
@@ -210,13 +210,13 @@ pub async fn search_with_concurrency(
 }
 ```
 
-### 内存管理
-- 使用 `Arc` 进行引用计数
-- 避免不必要的克隆
-- 使用 `Cow` 处理字符串
+### Memory Management
+- Use `Arc` for reference counting
+- Avoid unnecessary cloning
+- Use `Cow` to handle strings
 
 ```rust
-// ✅ 正确的内存管理
+// ✅ Correct memory management
 pub struct SearchEngine {
     config: Arc<SearchConfig>,
     client: Arc<reqwest::Client>,
@@ -232,25 +232,25 @@ impl SearchEngine {
 }
 ```
 
-## 🔄 事件系统
+## 🔄 Event System
 
-### 事件发送
-- 使用 `app.emit()` 发送事件
-- 定义清晰的事件类型
-- 处理发送失败的情况
+### Event Emission
+- Use `app.emit()` to send events
+- Define clear event types
+- Handle emission failures
 
 ```rust
-// ✅ 正确的事件发送
+// ✅ Correct event emission
 #[tauri::command]
 async fn start_search(app: AppHandle, query: String) -> Result<(), String> {
-    // 发送搜索开始事件
+    // Send search started event
     app.emit("search-started", &query)
         .map_err(|e| e.to_string())?;
     
-    // 执行搜索
+    // Execute search
     let results = perform_search(&query).await?;
     
-    // 发送结果更新事件
+    // Send result update event
     app.emit("search-update", &results)
         .map_err(|e| e.to_string())?;
     
@@ -258,13 +258,13 @@ async fn start_search(app: AppHandle, query: String) -> Result<(), String> {
 }
 ```
 
-### 事件类型定义
-- 使用结构体定义事件数据
-- 实现 `Serialize` trait
-- 使用描述性的字段名
+### Event Type Definition
+- Use structs to define event data
+- Implement `Serialize` trait
+- Use descriptive field names
 
 ```rust
-// ✅ 正确的事件类型
+// ✅ Correct event types
 #[derive(Debug, Clone, Serialize)]
 pub struct SearchUpdatePayload {
     pub site: String,
@@ -282,90 +282,90 @@ pub struct SearchProgressPayload {
 }
 ```
 
-## 🛡️ 安全性
+## 🛡️ Security
 
-### 输入验证
-- 验证所有用户输入
-- 使用正则表达式验证格式
-- 防止注入攻击
+### Input Validation
+- Validate all user inputs
+- Use regular expressions to validate formats
+- Prevent injection attacks
 
 ```rust
-// ✅ 正确的输入验证
+// ✅ Correct input validation
 pub fn validate_username(username: &str) -> Result<(), SearchError> {
     if username.is_empty() {
-        return Err(SearchError::ValidationError("用户名不能为空".to_string()));
+        return Err(SearchError::ValidationError("Username cannot be empty".to_string()));
     }
     
     if username.len() > 50 {
-        return Err(SearchError::ValidationError("用户名过长".to_string()));
+        return Err(SearchError::ValidationError("Username too long".to_string()));
     }
     
-    // 检查用户名格式
+    // Check username format
     let username_regex = Regex::new(r"^[a-zA-Z0-9._-]+$")?;
     if !username_regex.is_match(username) {
-        return Err(SearchError::ValidationError("用户名格式无效".to_string()));
+        return Err(SearchError::ValidationError("Invalid username format".to_string()));
     }
     
     Ok(())
 }
 ```
 
-### 错误处理
-- 不要暴露内部错误信息
-- 记录详细的错误日志
-- 提供用户友好的错误消息
+### Error Handling
+- Don't expose internal error information
+- Log detailed error information
+- Provide user-friendly error messages
 
 ```rust
-// ✅ 正确的错误处理
+// ✅ Correct error handling
 #[tauri::command]
 async fn start_search(query: String) -> Result<(), String> {
     match perform_search(&query).await {
         Ok(_) => Ok(()),
         Err(SearchError::NetworkError(e)) => {
-            log::error!("网络错误: {}", e);
-            Err("网络连接失败，请检查网络设置".to_string())
+            log::error!("Network error: {}", e);
+            Err("Network connection failed, please check network settings".to_string())
         }
         Err(SearchError::ValidationError(msg)) => {
-            log::warn!("验证错误: {}", msg);
+            log::warn!("Validation error: {}", msg);
             Err(msg)
         }
         Err(e) => {
-            log::error!("未知错误: {}", e);
-            Err("搜索失败，请稍后重试".to_string())
+            log::error!("Unknown error: {}", e);
+            Err("Search failed, please try again later".to_string())
         }
     }
 }
 ```
 
-## 📝 日志记录
+## 📝 Logging
 
-### 日志级别
-- 使用 `log` crate 进行日志记录
-- 合理设置日志级别
-- 记录关键操作和错误
+### Log Levels
+- Use `log` crate for logging
+- Set appropriate log levels
+- Log key operations and errors
 
 ```rust
-// ✅ 正确的日志记录
+// ✅ Correct logging
 use log::{info, warn, error, debug};
 
 pub async fn search_username(query: &str) -> Result<Vec<SearchResult>, SearchError> {
-    info!("开始搜索用户名: {}", query);
+    info!("Starting username search: {}", query);
     
     let results = perform_search(query).await?;
     
-    info!("搜索完成，找到 {} 个结果", results.len());
+    info!("Search completed, found {} results", results.len());
     
     Ok(results)
 }
 ```
 
-### 日志配置
-- 在应用启动时配置日志
-- 使用环境变量控制日志级别
-- 记录到文件和控制台
+### Log Configuration
+- Configure logging at application startup
+- Use environment variables to control log levels
+- Log to both file and console
 
 ```rust
-// ✅ 正确的日志配置
+// ✅ Correct log configuration
 pub fn init_logging() {
     env_logger::Builder::from_default_env()
         .filter_level(log::LevelFilter::Info)
@@ -380,15 +380,15 @@ pub fn init_logging() {
 }
 ```
 
-## 🧪 测试
+## 🧪 Testing
 
-### 单元测试
-- 为每个函数编写测试
-- 使用 `#[cfg(test)]` 标记测试模块
-- 测试正常情况和边界情况
+### Unit Tests
+- Write tests for each function
+- Use `#[cfg(test)]` to mark test modules
+- Test normal cases and edge cases
 
 ```rust
-// ✅ 正确的单元测试
+// ✅ Correct unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -408,13 +408,13 @@ mod tests {
 }
 ```
 
-### 集成测试
-- 测试 Tauri 命令
-- 测试事件系统
-- 测试完整的搜索流程
+### Integration Tests
+- Test Tauri commands
+- Test event system
+- Test complete search workflow
 
 ```rust
-// ✅ 正确的集成测试
+// ✅ Correct integration tests
 #[cfg(test)]
 mod integration_tests {
     use tauri::test;

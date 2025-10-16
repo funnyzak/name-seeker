@@ -1,127 +1,174 @@
 ---
 alwaysApply: true
-description: 项目架构和文件组织规则
+description: Project Architecture and File Organization Rules
 ---
 
-# NameSeeker - 项目架构规则
+# NameSeeker - Project Architecture Rules
 
-## 🏗️ 项目结构
+## 🏗️ Project Structure
 
-这是一个基于 **Tauri 2.x + React 19 + TypeScript** 的跨平台桌面应用，用于在数百个网站上搜索用户名和邮箱。
+This is a cross-platform desktop application based on **Tauri 2.x + React 19 + TypeScript** for searching usernames and emails across hundreds of websites.
 
-### 核心架构
-- **前端**: React 19 + TypeScript + Vite (位于 `src/`)
-- **后端**: Rust + Tauri 2.x (位于 `src-tauri/src/`)
-- **通信**: Tauri 事件系统 + 命令调用
-- **数据源**: WhatsMyName 项目 (600+ 网站)
+### Core Architecture
+- **Frontend**: React 19 + TypeScript + Vite (located in `src/`)
+- **Backend**: Rust + Tauri 2.x (located in `src-tauri/src/`)
+- **Communication**: Tauri event system + command calls
+- **Data Source**: WhatsMyName project (600+ websites)
 
-### 关键目录结构
+### Key Directory Structure
 
 ```
-src/                              # React 前端
-├── components/                   # UI 组件
-│   ├── SearchForm.tsx           # 搜索表单
-│   ├── ResultsDisplay.tsx       # 结果显示
-│   ├── ProgressIndicator.tsx    # 进度指示器
-│   └── index.ts                 # 组件导出
+src/                              # React Frontend
+├── components/                   # UI Components
+│   ├── AboutModal.tsx           # About application modal
+│   ├── DisclaimerModal.tsx      # First-launch disclaimer modal
+│   ├── ExportButton.tsx         # Results export functionality
+│   ├── LanguageSwitcher.tsx     # Language switching component
+│   ├── ProgressIndicator.tsx    # Search progress indicator
+│   ├── ResultItem.tsx           # Individual result display component
+│   ├── ResultsDisplay.tsx       # Results display and filtering
+│   ├── ResultsFilter.tsx        # Results filtering component
+│   ├── SearchForm.tsx           # Search input form with history
+│   ├── SearchHistory.tsx        # Search history dropdown
+│   ├── Toast.tsx                # Individual toast notification
+│   ├── ToastContainer.tsx       # Toast notification container
+│   └── index.ts                 # Component exports
 ├── hooks/                       # React Hooks
-│   ├── useSearch.ts             # 搜索状态管理
-│   └── useDisclaimer.ts         # 免责声明管理
-├── services/                    # 服务层
-│   └── tauriApi.ts              # Tauri API 封装
-├── types/                       # TypeScript 类型
-│   └── index.ts                 # 类型定义
-└── App.tsx                      # 主应用组件
+│   ├── useDisclaimer.ts         # Disclaimer state management
+│   ├── useKeyboardShortcuts.ts  # Keyboard shortcuts handling
+│   ├── useLanguage.ts           # Language switching and i18n management
+│   ├── useSearch.ts             # Search state management
+│   ├── useSearchHistory.ts      # Search history persistence
+│   └── useToast.ts              # Toast notification system
+├── services/                    # Service Layer
+│   └── tauriApi.ts              # Tauri API wrapper with singleton pattern
+├── i18n/                        # Internationalization
+│   ├── index.ts                 # i18n configuration and setup
+│   ├── types.ts                 # Language types and utilities
+│   └── locales/                 # Translation files
+│       ├── en/                  # English translations
+│       │   ├── common.json      # Common UI elements
+│       │   ├── search.json      # Search-related text
+│       │   ├── results.json     # Results display text
+│       │   ├── export.json      # Export functionality text
+│       │   ├── modals.json      # Modal dialog text
+│       │   ├── toast.json       # Toast notification text
+│       │   └── errors.json      # Error messages
+│       └── zh/                  # Chinese translations
+│           ├── common.json      # Common UI elements
+│           ├── search.json      # Search-related text
+│           ├── results.json     # Results display text
+│           ├── export.json      # Export functionality text
+│           ├── modals.json      # Modal dialog text
+│           ├── toast.json       # Toast notification text
+│           └── errors.json      # Error messages
+├── types/                       # TypeScript Definitions
+│   └── index.ts                 # Complete type declarations
+├── App.css                      # Application styles
+├── App.tsx                      # Main application component
+├── main.tsx                     # React application entry point
+└── vite-env.d.ts               # Vite environment types
 
-src-tauri/src/                   # Rust 后端
-├── core/                        # 核心模块
-│   ├── search.rs               # 搜索引擎
-│   ├── sites.rs                # 网站数据管理
-│   ├── models.rs               # 数据模型
-│   └── export.rs               # 导出功能
-└── lib.rs                      # Tauri 主入口
+src-tauri/src/                    # Rust Backend
+├── core/                        # Core Business Logic
+│   ├── config.rs                # Application configuration and persistence
+│   ├── error.rs                 # Comprehensive error handling with context
+│   ├── models.rs                # Data structures and serialization schemas
+│   ├── search.rs                # High-performance search engine with concurrency
+│   ├── sites.rs                 # Website data management and updates
+│   ├── export.rs                # Multi-format export functionality (PDF, CSV, JSON, TXT)
+│   ├── utils.rs                 # HTTP utilities and metadata extraction
+│   └── mod.rs                   # Module organization and public exports
+├── lib.rs                       # Tauri commands, events, and application setup
+└── main.rs                      # Application entry point with logging configuration
+
+src-tauri/data/                   # Data Resources
+├── wmn-data.json               # websites from WhatsMyName project
+├── email-data.json              # Email search configuration and patterns
+├── wmn-metadata.json            # Metadata extraction rules and patterns
+└── useragents.txt              # User agent rotation for anti-detection
 ```
 
-## 📋 开发规范
+## 📋 Development Standards
 
-### 文件命名约定
-- **React 组件**: PascalCase (如 `SearchForm.tsx`)
-- **Hooks**: camelCase 以 `use` 开头 (如 `useSearch.ts`)
-- **Rust 模块**: snake_case (如 `search.rs`)
-- **类型文件**: `index.ts` 或 `types.ts`
+### File Naming Conventions
+- **React Components**: PascalCase (e.g., `SearchForm.tsx`)
+- **Hooks**: camelCase starting with `use` (e.g., `useSearch.ts`)
+- **Rust Modules**: snake_case (e.g., `search.rs`)
+- **Type Files**: `index.ts` or `types.ts`
 
-### 导入顺序
-1. React 相关导入
-2. 第三方库导入
-3. 本地组件导入
-4. 类型导入
-5. 样式导入
+### Import Order
+1. React related imports
+2. Third-party library imports
+3. Local component imports
+4. Type imports
+5. Style imports
 
-### 组件组织
-- 每个组件一个文件
-- 相关组件放在同一目录
-- 使用 `index.ts` 进行统一导出
-- Hook 逻辑与 UI 组件分离
+### Component Organization
+- One component per file
+- Related components in the same directory
+- Use `index.ts` for unified exports
+- Separate Hook logic from UI components
 
-## 🔧 技术栈要求
+## 🔧 Technology Stack Requirements
 
-### 前端技术
-- **React 19**: 使用函数组件和 Hooks
-- **TypeScript**: 严格类型检查
-- **Vite**: 构建工具和开发服务器
-- **CSS**: 现代 CSS 特性，支持响应式设计
+### Frontend Technologies
+- **React 19**: Use function components and Hooks
+- **TypeScript**: Strict type checking
+- **Vite**: Build tool and development server
+- **CSS**: Modern CSS features with responsive design support
 
-### 后端技术
-- **Rust**: 异步编程，使用 Tokio
-- **Tauri 2.x**: 最新版本，支持事件系统
-- **reqwest**: HTTP 客户端
-- **serde**: JSON 序列化
+### Backend Technologies
+- **Rust**: Async programming using Tokio
+- **Tauri 2.x**: Latest version with event system support
+- **reqwest**: HTTP client
+- **serde**: JSON serialization
 
-## 🎯 核心功能模块
+## 🎯 Core Feature Modules
 
-### 搜索功能
-- 用户名搜索 (主要功能)
-- 邮箱搜索 (扩展功能)
-- 并发请求控制 (默认30个)
-- 实时进度反馈
+### Search Functionality
+- Username search (main feature)
+- Email search (extended feature)
+- Concurrent request control (default 30)
+- Real-time progress feedback
 
-### 用户界面
-- 免责声明模态框
-- 搜索表单和验证
-- 实时结果显示
-- 导出功能 (CSV, JSON, PDF)
+### User Interface
+- Disclaimer modal
+- Search form and validation
+- Real-time results display
+- Export functionality (CSV, JSON, PDF)
 
-### 数据管理
-- WhatsMyName 数据源集成
-- 本地缓存和更新
-- 搜索结果持久化
-- 搜索历史记录
+### Data Management
+- WhatsMyName data source integration
+- Local caching and updates
+- Search result persistence
+- Search history
 
-## 🚀 开发工作流
+## 🚀 Development Workflow
 
-### 开发命令
+### Development Commands
 ```bash
-# 前端开发
+# Frontend development
 npm run dev
 
-# 完整应用开发 (推荐)
+# Full application development (recommended)
 npm run tauri dev
 
-# 构建生产版本
+# Build production version
 npm run tauri build
 ```
 
-### 代码质量
-- 使用 TypeScript 严格模式
-- Rust 代码遵循 clippy 建议
-- 组件使用函数式编程
-- 异步操作使用 async/await
+### Code Quality
+- Use TypeScript strict mode
+- Follow clippy suggestions for Rust code
+- Use functional programming for components
+- Use async/await for async operations
 
-## 📁 文件引用格式
+## 📁 File Reference Format
 
-使用以下格式引用项目文件：
-- [App.tsx](mdc:src/App.tsx) - 主应用组件
-- [SearchForm.tsx](mdc:src/components/SearchForm.tsx) - 搜索表单
-- [useSearch.ts](mdc:src/hooks/useSearch.ts) - 搜索 Hook
-- [lib.rs](mdc:src-tauri/src/lib.rs) - Tauri 主入口
-- [search.rs](mdc:src-tauri/src/core/search.rs) - 搜索引擎
+Use the following format to reference project files:
+- [App.tsx](mdc:src/App.tsx) - Main application component
+- [SearchForm.tsx](mdc:src/components/SearchForm.tsx) - Search form
+- [useSearch.ts](mdc:src/hooks/useSearch.ts) - Search Hook
+- [lib.rs](mdc:src-tauri/src/lib.rs) - Tauri main entry
+- [search.rs](mdc:src-tauri/src/core/search.rs) - Search engine
