@@ -1,10 +1,6 @@
 # Name Seeker - Username Search Tool
 
-A cross-platform desktop application for discovering public profiles based on usernames, supporting searches across hundreds of websites.
-
-## 📖 Project Description
-
-Name Seeker is a powerful username search tool inspired by OSINT tools like `blackbird`. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.
+Name Seeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.
 
 Built with the Tauri (Rust + React) framework, it delivers a fast, secure, and localized search experience.
 
@@ -17,24 +13,6 @@ Built with the Tauri (Rust + React) framework, it delivers a fast, secure, and l
 - **HTTP Client**: reqwest
 - **Async Runtime**: tokio
 - **Data Source**: WhatsMyName project
-
-### Project Structure
-
-```
-src/                              # React frontend
-├── components/                   # UI components
-├── hooks/                        # React Hooks
-├── services/                     # Service layer
-├── types/                        # TypeScript type definitions
-└── App.tsx                       # Main application component
-
-src-tauri/src/                    # Rust backend
-├── core/                         # Core business logic
-│   ├── search.rs                 # Search engine
-│   ├── sites.rs                  # Website data management
-│   └── models.rs                 # Data models
-└── lib.rs                        # Tauri command definitions
-```
 
 ### Development Workflow
 
