@@ -111,11 +111,13 @@ const App: React.FC = () => {
                 NameSeeker
               </h1>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                <LanguageSwitcher 
-                  variant="dropdown" 
-                  size="small"
-                  onError={(errorMsg) => error(`Language Error: ${errorMsg}`)}
-                />
+                {import.meta.env.DEV && (
+                  <LanguageSwitcher 
+                    variant="dropdown" 
+                    size="small"
+                    onError={(errorMsg) => error(`Language Error: ${errorMsg}`)}
+                  />
+                )}
                 <button 
                   className='about-button' 
                   onClick={() => setShowAbout(true)}
