@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import SearchHistory from './SearchHistory';
 import { SearchType } from '../types';
 import type { SearchFormProps } from '../types';
@@ -15,6 +16,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   onError,
   onWarning
 }) => {
+  const { t } = useTranslation(['search', 'common']);
   const [query, setQuery] = useState('');
   const [searchType, setSearchType] = useState<SearchType>(initialSearchType || SearchType.USERNAME);
   const [showHistory, setShowHistory] = useState(false);
@@ -42,9 +44,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
     e.preventDefault();
 
     if (!query.trim()) {
-      const message = searchType === SearchType.USERNAME ? '请输入用户名' : '请输入邮箱';
       if (onError) {
-        onError(message);
+        onError(t('search:validation.emptyQuery'));
       }
       return;
     }
@@ -52,7 +53,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
     // 基本长度验证
     if (searchType === SearchType.USERNAME && query.trim().length < 2) {
       if (onWarning) {
-        onWarning('用户名至少需要2个字符');
+        onWarning(t('search:validation.usernameTooShort'));
       }
       return;
     }
@@ -60,7 +61,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
     // 简单的邮箱格式检查
     if (searchType === SearchType.EMAIL && !query.includes('@')) {
       if (onError) {
-        onError('请输入有效的邮箱地址');
+        onError(t('search:validation.invalidEmail'));
       }
       return;
     }
@@ -124,10 +125,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
           value={searchType}
           onChange={(e) => handleSearchTypeChange(e.target.value as SearchType)}
           disabled={isSearching}
-          aria-label="选择搜索类型"
+          aria-label={t('search:form.searchTypeLabel')}
         >
-          <option value={SearchType.USERNAME}>👤 用户名</option>
-          <option value={SearchType.EMAIL}>📧 邮箱</option>
+          <option value={SearchType.USERNAME}>👤 {t('search:form.searchTypeUsername')}</option>
+          <option value={SearchType.EMAIL}>📧 {t('search:form.searchTypeEmail')}</option>
         </select>
 
         {/* 输入框容器 */}
@@ -139,11 +140,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
               value={query}
               onChange={handleInputChange}
               onFocus={handleInputFocus}
-              placeholder={searchType === SearchType.USERNAME ? '输入用户名... (按 / 快速聚焦)' : '输入邮箱地址... (按 / 快速聚焦)'}
+              placeholder={searchType === SearchType.USERNAME ? t('search:form.inputPlaceholder') : t('search:form.inputPlaceholder')}
               className="search-input"
               disabled={isSearching}
               autoFocus
-              aria-label={searchType === SearchType.USERNAME ? '搜索用户名' : '搜索邮箱'}
+              aria-label={searchType === SearchType.USERNAME ? t('search:form.inputLabel') : t('search:form.inputLabel')}
             />
             
             {/* 搜索历史下拉 */}
@@ -163,15 +164,15 @@ const SearchForm: React.FC<SearchFormProps> = ({
             type="submit"
             disabled={isSearching || !query.trim()}
             className={`search-button-compact ${isSearching ? 'searching' : ''}`}
-            aria-label={isSearching ? '正在搜索' : '开始搜索'}
+            aria-label={isSearching ? t('common:status.loading') : t('search:form.searchButton')}
           >
             {isSearching ? (
               <>
                 <div className="spinner" aria-hidden="true"></div>
-                搜索中
+                {t('common:status.loading')}
               </>
             ) : (
-              '搜索'
+              t('search:form.searchButton')
             )}
           </button>}
 
@@ -180,10 +181,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
               type="button"
               onClick={handleStopSearch}
               className="stop-button-compact"
-              aria-label="停止当前搜索"
+              aria-label={t('search:form.stopButton')}
             >
               <div className="stop-icon" aria-hidden="true">⏹</div>
-              停止
+              {t('search:form.stopButton')}
             </button>
           )}
         </div>

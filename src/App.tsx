@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DisclaimerModal from './components/DisclaimerModal';
 import AboutModal from './components/AboutModal';
 import SearchForm from './components/SearchForm';
 import ResultsDisplay from './components/ResultsDisplay';
 import ToastContainer from './components/ToastContainer';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { useDisclaimer } from './hooks/useDisclaimer';
 import { useSearch } from './hooks/useSearch';
 import { useToast } from './hooks/useToast';
@@ -14,6 +16,7 @@ import './App.css';
 
 const App: React.FC = () => {
   const [showAbout, setShowAbout] = useState(false);
+  const { t } = useTranslation(['common', 'search', 'toast']);
 
   const { showDisclaimer, isLoading, acceptDisclaimer, declineDisclaimer } = useDisclaimer();
   const { toasts, removeToast, success, error, info } = useToast();
@@ -28,11 +31,10 @@ const App: React.FC = () => {
         excludeNsfw: true,
         categoryFilter: undefined,
       });
-      const typeText = type === SearchType.USERNAME ? '用户名' : '邮箱';
-      info(`开始搜索${typeText}: ${searchQuery}`);
+      info(t('toast:info.searchStarting'));
     } catch (err) {
       console.error('Search failed:', err);
-      error(`搜索失败: ${err instanceof Error ? err.message : '未知错误'}`);
+      error(t('toast:error.searchFailed'));
     }
   };
 
@@ -46,17 +48,17 @@ const App: React.FC = () => {
           input.focus();
         }
       },
-      description: '聚焦到搜索框',
+      description: t('search:shortcuts.focus'),
     },
     {
       key: 'Escape',
       callback: () => {
         if (isSearching) {
           stopSearch();
-          info('搜索已停止');
+          info(t('toast:info.searchStopped'));
         }
       },
-      description: '停止搜索',
+      description: t('search:shortcuts.stop'),
     },
     {
       key: 'h',
@@ -64,7 +66,7 @@ const App: React.FC = () => {
       callback: () => {
         setShowAbout(true);
       },
-      description: '显示帮助',
+      description: t('search:shortcuts.help'),
     },
   ]);
 
@@ -72,8 +74,8 @@ const App: React.FC = () => {
     return (
       <div className='app-loading' role="status" aria-live="polite">
         <div className='loading-spinner' aria-hidden="true"></div>
-        <p className='loading-text'>正在加载应用...</p>
-        <p className='loading-subtext'>请稍候片刻</p>
+        <p className='loading-text'>{t('common:message.loading')}</p>
+        <p className='loading-subtext'>{t('common:message.pleaseWait')}</p>
       </div>
     );
   }
@@ -95,7 +97,7 @@ const App: React.FC = () => {
 
       {/* Skip to main content link for accessibility */}
       <a href="#main-content" className="skip-to-content">
-        跳转到主要内容
+        {t('common:action.continue')}
       </a>
 
       {/* 主应用内容 */}
@@ -108,13 +110,20 @@ const App: React.FC = () => {
                 <span className='icon' aria-hidden="true">🔍</span>
                 NameSeeker
               </h1>
-              <button 
-                className='about-button' 
-                onClick={() => setShowAbout(true)}
-                aria-label="显示关于信息"
-              >
-                关于
-              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <LanguageSwitcher 
+                  variant="dropdown" 
+                  size="small"
+                  onError={(errorMsg) => error(`Language Error: ${errorMsg}`)}
+                />
+                <button 
+                  className='about-button' 
+                  onClick={() => setShowAbout(true)}
+                  aria-label={t('common:label.about')}
+                >
+                  {t('common:label.about')}
+                </button>
+              </div>
             </div>
             {/* 搜索表单 */}
             <section className='search-section'>
@@ -143,7 +152,7 @@ const App: React.FC = () => {
             onExportError={error}
             onClearResults={() => {
               clearResults();
-              info('已清除搜索结果');
+              info(t('toast:success.resultsCleared'));
             }}
           />
         </div>

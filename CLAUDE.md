@@ -19,6 +19,7 @@ This project uses a **complete Rust implementation** with no Python sidecar. The
   * **Core Crates**: `reqwest` for HTTP requests, `tokio` for async runtime, `serde` for JSON serialization
   * **Data Source**: WhatsMyName project (600+ websites)
   * **Communication**: Tauri's event system with real-time updates
+  * **Internationalization**: react-i18next for multi-language support (English/Chinese)
 
 ### Project Structure
 
@@ -28,6 +29,7 @@ src/                              # React Frontend
 │   ├── AboutModal.tsx           # About application modal
 │   ├── DisclaimerModal.tsx      # First-launch disclaimer modal
 │   ├── ExportButton.tsx         # Results export functionality
+│   ├── LanguageSwitcher.tsx     # Language switching component
 │   ├── ProgressIndicator.tsx    # Search progress indicator
 │   ├── ResultItem.tsx           # Individual result display component
 │   ├── ResultsDisplay.tsx       # Results display and filtering
@@ -40,11 +42,32 @@ src/                              # React Frontend
 ├── hooks/                       # React Hooks
 │   ├── useDisclaimer.ts         # Disclaimer state management
 │   ├── useKeyboardShortcuts.ts  # Keyboard shortcuts handling
+│   ├── useLanguage.ts           # Language switching and i18n management
 │   ├── useSearch.ts             # Search state management
 │   ├── useSearchHistory.ts      # Search history persistence
 │   └── useToast.ts              # Toast notification system
 ├── services/                    # Service Layer
 │   └── tauriApi.ts              # Tauri API wrapper with singleton pattern
+├── i18n/                        # Internationalization
+│   ├── index.ts                 # i18n configuration and setup
+│   ├── types.ts                 # Language types and utilities
+│   └── locales/                 # Translation files
+│       ├── en/                  # English translations
+│       │   ├── common.json      # Common UI elements
+│       │   ├── search.json      # Search-related text
+│       │   ├── results.json     # Results display text
+│       │   ├── export.json      # Export functionality text
+│       │   ├── modals.json      # Modal dialog text
+│       │   ├── toast.json       # Toast notification text
+│       │   └── errors.json      # Error messages
+│       └── zh/                  # Chinese translations
+│           ├── common.json      # Common UI elements
+│           ├── search.json      # Search-related text
+│           ├── results.json     # Results display text
+│           ├── export.json      # Export functionality text
+│           ├── modals.json      # Modal dialog text
+│           ├── toast.json       # Toast notification text
+│           └── errors.json      # Error messages
 ├── types/                       # TypeScript Definitions
 │   └── index.ts                 # Complete type declarations
 ├── App.css                      # Application styles
@@ -98,6 +121,115 @@ All MVP features have been successfully implemented and are fully operational:
 - **Accessibility**: Full ARIA support, keyboard navigation, semantic HTML
 - **Loading States**: Loading spinner and empty state with feature highlights
 - **External Links**: Automatic opening of found profile links in default browser
+- **Internationalization**: Complete multi-language support with English and Chinese translations
+- **Language Switching**: Dynamic language switching with dropdown UI and persistent preferences
+- **Localized UI**: All user interface elements, messages, and content are fully internationalized
+
+-----
+
+## 🌍 Internationalization (i18n) Implementation
+
+The application includes comprehensive internationalization support using react-i18next, enabling seamless multi-language functionality with English and Chinese translations.
+
+### Core i18n Architecture
+
+**Configuration Setup** (`src/i18n/index.ts:1-94`):
+- **i18next Integration**: Uses react-i18next with initReactI18next plugin
+- **Resource Management**: Automatic importing and configuration of translation namespaces
+- **Language Detection**: Smart language detection with localStorage and browser preferences
+- **Event Handling**: Automatic HTML lang attribute updates and localStorage persistence
+- **Development Support**: Debug logging and development environment optimizations
+
+**Supported Languages** (`src/i18n/types.ts:25-42`):
+- **English (en)**: 🇺🇸 English - Default fallback language
+- **Chinese (zh)**: 🇨🇳 中文 - Simplified Chinese support
+
+### Language Management System
+
+**Language Detection & Persistence** (`src/i18n/types.ts:57-114`):
+- **Browser Detection**: Automatic detection from `navigator.language`
+- **Language Normalization**: Converts `zh-CN`, `zh-TW`, `en-US`, `en-GB` to standard codes
+- **LocalStorage Integration**: Persistent language preference storage
+- **Fallback Logic**: Smart fallback chain: localStorage → browser → default English
+
+**Language Switching Hook** (`src/hooks/useLanguage.ts:1-77`):
+- **State Management**: React state integration with i18n events
+- **Error Handling**: Comprehensive error catching and reporting
+- **Loading States**: Loading indicators during language transitions
+- **Performance**: Memoized language configuration for optimal rendering
+
+### UI Components
+
+**LanguageSwitcher Component** (`src/components/LanguageSwitcher.tsx:1-133`):
+- **Multiple Variants**: Dropdown and button-based switching interfaces
+- **Accessibility**: Full ARIA support with proper labels and keyboard navigation
+- **Visual Design**: Flag emojis, native language names, and English alternatives
+- **Responsive Layout**: Multiple size options (small, medium, large)
+- **Error Propagation**: Optional error handling callbacks for parent components
+
+### Translation Structure
+
+**Namespace Organization**:
+- **`common`**: Universal UI elements (buttons, labels, status messages)
+- **`search`**: Search functionality, forms, validation, progress indicators
+- **`results`**: Results display, filtering, categorization, status messages
+- **`export`**: Export functionality, format selection, file operations
+- **`modals`**: Dialog windows, disclaimers, about information
+- **`toast`**: Toast notifications, success/error/info/warning messages
+- **`errors`**: Error messages, validation failures, system errors
+
+**Translation Features**:
+- **Interpolation**: Dynamic variable insertion (e.g., `{{site}}`, `{{count}}`)
+- **Pluralization**: Context-aware plural forms (not yet implemented but available)
+- **Nested Keys**: Hierarchical organization for maintainable translations
+- **Type Safety**: Full TypeScript integration with strict typing
+
+### Integration Examples
+
+**Component Usage**:
+```tsx
+// Multiple namespace usage
+const { t } = useTranslation(['search', 'common']);
+
+// Single namespace usage
+const { t } = useTranslation('common');
+
+// Translation keys with interpolation
+t('search:progress.currentSite', { site: 'GitHub' })
+t('search:progress.checked', { count: 45, total: 600 })
+```
+
+**Language Switching**:
+```tsx
+const { currentLanguage, setLanguage, availableLanguages } = useLanguage();
+
+// Change language with loading state
+await setLanguage('zh');
+
+// Access language configuration
+const config = availableLanguages.find(lang => lang.code === currentLanguage);
+```
+
+### Development Guidelines
+
+**Adding New Translations**:
+1. Add translation keys to both `en/` and `zh/` JSON files
+2. Use consistent key naming (e.g., `section.subsection.item`)
+3. Include interpolation variables where needed
+4. Update TypeScript types if adding new namespaces
+
+**Best Practices**:
+- Use semantic key names that describe content, not location
+- Group related translations in appropriate namespaces
+- Include context-specific translations for better user experience
+- Test language switching functionality after adding new translations
+- Use interpolation for dynamic content instead of string concatenation
+
+**Performance Considerations**:
+- Translation resources are loaded asynchronously
+- Language switching is optimized with memoization
+- HTML lang attribute updates for SEO and accessibility
+- LocalStorage persistence prevents unnecessary re-detection
 
 -----
 
@@ -291,13 +423,21 @@ npm run tauri build
 - `src/components/SearchForm.tsx` - Search input with type selection and history dropdown
 - `src/components/ResultsDisplay.tsx` - Results rendering, filtering, and export controls
 - `src/components/ExportButton.tsx` - Multi-format export with dropdown menu
+- `src/components/LanguageSwitcher.tsx` - Language switching component with dropdown/button variants
 - `src/components/DisclaimerModal.tsx` - First-launch legal disclaimer modal
 - `src/components/ToastContainer.tsx` - Toast notification management
 - `src/components/SearchHistory.tsx` - Search history dropdown with CRUD operations
 - `src/hooks/useSearch.ts` - Comprehensive search state management and event handling
 - `src/hooks/useSearchHistory.ts` - LocalStorage-based search history management
 - `src/hooks/useToast.ts` - Toast notification system with auto-dismiss
+- `src/hooks/useLanguage.ts` - Language switching and i18n management with persistence
 - `src/services/tauriApi.ts` - Singleton-based Tauri API wrapper with error handling
+
+### Internationalization Files
+- `src/i18n/index.ts` - i18next configuration with resource management and language detection
+- `src/i18n/types.ts` - Language types, utilities, and detection/persistence functions
+- `src/i18n/locales/en/` - English translation files organized by namespace
+- `src/i18n/locales/zh/` - Chinese translation files organized by namespace
 
 ### Configuration Files
 - `src-tauri/tauri.conf.json` - Tauri application configuration

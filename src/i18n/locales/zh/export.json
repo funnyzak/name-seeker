@@ -1,0 +1,69 @@
+{
+  "title": "导出结果",
+  "formats": {
+    "csv": "CSV",
+    "json": "JSON",
+    "txt": "文本",
+    "pdf": "PDF"
+  },
+  "options": {
+    "title": "导出选项",
+    "includeAll": "包含所有结果",
+    "includeFound": "仅包含已找到",
+    "includeNotFound": "包含未找到",
+    "includeErrors": "包含错误",
+    "includeMetadata": "包含元数据",
+    "includeTimestamp": "包含时间戳",
+    "includeSearchQuery": "包含搜索查询",
+    "includeProgress": "包含进度信息"
+  },
+  "actions": {
+    "export": "导出",
+    "exporting": "导出中...",
+    "copyToClipboard": "复制到剪贴板",
+    "exportAsPDF": "导出为 PDF",
+    "exportAsCSV": "导出为 CSV",
+    "exportAsJSON": "导出为 JSON",
+    "exportAsTXT": "导出为 TXT",
+    "download": "下载",
+    "openFolder": "打开文件夹",
+    "preview": "预览"
+  },
+  "messages": {
+    "exporting": "正在导出",
+    "exportingResults": "正在导出结果...",
+    "exported": "结果导出成功",
+    "exportSuccess": "成功导出为 {{format}} 到 {{path}}",
+    "exportFailed": "导出失败",
+    "copied": "已复制 {{count}} 个结果到剪贴板",
+    "copyFailed": "复制失败: {{error}}",
+    "openDirectoryFailed": "打开目录失败: {{error}}",
+    "downloading": "正在下载文件...",
+    "downloadComplete": "下载完成",
+    "downloadFailed": "下载失败",
+    "noResults": "没有可导出的结果",
+    "selectFormat": "请选择导出格式",
+    "selectResults": "请选择要导出的结果",
+    "exportResults": "导出搜索结果",
+    "unknownError": "未知错误",
+    "resultHeader": "搜索结果 - {{username}}\n生成时间: {{time}}\n找到 {{count}} 个结果\n\n"
+  },
+  "preview": {
+    "title": "导出预览",
+    "filename": "文件名：{{name}}",
+    "size": "大小：{{size}}",
+    "format": "格式：{{format}}",
+    "results": "结果：{{count}}",
+    "close": "关闭预览"
+  },
+  "settings": {
+    "title": "导出设置",
+    "defaultFormat": "默认格式",
+    "defaultFilename": "默认文件名",
+    "includeHeaders": "包含标题",
+    "separator": "分隔符",
+    "encoding": "编码",
+    "dateFormat": "日期格式",
+    "timeFormat": "时间格式"
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import ResultItem from './ResultItem';
 import ProgressIndicator from './ProgressIndicator';
 import ExportButton from './ExportButton';
@@ -21,6 +22,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   onExportError,
   onClearResults
 }) => {
+  const { t } = useTranslation(['results', 'common']);
   const [collapsed, setCollapsed] = useState<CollapsedSections>({
     found: false,
     notFound: true,  // 默认折叠 Not Found
@@ -59,30 +61,30 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
   if (!hasResults) {
     return (
-      <div className="empty-state" role="status" aria-label="暂无搜索结果">
+      <div className="empty-state" role="status" aria-label={t('results:empty.ariaLabel')}>
         <div className="empty-icon" aria-hidden="true">🔍</div>
-        <h3>开始你的搜索</h3>
-        <p className="empty-description">输入用户名或邮箱，将帮您在数百个网站上查找相关信息</p>
+        <h3>{t('results:empty.title')}</h3>
+        <p className="empty-description">{t('results:empty.description')}</p>
         <div className="empty-features">
           <div className="feature-item">
             <span className="feature-icon" aria-hidden="true">⚡</span>
-            <span>快速搜索</span>
+            <span>{t('results:empty.features.fastSearch')}</span>
           </div>
           <div className="feature-item">
             <span className="feature-icon" aria-hidden="true">🌐</span>
-            <span>多网站覆盖</span>
+            <span>{t('results:empty.features.multiSite')}</span>
           </div>
           <div className="feature-item">
             <span className="feature-icon" aria-hidden="true">📊</span>
-            <span>结果导出</span>
+            <span>{t('results:empty.features.export')}</span>
           </div>
         </div>
         <div className="empty-shortcuts">
-          <p className="shortcuts-title">快捷键提示：</p>
+          <p className="shortcuts-title">{t('results:empty.shortcuts.title')}</p>
           <ul className="shortcuts-list">
-            <li><kbd>/</kbd> 聚焦搜索框</li>
-            <li><kbd>Esc</kbd> 停止搜索</li>
-            <li><kbd>Ctrl+H</kbd> 显示帮助</li>
+            <li><kbd>/</kbd> {t('results:empty.shortcuts.focus')}</li>
+            <li><kbd>Esc</kbd> {t('results:empty.shortcuts.stop')}</li>
+            <li><kbd>Ctrl+H</kbd> {t('results:empty.shortcuts.help')}</li>
           </ul>
         </div>
       </div>
@@ -90,12 +92,12 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   }
 
   return (
-    <div className="results-container" role="region" aria-label="搜索结果">
+    <div className="results-container" role="region" aria-label={t('results:empty.resultsAriaLabel')}>
       {/* 结果头部：标题和导出按钮 */}
       {results.length > 0 && (
         <div className="results-header">
           <h3 className="results-title" id="results-heading">
-            搜索结果 <span className="results-count" aria-label={`显示 ${filteredResults.length} 个，共 ${results.length} 个结果`}>({filteredResults.length}/{results.length})</span>
+            {t('results:title')} <span className="results-count" aria-label={t('results:actions.resultsCount', { filtered: filteredResults.length, total: results.length })}>({filteredResults.length}/{results.length})</span>
           </h3>
           <div className="results-actions">
             <ResultsFilter 
@@ -115,11 +117,11 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                   <button
                     className="btn btn-clear"
                     onClick={onClearResults}
-                    aria-label="清除搜索结果"
-                    title="清除所有搜索结果"
+                    aria-label={t('results:actions.clearAriaLabel')}
+                    title={t('results:actions.clearTitle')}
                   >
                     <span className="btn-icon" aria-hidden="true">🗑️</span>
-                    <span className="btn-text">清除结果</span>
+                    <span className="btn-text">{t('results:actions.clear')}</span>
                   </button>
                 )}
               </>
@@ -149,7 +151,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                 }
               }}
             >
-              <span>✓ 找到的用户 ({foundResults.length})</span>
+              <span>✓ {t('results:categories.foundUsers')} ({foundResults.length})</span>
               <span className={`collapse-icon ${collapsed.found ? 'collapsed' : ''}`} aria-hidden="true">
                 ▼
               </span>
@@ -158,7 +160,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               id="found-results-list"
               className={`results-list ${collapsed.found ? 'collapsed' : ''}`}
               role="list"
-              aria-label="找到的用户列表"
+              aria-label={t('results:categories.foundUsers')}
             >
               {foundResults.reverse().map((result, index) => (
                 <ResultItem key={`found-${result.site}-${index}`} result={result} />
@@ -173,7 +175,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               className="section-header pending-header"
               onClick={() => toggleSection('pending')}
             >
-              <span>⏳ 正在检查 ({pendingResults.length})</span>
+              <span>⏳ {t('results:categories.checking')} ({pendingResults.length})</span>
               <span className={`collapse-icon ${collapsed.pending ? 'collapsed' : ''}`}>
                 ▼
               </span>
@@ -192,7 +194,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               className="section-header error-header"
               onClick={() => toggleSection('error')}
             >
-              <span>⚠ 错误 ({errorResults.length})</span>
+              <span>⚠ {t('results:categories.error')} ({errorResults.length})</span>
               <span className={`collapse-icon ${collapsed.error ? 'collapsed' : ''}`}>
                 ▼
               </span>
@@ -211,7 +213,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               className="section-header not-found-header"
               onClick={() => toggleSection('notFound')}
             >
-              <span>✗ 未找到 ({notFoundResults.length})</span>
+              <span>✗ {t('results:categories.notFound')} ({notFoundResults.length})</span>
               <span className={`collapse-icon ${collapsed.notFound ? 'collapsed' : ''}`}>
                 ▼
               </span>
@@ -235,16 +237,16 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           )} */}
           <div className="summary-stats">
             <span className="summary-stat found">
-              找到: {foundResults.length}
+              {t('results:summary.found')}: {foundResults.length}
             </span>
             <span className="summary-stat not-found">
-              未找到: {notFoundResults.length}
+              {t('results:categories.notFound')}: {notFoundResults.length}
             </span>
             <span className="summary-stat error">
-              错误: {errorResults.length}
+              {t('results:summary.error')}: {errorResults.length}
             </span>
             <span className="summary-stat total">
-              总计: {results.length}
+              {t('results:summary.total')}: {results.length}
             </span>
           </div>
         </div>

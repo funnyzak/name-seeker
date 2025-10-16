@@ -1,8 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { tauriApi } from '../services/tauriApi';
 import type { ResultItemProps } from '../types';
 
 const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
+  const { t } = useTranslation('results');
   const [isOpening, setIsOpening] = React.useState(false);
 
   const handleUrlClick = async () => {
@@ -58,7 +60,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
 
   return (
     <div className={`result-item ${getStatusClass()}`} role="listitem">
-      <div className="result-status" aria-label={`状态: ${result.status}`}>
+      <div className="result-status" aria-label={t('item.statusAriaLabel', { status: result.status })}>
         <span className="status-icon" aria-hidden="true">{getStatusIcon()}</span>
       </div>
 
@@ -76,32 +78,32 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
               className={`result-link ${isOpening ? 'opening' : ''}`}
               onClick={handleUrlClick}
               onKeyDown={handleKeyDown}
-              title="点击访问个人资料页面"
+              title={t('item.clickToVisit')}
               disabled={isOpening}
               type="button"
             >
-              {isOpening ? '正在打开...' : '查看资料'}
+              {isOpening ? t('item.opening') : t('item.viewProfile')}
             </button>
           )}
 
           {result.status === 'NotFound' && (
-            <span className="result-message">未找到相关用户</span>
+            <span className="result-message">{t('item.userNotFound')}</span>
           )}
 
           {result.status === 'Error' && (
             <span className="result-message error-text">
-              {result.error === '搜索被用户停止' ? '⏸️ 搜索已停止' : (result.error || '检查时发生错误')}
+              {result.error === '搜索被用户停止' ? '⏸️ ' + t('item.searchStopped') : (result.error || t('item.checking'))}
             </span>
           )}
 
           {result.status === 'Pending' && (
-            <span className="result-message">正在检查...</span>
+            <span className="result-message">{t('item.checking')}</span>
           )}
         </div>
 
         {result.metadata && result.metadata.length > 0 && (
           <div className="result-metadata">
-            <div className="metadata-title">详细信息:</div>
+            <div className="metadata-title">{t('item.detailsTitle')}</div>
             {result.metadata.map((item, index) => (
               <div key={index} className="metadata-item">
                 <span className="metadata-name">{item.name}:</span>

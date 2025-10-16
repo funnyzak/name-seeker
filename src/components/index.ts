@@ -1,5 +1,6 @@
 // Components
 export { default as DisclaimerModal } from './DisclaimerModal';
+export { default as LanguageSwitcher } from './LanguageSwitcher';
 export { default as SearchForm } from './SearchForm';
 export { default as SearchHistory } from './SearchHistory';
 export { default as ResultsDisplay } from './ResultsDisplay';

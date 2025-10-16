@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExportButtonProps, ExportFormat, SearchResultStatus } from '../types';
 import { tauriApi } from '../services/tauriApi';
 
@@ -9,6 +10,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   onExportSuccess,
   onExportError 
 }) => {
+  const { t, i18n } = useTranslation(['export', 'common']);
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,17 +50,17 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         timestamp
       });
       const formatName = format.toUpperCase();
-      onExportSuccess?.(`成功导出为 ${formatName} 到 ${filePath}`);
+      onExportSuccess?.(t('export:messages.exportSuccess', { format: formatName, path: filePath }));
       
       try {
         await tauriApi.openDirectory(filePath);
       } catch (error) {
-        console.error('打开目录失败:', error);
-        const errorMessage = error instanceof Error ? error.message : '未知错误';
-        onExportError?.(`打开目录失败: ${errorMessage}`);
+        console.error('Failed to open directory:', error);
+        const errorMessage = error instanceof Error ? error.message : t('export:messages.unknownError');
+        onExportError?.(t('export:messages.openDirectoryFailed', { error: errorMessage }));
       }
     } catch (error) {
-      console.error('导出失败:', error);
+      console.error('Export failed:', error);
     } finally {
       setIsExporting(false);
     }
@@ -74,15 +76,16 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         .map(r => `${r.site}: ${r.url || 'N/A'}`)
         .join('\n');
       
-      const header = `搜索结果 - ${username}\n生成时间: ${new Date().toLocaleString('zh-CN')}\n找到 ${foundResults.length} 个结果\n\n`;
+      const time = new Date().toLocaleString(i18n.language);
+      const header = t('export:messages.resultHeader', { username, time, count: foundResults.length });
       const fullText = header + resultText;
 
       await tauriApi.copyToClipboard(fullText);
-      onExportSuccess?.(`已复制 ${foundResults.length} 个结果到剪贴板`);
+      onExportSuccess?.(t('export:messages.copied', { count: foundResults.length }));
     } catch (error) {
-      console.error('复制到剪贴板失败:', error);
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
-      onExportError?.(`复制失败: ${errorMessage}`);
+      console.error('Failed to copy to clipboard:', error);
+      const errorMessage = error instanceof Error ? error.message : t('export:messages.unknownError');
+      onExportError?.(t('export:messages.copyFailed', { error: errorMessage }));
     } finally {
       setIsExporting(false);
     }
@@ -99,10 +102,10 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         disabled={isDisabled}
         aria-label={
           isExporting 
-            ? '正在导出' 
+            ? t('export:messages.exporting')
             : !hasResults 
-            ? '没有可导出的结果' 
-            : '导出搜索结果'
+            ? t('export:messages.noResults')
+            : t('export:messages.exportResults')
         }
         aria-expanded={isOpen}
         aria-haspopup="menu"
@@ -110,7 +113,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         <span className="export-icon" aria-hidden="true">
           {isExporting ? '⏳' : '📥'}
         </span>
-        <span>{isExporting ? '导出中...' : '导出'}</span>
+        <span>{isExporting ? t('export:actions.exporting') : t('export:actions.export')}</span>
         <span className="dropdown-arrow" aria-hidden="true">▼</span>
       </button>
 
@@ -121,49 +124,50 @@ const ExportButton: React.FC<ExportButtonProps> = ({
             onClick={handleCopyToClipboard}
             disabled={isExporting}
             role="menuitem"
-            aria-label="复制到剪贴板"
+            aria-label={t('export:actions.copyToClipboard')}
           >
             <span className="icon" aria-hidden="true">📋</span>
-            <span>复制到剪贴板</span>
+            <span>{t('export:actions.copyToClipboard')}</span>
           </button>
           <button
             className="export-menu-item"
             onClick={() => handleExport(ExportFormat.PDF)}
             disabled={isExporting}
             role="menuitem"
+            aria-label={t('export:actions.exportAsPDF')}
           >
             <span className="icon" aria-hidden="true">📄</span>
-            <span>导出为 PDF</span>
+            <span>{t('export:actions.exportAsPDF')}</span>
           </button>
           <button
             className="export-menu-item"
             onClick={() => handleExport(ExportFormat.CSV)}
             disabled={isExporting}
             role="menuitem"
-            aria-label="导出为CSV格式"
+            aria-label={t('export:actions.exportAsCSV')}
           >
             <span className="icon" aria-hidden="true">📊</span>
-            <span>导出为 CSV</span>
+            <span>{t('export:actions.exportAsCSV')}</span>
           </button>
           <button
             className="export-menu-item"
             onClick={() => handleExport(ExportFormat.JSON)}
             disabled={isExporting}
             role="menuitem"
-            aria-label="导出为JSON格式"
+            aria-label={t('export:actions.exportAsJSON')}
           >
             <span className="icon" aria-hidden="true">📝</span>
-            <span>导出为 JSON</span>
+            <span>{t('export:actions.exportAsJSON')}</span>
           </button>
           <button
             className="export-menu-item"
             onClick={() => handleExport(ExportFormat.TXT)}
             disabled={isExporting}
             role="menuitem"
-            aria-label="导出为TXT格式"
+            aria-label={t('export:actions.exportAsTXT')}
           >
             <span className="icon" aria-hidden="true">📝</span>
-            <span>导出为 TXT</span>
+            <span>{t('export:actions.exportAsTXT')}</span>
           </button>
         </div>
       )}

@@ -1,0 +1,76 @@
+{
+  "title": "搜索",
+  "form": {
+    "title": "搜索个人资料",
+    "subtitle": "输入用户名或邮箱在多个平台上搜索",
+    "inputLabel": "搜索查询",
+    "inputPlaceholder": "输入用户名或邮箱...",
+    "searchTypeLabel": "搜索类型",
+    "searchTypeUsername": "用户名",
+    "searchTypeEmail": "邮箱",
+    "searchButton": "开始搜索",
+    "stopButton": "停止搜索",
+    "clearButton": "清除",
+    "historyButton": "搜索历史"
+  },
+  "validation": {
+    "required": "此字段为必填项",
+    "invalidUsername": "用户名格式无效",
+    "invalidEmail": "邮箱格式无效",
+    "usernameTooShort": "用户名至少需要2个字符",
+    "usernameTooLong": "用户名不能超过50个字符",
+    "emailTooLong": "邮箱不能超过100个字符",
+    "specialCharacters": "用户名包含无效字符",
+    "emptyQuery": "请输入搜索查询"
+  },
+  "progress": {
+    "title": "搜索进度",
+    "currentSite": "正在检查 {{site}}...",
+    "checked": "已检查 {{count}}/{{total}} 个网站",
+    "found": "找到 {{count}} 个个人资料",
+    "errors": "{{count}} 个错误",
+    "percentage": "完成 {{percentage}}%",
+    "estimatedTime": "预计剩余时间：{{time}}",
+    "elapsedTime": "已用时间：{{time}}",
+    "progressLabel": "进度: {{checked}} / {{total}}",
+    "foundLabel": "找到: {{count}}",
+    "errorLabel": "错误: {{count}}",
+    "searchingStatus": "正在搜索 {{currentSite}}..."
+  },
+  "settings": {
+    "title": "搜索设置",
+    "concurrency": "并发请求数",
+    "concurrencyDescription": "同时进行的请求数量 (1-50)",
+    "timeout": "请求超时",
+    "timeoutDescription": "超时时间（秒）(5-60)",
+    "excludeNsfw": "排除成人内容",
+    "excludeNsfwDescription": "跳过包含成人内容的网站",
+    "categoryFilter": "分类筛选",
+    "categoryFilterDescription": "仅搜索特定分类"
+  },
+  "history": {
+    "title": "搜索历史",
+    "empty": "无搜索历史",
+    "clear": "清除历史",
+    "recent": "最近搜索",
+    "frequent": "常用搜索",
+    "delete": "删除",
+    "deleteConfirm": "从历史记录中删除此搜索？",
+    "maxItems": "最多10个项目",
+    "recentSearches": "最近搜索",
+    "clearHistory": "清除",
+    "clearHistoryAriaLabel": "清除搜索历史",
+    "deleteRecord": "删除 {{item}}",
+    "deleteRecordTitle": "删除此记录",
+    "searchPrefix": "搜索: {{item}}"
+  },
+  "shortcuts": {
+    "title": "键盘快捷键",
+    "focus": "聚焦搜索 (/)",
+    "stop": "停止搜索 (Esc)",
+    "clear": "清除结果 (Ctrl+L)",
+    "export": "导出结果 (Ctrl+E)",
+    "help": "显示帮助 (Ctrl+H)",
+    "settings": "打开设置 (Ctrl+,)"
+  }
+}

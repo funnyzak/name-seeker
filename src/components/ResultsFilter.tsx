@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ResultsFilterProps {
   onFilterChange: (filter: string) => void;
@@ -6,6 +7,7 @@ interface ResultsFilterProps {
 }
 
 const ResultsFilter: React.FC<ResultsFilterProps> = ({ onFilterChange, resultsCount }) => {
+  const { t } = useTranslation('results');
   const [filter, setFilter] = useState('');
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,18 +28,18 @@ const ResultsFilter: React.FC<ResultsFilterProps> = ({ onFilterChange, resultsCo
         <input
           type="text"
           className="filter-input"
-          placeholder="筛选结果..."
+          placeholder={t('filter.filterPlaceholder')}
           value={filter}
           onChange={handleFilterChange}
-          aria-label="筛选搜索结果"
+          aria-label={t('filter.filterAriaLabel')}
         />
         {filter && (
           <button
             type="button"
             className="filter-clear-button"
             onClick={handleClear}
-            aria-label="清除筛选"
-            title="清除筛选"
+            aria-label={t('filter.clearFilter')}
+            title={t('filter.clearFilterTitle')}
           >
             ×
           </button>
@@ -45,7 +47,7 @@ const ResultsFilter: React.FC<ResultsFilterProps> = ({ onFilterChange, resultsCo
       </div>
       {filter && (
         <span className="filter-count">
-          显示 {resultsCount} 个结果
+          {t('filter.showingResults', { count: resultsCount })}
         </span>
       )}
     </div>

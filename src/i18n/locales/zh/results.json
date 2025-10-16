@@ -1,0 +1,106 @@
+{
+  "title": "搜索结果",
+  "summary": {
+    "title": "搜索摘要",
+    "totalSites": "总网站数：{{count}}",
+    "foundProfiles": "找到个人资料：{{count}}",
+    "notFound": "未找到：{{count}}",
+    "errors": "错误：{{count}}",
+    "pending": "等待中：{{count}}",
+    "duration": "搜索耗时：{{duration}}",
+    "averageTime": "平均每个网站：{{time}}",
+    "found": "找到",
+    "error": "错误",
+    "total": "总计"
+  },
+  "categories": {
+    "found": "找到的个人资料",
+    "foundUsers": "找到的用户",
+    "notFound": "未找到",
+    "error": "错误",
+    "pending": "等待中",
+    "checking": "正在检查"
+  },
+  "item": {
+    "site": "网站",
+    "url": "链接",
+    "status": "状态",
+    "responseTime": "响应时间",
+    "lastChecked": "最后检查",
+    "openProfile": "打开个人资料",
+    "copyUrl": "复制链接",
+    "visitSite": "访问网站",
+    "checkAgain": "重新检查",
+    "clickToVisit": "点击访问个人资料页面",
+    "opening": "正在打开...",
+    "viewProfile": "查看资料",
+    "userNotFound": "未找到相关用户",
+    "searchStopped": "搜索已停止",
+    "checking": "正在检查...",
+    "detailsTitle": "详细信息:",
+    "statusAriaLabel": "状态: {{status}}"
+  },
+  "filter": {
+    "title": "筛选结果",
+    "all": "全部",
+    "found": "仅已找到",
+    "notFound": "仅未找到",
+    "error": "仅错误",
+    "pending": "仅等待中",
+    "bySite": "按网站筛选",
+    "byCategory": "按分类筛选",
+    "byStatus": "按状态筛选",
+    "clear": "清除筛选",
+    "placeholder": "搜索结果...",
+    "filterPlaceholder": "筛选结果...",
+    "filterAriaLabel": "筛选搜索结果",
+    "clearFilter": "清除筛选",
+    "clearFilterTitle": "清除筛选",
+    "showingResults": "显示 {{count}} 个结果"
+  },
+  "sort": {
+    "title": "排序结果",
+    "bySite": "按网站排序",
+    "byStatus": "按状态排序",
+    "byTime": "按时间排序",
+    "ascending": "升序",
+    "descending": "降序",
+    "default": "默认顺序"
+  },
+  "actions": {
+    "expandAll": "展开全部",
+    "collapseAll": "收起全部",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "refresh": "刷新结果",
+    "clear": "清除结果",
+    "clearAriaLabel": "清除搜索结果",
+    "clearTitle": "清除所有搜索结果",
+    "resultsCount": "显示 {{filtered}} 个，共 {{total}} 个结果"
+  },
+  "empty": {
+    "title": "开始你的搜索",
+    "description": "输入用户名或邮箱，将帮您在数百个网站上查找相关信息",
+    "startSearch": "开始搜索",
+    "checkSettings": "检查设置",
+    "ariaLabel": "暂无搜索结果",
+    "resultsAriaLabel": "搜索结果",
+    "features": {
+      "fastSearch": "快速搜索",
+      "multiSite": "多网站覆盖",
+      "export": "结果导出"
+    },
+    "shortcuts": {
+      "title": "快捷键提示：",
+      "focus": "聚焦搜索框",
+      "stop": "停止搜索",
+      "help": "显示帮助"
+    }
+  },
+  "loading": {
+    "title": "搜索中...",
+    "description": "正在检查网站中的个人资料",
+    "currentSite": "当前检查：{{site}}",
+    "progress": "进度：{{current}}/{{total}}"
+  }
+}

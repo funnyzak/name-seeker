@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SearchHistoryProps {
   history: string[];
@@ -15,6 +16,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
   onClear,
   show
 }) => {
+  const { t } = useTranslation('search');
   if (!show || history.length === 0) {
     return null;
   }
@@ -22,7 +24,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
   return (
     <div className="search-history-dropdown" role="listbox">
       <div className="search-history-header">
-        <span className="history-title">最近搜索</span>
+        <span className="history-title">{t('history.recentSearches')}</span>
         <button
           type="button"
           className="history-clear-button"
@@ -30,15 +32,15 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
             e.stopPropagation();
             onClear();
           }}
-          aria-label="清除搜索历史"
+          aria-label={t('history.clearHistoryAriaLabel')}
         >
-          清除
+          {t('history.clearHistory')}
         </button>
       </div>
       <ul className="search-history-list">
         {history.map((item, index) => (
-          <li 
-            key={`${item}-${index}`} 
+          <li
+            key={`${item}-${index}`}
             className="search-history-item"
             role="option"
           >
@@ -46,7 +48,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
               type="button"
               className="history-item-button"
               onClick={() => onSelect(item)}
-              title={`搜索: ${item}`}
+              title={t('history.searchPrefix', { item })}
             >
               <span className="history-icon">🔍</span>
               <span className="history-text">{item}</span>
@@ -58,8 +60,8 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
                 e.stopPropagation();
                 onRemove(item);
               }}
-              aria-label={`删除 ${item}`}
-              title="删除此记录"
+              aria-label={t('history.deleteRecord', { item })}
+              title={t('history.deleteRecordTitle')}
             >
               ×
             </button>
