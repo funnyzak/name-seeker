@@ -220,17 +220,17 @@ jobs:
       - name: 📦 Install frontend dependencies
         run: npm ci
 
-      - name: 🔨 Build Tauri application (Universal Binary)
-        run: |
-          # 构建 Universal Binary（同时支持 Intel 和 Apple Silicon）
-          npm run tauri build -- --target universal-apple-darwin
-        env:
-          # 如果需要代码签名，在这里添加证书配置
-          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          # APPLE_ID: ${{ secrets.APPLE_ID }}
-          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      # - name: 🔨 Build Tauri application (Universal Binary)
+      #   run: |
+      #     # 构建 Universal Binary（同时支持 Intel 和 Apple Silicon）
+      #     npm run tauri build -- --target universal-apple-darwin
+      #   env:
+      #     # 如果需要代码签名，在这里添加证书配置
+      #     APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      #     APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      #     APPLE_ID: ${{ secrets.APPLE_ID }}
+      #     APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      #     APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: 📦 Prepare artifacts
         run: |
