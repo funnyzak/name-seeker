@@ -128,7 +128,11 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
             <div className="about-section">
               <h3>{t('about.dataSource.title')}</h3>
-              <p dangerouslySetInnerHTML={{ __html: t('about.dataSource.description') }}></p>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: t('about.dataSource.description'),
+                }}
+              ></p>
               <button
                 className="btn btn-link"
                 onClick={() =>
@@ -141,7 +145,11 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
             <div className="about-section">
               <h3>{t('about.acknowledgments.title')}</h3>
-              <p dangerouslySetInnerHTML={{ __html: t('about.acknowledgments.description') }}></p>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: t('about.acknowledgments.description'),
+                }}
+              ></p>
               <button
                 className="btn btn-link"
                 onClick={() =>

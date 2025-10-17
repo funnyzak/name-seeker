@@ -46,9 +46,7 @@
     "shortDescription": "Multi-platform search tool for usernames and emails",
     "longDescription": "NameSeeker is a powerful cross-platform desktop application that searches for usernames and email addresses across hundreds of websites to help you quickly discover your digital footprint. Based on WhatsMyName project data, it supports exporting search results to PDF, CSV, JSON and other formats.",
     "copyright": "Copyright © 2025 Funnyzak",
-    "resources": [
-      "data/*"
-    ],
+    "resources": ["data/*"],
     "externalBin": [],
     "macOS": {
       "frameworks": [],

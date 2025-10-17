@@ -47,7 +47,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
             <button
               type="button"
               className="history-item-button"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onSelect(item);
               }}
