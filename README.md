@@ -2,19 +2,7 @@
 
 NameSeeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.
 
-Built with the Tauri (Rust + React) framework, it delivers a fast, secure, and localized search experience.
-
 ## Development
-
-### Tech Stack
-
-- **Frontend**: React 19 + TypeScript + Vite
-- **Backend**: Rust + Tauri 2.x
-- **HTTP Client**: reqwest
-- **Async Runtime**: tokio
-- **Data Source**: WhatsMyName project
-
-### Development Workflow
 
 ```bash
 # Frontend-only development (Vite dev server on port 1420)
