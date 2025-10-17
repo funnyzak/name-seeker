@@ -31,8 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '23'
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -56,7 +55,9 @@ jobs:
             patchelf
 
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm cache clean --force
+          npm ci --include=optional
 
       - name: Build Frontend
         run: npm run build
