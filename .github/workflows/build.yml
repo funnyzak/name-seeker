@@ -63,7 +63,7 @@ jobs:
       - name: Install Rollup for Ubuntu
         if: matrix.platform.os == 'ubuntu-latest'
         run: |
-          npm install --save-dev @rollup/rollup-linux-x64-gnu @tauri-apps/cli-linux-x64-gnu
+          npm install --save-dev @rollup/rollup-linux-x64-gnu @tauri-apps/cli-linux-x64-gnu 
 
       # - name: Install Rollup for Windows
       #   if: matrix.platform.os == 'windows-latest'
