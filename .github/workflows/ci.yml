@@ -98,7 +98,7 @@ jobs:
         if: needs.lint-and-format.result == 'failure' || needs.build.result == 'failure'
         run: |
           curl -X POST \
-          -F "tag=ci" \
+          -F "tag=devops" \
           -F "body=❌ NameSeeker CI Pipeline Failed
 
           📦 Application Information
