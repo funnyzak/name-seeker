@@ -60,6 +60,16 @@ jobs:
           npm cache clean --force
           npm install --include=optional
 
+      - name: Install Rollup for Ubuntu
+        if: matrix.platform.os == 'ubuntu-latest'
+        run: |
+          npm install --save-dev @rollup/rollup-linux-x64-gnu
+
+      - name: Install Rollup for Windows
+        if: matrix.platform.os == 'windows-latest'
+        run: |
+          npm install --save-dev @rollup/rollup-windows-x64-msvc
+
       - name: Build Frontend
         run: npm run build
 
