@@ -85,3 +85,54 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: --target ${{ matrix.platform.rust_target }}
+
+      - name: Send Success Notification
+        if: success()
+        run: |
+          curl -X POST \
+          -F "tag=ycgo" \
+          -F "body=🚀 NameSeeker Release Build Success
+      
+          📦 Application Information
+          • Name: [NameSeeker](https://github.com/${{ github.repository }})
+          • Version: ${{ github.ref_name }}
+          • Platform: ${{ matrix.platform.rust_target }}
+
+          💻 Build Details
+          • OS: ${{ matrix.platform.os }}
+          • Target: ${{ matrix.platform.rust_target }}
+          • Status: ✅ Success
+
+          ⏰ Build Time
+          • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
+          
+          📎 Related Links
+          • [Release Page](https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }})
+          • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          • [Repository](https://github.com/${{ github.repository }})" \
+          "${{ secrets.APPRISE_HTTP_URL }}"
+
+      - name: Send Failure Notification
+        if: failure()
+        run: |
+          curl -X POST \
+          -F "tag=ycgo" \
+          -F "body=❌ NameSeeker Release Build Failed
+      
+          📦 Application Information
+          • Name: [NameSeeker](https://github.com/${{ github.repository }})
+          • Version: ${{ github.ref_name }}
+          • Platform: ${{ matrix.platform.rust_target }}
+
+          💻 Build Details
+          • OS: ${{ matrix.platform.os }}
+          • Target: ${{ matrix.platform.rust_target }}
+          • Status: ❌ Failed
+
+          ⏰ Build Time
+          • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
+          
+          📎 Related Links
+          • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          • [Repository](https://github.com/${{ github.repository }})" \
+          "${{ secrets.APPRISE_HTTP_URL }}"
