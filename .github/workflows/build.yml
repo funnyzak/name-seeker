@@ -1,4 +1,4 @@
-name: Build
+name: Release Tauri App
 on:
   push:
     tags:
@@ -56,7 +56,7 @@ jobs:
             patchelf
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Frontend
         run: npm run build
