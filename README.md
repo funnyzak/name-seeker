@@ -1,10 +1,10 @@
-# Name Seeker - Username Search Tool
+# NameSeeker
 
-Name Seeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.
+NameSeeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.
 
 Built with the Tauri (Rust + React) framework, it delivers a fast, secure, and localized search experience.
 
-## Development Guide
+## Development
 
 ### Tech Stack
 
@@ -17,17 +17,22 @@ Built with the Tauri (Rust + React) framework, it delivers a fast, secure, and l
 ### Development Workflow
 
 ```bash
-# Frontend development only
-deno task dev
+# Frontend-only development (Vite dev server on port 1420)
+npm run dev
 
 # Full application development (recommended)
-deno task tauri dev
+npm run tauri dev
 
-# Type checking
-deno task type-check
+# Code Quality Tools
+npm run type-check      # TypeScript type checking
+npm run lint            # ESLint code linting
+npm run lint:fix         # Auto-fix ESLint issues
+npm run format           # Prettier code formatting
+npm run format:check     # Check code formatting
+npm run ci               # Run all quality checks
 
-# Build production version
-deno task tauri build
+# Build for production
+npm run tauri build
 ```
 
 ## Privacy & Security

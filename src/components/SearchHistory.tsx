@@ -14,7 +14,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
   onSelect,
   onRemove,
   onClear,
-  show
+  show,
 }) => {
   const { t } = useTranslation('search');
   if (!show || history.length === 0) {
@@ -28,7 +28,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
         <button
           type="button"
           className="history-clear-button"
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             onClear();
           }}
@@ -47,7 +47,10 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
             <button
               type="button"
               className="history-item-button"
-              onClick={() => onSelect(item)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item);
+              }}
               title={t('history.searchPrefix', { item })}
             >
               <span className="history-icon">🔍</span>
@@ -56,7 +59,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
             <button
               type="button"
               className="history-remove-button"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onRemove(item);
               }}
@@ -73,4 +76,3 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
 };
 
 export default SearchHistory;
-

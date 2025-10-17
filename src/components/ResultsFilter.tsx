@@ -6,7 +6,10 @@ interface ResultsFilterProps {
   resultsCount: number;
 }
 
-const ResultsFilter: React.FC<ResultsFilterProps> = ({ onFilterChange, resultsCount }) => {
+const ResultsFilter: React.FC<ResultsFilterProps> = ({
+  onFilterChange,
+  resultsCount,
+}) => {
   const { t } = useTranslation('results');
   const [filter, setFilter] = useState('');
 
@@ -55,4 +58,3 @@ const ResultsFilter: React.FC<ResultsFilterProps> = ({ onFilterChange, resultsCo
 };
 
 export default ResultsFilter;
-

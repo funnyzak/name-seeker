@@ -14,22 +14,26 @@ This comprehensive guide provides development standards, best practices, and arc
 - **Open Source**: Transparent codebase for community trust and contribution
 - **Accessibility**: Full WCAG compliance with multi-language support
 
------
+---
 
 ## 🏗️ Architecture & Implementation
 
-This project implements a **complete Rust-based architecture** with no Python sidecar, ensuring optimal performance, minimal bundle size, and enhanced stability.
+This project implements a **complete Rust-based architecture**, ensuring optimal performance, minimal bundle size, and enhanced stability.
 
 ### Modern Technology Stack
 
 #### Frontend Layer
+
 - **React 19.1.0**: Latest version with concurrent features, Suspense, and modern hooks
 - **TypeScript 5.8.3**: Strict type checking with comprehensive type definitions
 - **Vite 7.0.4**: Ultra-fast build tool with HMR and optimized bundling
 - **react-i18next 16.0.1**: Production-ready internationalization with namespace support
 - **@tauri-apps/api 2**: Type-safe Tauri integration with modern event handling
+- **ESLint 9.15.0**: Code linting with TypeScript and React support
+- **Prettier 3.3.3**: Code formatting with consistent style rules
 
 #### Backend Layer
+
 - **Tauri 2.x**: Latest desktop framework with enhanced security and performance
 - **Tokio 1.x**: Production-grade async runtime with efficient concurrency
 - **reqwest 0.12**: Feature-rich HTTP client with TLS, cookies, and redirect handling
@@ -38,6 +42,7 @@ This project implements a **complete Rust-based architecture** with no Python si
 - **printpdf 0.7**: PDF generation for advanced export capabilities
 
 #### Data & Infrastructure
+
 - **WhatsMyName Integration**: 9,904+ websites with automated updates
 - **LocalStorage**: Persistent search history and user preferences
 - **Event-Driven Architecture**: Real-time updates via Tauri events
@@ -117,7 +122,7 @@ src-tauri/data/                   # Data Resources
 └── useragents.txt              # User agent rotation for anti-detection
 ```
 
------
+---
 
 ## ✅ Implemented Features
 
@@ -155,7 +160,7 @@ All MVP features have been successfully implemented and are fully operational:
 - **Language Switching**: Dynamic language switching with dropdown UI and persistent preferences
 - **Localized UI**: All user interface elements, messages, and content are fully internationalized
 
------
+---
 
 ## 🌍 Internationalization (i18n) Implementation
 
@@ -164,6 +169,7 @@ The application includes comprehensive internationalization support using react-
 ### Core i18n Architecture
 
 **Configuration Setup** (`src/i18n/index.ts:1-94`):
+
 - **i18next Integration**: Uses react-i18next with initReactI18next plugin
 - **Resource Management**: Automatic importing and configuration of translation namespaces
 - **Language Detection**: Smart language detection with localStorage and browser preferences
@@ -171,18 +177,21 @@ The application includes comprehensive internationalization support using react-
 - **Development Support**: Debug logging and development environment optimizations
 
 **Supported Languages** (`src/i18n/types.ts:25-42`):
+
 - **English (en)**: 🇺🇸 English - Default fallback language
 - **Chinese (zh)**: 🇨🇳 中文 - Simplified Chinese support
 
 ### Language Management System
 
 **Language Detection & Persistence** (`src/i18n/types.ts:57-114`):
+
 - **Browser Detection**: Automatic detection from `navigator.language`
 - **Language Normalization**: Converts `zh-CN`, `zh-TW`, `en-US`, `en-GB` to standard codes
 - **LocalStorage Integration**: Persistent language preference storage
 - **Fallback Logic**: Smart fallback chain: localStorage → browser → default English
 
 **Language Switching Hook** (`src/hooks/useLanguage.ts:1-77`):
+
 - **State Management**: React state integration with i18n events
 - **Error Handling**: Comprehensive error catching and reporting
 - **Loading States**: Loading indicators during language transitions
@@ -191,6 +200,7 @@ The application includes comprehensive internationalization support using react-
 ### UI Components
 
 **LanguageSwitcher Component** (`src/components/LanguageSwitcher.tsx:1-133`):
+
 - **Multiple Variants**: Dropdown and button-based switching interfaces
 - **Accessibility**: Full ARIA support with proper labels and keyboard navigation
 - **Visual Design**: Flag emojis, native language names, and English alternatives
@@ -200,6 +210,7 @@ The application includes comprehensive internationalization support using react-
 ### Translation Structure
 
 **Namespace Organization**:
+
 - **`common`**: Universal UI elements (buttons, labels, status messages)
 - **`search`**: Search functionality, forms, validation, progress indicators
 - **`results`**: Results display, filtering, categorization, status messages
@@ -209,6 +220,7 @@ The application includes comprehensive internationalization support using react-
 - **`errors`**: Error messages, validation failures, system errors
 
 **Translation Features**:
+
 - **Interpolation**: Dynamic variable insertion (e.g., `{{site}}`, `{{count}}`)
 - **Pluralization**: Context-aware plural forms (not yet implemented but available)
 - **Nested Keys**: Hierarchical organization for maintainable translations
@@ -217,6 +229,7 @@ The application includes comprehensive internationalization support using react-
 ### Integration Examples
 
 **Component Usage**:
+
 ```tsx
 // Multiple namespace usage
 const { t } = useTranslation(['search', 'common']);
@@ -225,11 +238,12 @@ const { t } = useTranslation(['search', 'common']);
 const { t } = useTranslation('common');
 
 // Translation keys with interpolation
-t('search:progress.currentSite', { site: 'GitHub' })
-t('search:progress.checked', { count: 45, total: 600 })
+t('search:progress.currentSite', { site: 'GitHub' });
+t('search:progress.checked', { count: 45, total: 600 });
 ```
 
 **Language Switching**:
+
 ```tsx
 const { currentLanguage, setLanguage, availableLanguages } = useLanguage();
 
@@ -243,12 +257,14 @@ const config = availableLanguages.find(lang => lang.code === currentLanguage);
 ### Development Guidelines
 
 **Adding New Translations**:
+
 1. Add translation keys to both `en/` and `zh/` JSON files
 2. Use consistent key naming (e.g., `section.subsection.item`)
 3. Include interpolation variables where needed
 4. Update TypeScript types if adding new namespaces
 
 **Best Practices**:
+
 - Use semantic key names that describe content, not location
 - Group related translations in appropriate namespaces
 - Include context-specific translations for better user experience
@@ -256,12 +272,13 @@ const config = availableLanguages.find(lang => lang.code === currentLanguage);
 - Use interpolation for dynamic content instead of string concatenation
 
 **Performance Considerations**:
+
 - Translation resources are loaded asynchronously
 - Language switching is optimized with memoization
 - HTML lang attribute updates for SEO and accessibility
 - LocalStorage persistence prevents unnecessary re-detection
 
------
+---
 
 ## 🔌 Tauri API Implementation
 
@@ -327,7 +344,7 @@ The frontend listens for these events defined in `src-tauri/src/core/models.rs:1
 - **`search-error`**: Emitted on search failures
 - **`search-stopped`**: Emitted when user stops the search
 
------
+---
 
 ## 🔧 Core Implementation Details
 
@@ -367,22 +384,24 @@ The React frontend uses a comprehensive set of custom hooks for state management
 - **Animations**: Smooth transitions and loading states
 - **Accessibility**: Semantic HTML and keyboard navigation
 
------
+---
 
 ## 🛡️ Security & Privacy
 
 ### Data Privacy
+
 - **Local Processing**: All searches occur locally; no data sent to external servers
 - **No Tracking**: No analytics or user data collection
 - **Open Source**: Full code transparency and auditability
 
 ### Security Measures
+
 - **Input Validation**: Client and server-side input sanitization
 - **Request Limiting**: Configurable concurrency controls
 - **Timeout Protection**: Prevents hanging requests
 - **User Agent Rotation**: Avoids anti-bot detection
 
------
+---
 
 ## 💻 Development Guide
 
@@ -411,8 +430,13 @@ npm run dev
 # Full application development (recommended)
 npm run tauri dev
 
-# Type checking
-npm run type-check
+# Code Quality Tools
+npm run type-check      # TypeScript type checking
+npm run lint            # ESLint code linting
+npm run lint:fix         # Auto-fix ESLint issues
+npm run format           # Prettier code formatting
+npm run format:check     # Check code formatting
+npm run ci               # Run all quality checks
 
 # Build for production
 npm run tauri build
@@ -425,8 +449,11 @@ npm run tauri build
 - **Styling**: CSS-in-JS patterns with CSS variables for theming
 - **Build**: Vite for frontend, Cargo for Rust backend, Tauri for bundling
 
-### Testing and Debugging
+### Code Quality and Debugging
 
+- **ESLint**: Comprehensive code linting with TypeScript and React support
+- **Prettier**: Consistent code formatting across the project
+- **TypeScript**: Strict type checking for type safety
 - **Console Logging**: Rust backend uses `log` crate with `env_logger`
 - **Browser DevTools**: Available in development mode for frontend debugging
 - **Tauri DevTools**: Built-in development tools for inspecting the app
@@ -438,17 +465,19 @@ npm run tauri build
 - **UI Responsiveness**: Async operations prevent UI freezing
 - **Bundle Size**: Optimized production builds with tree shaking
 
------
+---
 
 ## 📚 Key Files and Components
 
 ### Core Backend Files
+
 - `src-tauri/src/lib.rs` - Main Tauri commands and application setup
 - `src-tauri/src/core/search.rs` - Search engine implementation
 - `src-tauri/src/core/sites.rs` - Website data management
 - `src-tauri/src/core/models.rs` - Data structures and type definitions
 
 ### Core Frontend Files
+
 - `src/App.tsx` - Main application component with modal management and keyboard shortcuts
 - `src/components/SearchForm.tsx` - Search input with type selection and history dropdown
 - `src/components/ResultsDisplay.tsx` - Results rendering, filtering, and export controls
@@ -464,12 +493,14 @@ npm run tauri build
 - `src/services/tauriApi.ts` - Singleton-based Tauri API wrapper with error handling
 
 ### Internationalization Files
+
 - `src/i18n/index.ts` - i18next configuration with resource management and language detection
 - `src/i18n/types.ts` - Language types, utilities, and detection/persistence functions
 - `src/i18n/locales/en/` - English translation files organized by namespace
 - `src/i18n/locales/zh/` - Chinese translation files organized by namespace
 
 ### Configuration Files
+
 - `src-tauri/tauri.conf.json` - Tauri application configuration and permissions
 - `package.json` - Frontend dependencies, scripts, and build configuration
 - `src-tauri/Cargo.toml` - Rust dependencies, features, and metadata

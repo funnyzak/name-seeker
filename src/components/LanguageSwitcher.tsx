@@ -14,19 +14,22 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   className = '',
   variant = 'dropdown',
   size = 'medium',
-  onError
+  onError,
 }) => {
   const { t } = useTranslation('common');
   const { currentLanguage, setLanguage, isLoading, error } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   const currentConfig = LANGUAGE_CONFIG[currentLanguage];
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -81,7 +84,10 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   }
 
   return (
-    <div className={`language-switcher-dropdown ${className}`} ref={dropdownRef}>
+    <div
+      className={`language-switcher-dropdown ${className}`}
+      ref={dropdownRef}
+    >
       <button
         onClick={toggleDropdown}
         className={`
@@ -99,7 +105,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <span className="code">{currentConfig.code.toUpperCase()}</span>
         <span className="arrow">{isLoading ? '⏳' : '▼'}</span>
       </button>
-      
+
       {isOpen && !isLoading && (
         <div className="language-dropdown-menu">
           {Object.entries(LANGUAGE_CONFIG).map(([code, config]) => (
@@ -118,9 +124,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                 <span className="name">{config.nativeName}</span>
                 <span className="english-name">{config.name}</span>
               </div>
-              {currentLanguage === code && (
-                <span className="checkmark">✓</span>
-              )}
+              {currentLanguage === code && <span className="checkmark">✓</span>}
             </button>
           ))}
         </div>

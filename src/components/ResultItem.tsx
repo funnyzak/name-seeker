@@ -59,8 +59,13 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
 
   return (
     <div className={`result-item ${getStatusClass()}`} role="listitem">
-      <div className="result-status" aria-label={t('item.statusAriaLabel', { status: result.status })}>
-        <span className="status-icon" aria-hidden="true">{getStatusIcon()}</span>
+      <div
+        className="result-status"
+        aria-label={t('item.statusAriaLabel', { status: result.status })}
+      >
+        <span className="status-icon" aria-hidden="true">
+          {getStatusIcon()}
+        </span>
       </div>
 
       <div className="result-content">
@@ -91,7 +96,9 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
 
           {result.status === 'Error' && (
             <span className="result-message error-text">
-              {result.error === 'Search stopped by user' ? '⏸️ ' + t('item.searchStopped') : (result.error || t('item.checking'))}
+              {result.error === 'Search stopped by user'
+                ? '⏸️ ' + t('item.searchStopped')
+                : result.error || t('item.checking')}
             </span>
           )}
 
@@ -107,7 +114,9 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
               <div key={index} className="metadata-item">
                 <span className="metadata-name">{item.name}:</span>
                 <span className="metadata-value">
-                  {typeof item.value === 'string' ? item.value : JSON.stringify(item.value)}
+                  {typeof item.value === 'string'
+                    ? item.value
+                    : JSON.stringify(item.value)}
                 </span>
               </div>
             ))}

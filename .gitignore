@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 /bl*
 *.env*
+
+
+# IDE
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json

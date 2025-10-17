@@ -45,35 +45,33 @@ const resources = {
 const initialLanguage = detectLanguage();
 
 // Initialize i18next
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: initialLanguage,
-    fallbackLng: 'en',
-    defaultNS: 'common',
-    ns: ['common', 'search', 'results', 'export', 'modals', 'toast', 'errors'],
-    supportedLngs: ['en', 'zh'],
-    
-    // Interpolation configuration
-    interpolation: {
-      escapeValue: false, // React already prevents XSS
-    },
-    
-    // Debug mode (development environment)
-    debug: import.meta.env.DEV,
-    
-    // React configuration
-    react: {
-      useSuspense: false,
-    },
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: initialLanguage,
+  fallbackLng: 'en',
+  defaultNS: 'common',
+  ns: ['common', 'search', 'results', 'export', 'modals', 'toast', 'errors'],
+  supportedLngs: ['en', 'zh'],
+
+  // Interpolation configuration
+  interpolation: {
+    escapeValue: false, // React already prevents XSS
+  },
+
+  // Debug mode (development environment)
+  debug: import.meta.env.DEV,
+
+  // React configuration
+  react: {
+    useSuspense: false,
+  },
+});
 
 // Listen for language changes, auto-persist and update HTML lang attribute
 i18n.on('languageChanged', (lng: string) => {
   setStoredLanguage(lng as 'en' | 'zh');
   document.documentElement.lang = lng;
-  
+
   if (import.meta.env.DEV) {
     console.log('🌍 Language changed to:', lng);
   }

@@ -4,22 +4,28 @@ import type { ProgressIndicatorProps } from '../types';
 
 const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   progress,
-  isSearching
+  isSearching,
 }) => {
   const { t } = useTranslation('search');
   if (!isSearching && progress.checked_sites === 0) {
     return null;
   }
 
-  const percentage = progress.total_sites > 0
-    ? Math.round((progress.checked_sites / progress.total_sites) * 100)
-    : 0;
+  const percentage =
+    progress.total_sites > 0
+      ? Math.round((progress.checked_sites / progress.total_sites) * 100)
+      : 0;
 
   return (
     <div className="progress-container">
       <div className="progress-info">
         <div className="progress-text">
-          <span>{t('progress.progressLabel', { checked: progress.checked_sites, total: progress.total_sites })}</span>
+          <span>
+            {t('progress.progressLabel', {
+              checked: progress.checked_sites,
+              total: progress.total_sites,
+            })}
+          </span>
           <span className="percentage"> {percentage}%</span>
         </div>
 
@@ -34,17 +40,16 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
       </div>
 
       <div className="progress-bar-container">
-        <div
-          className="progress-bar"
-          style={{ width: `${percentage}%` }}
-        />
+        <div className="progress-bar" style={{ width: `${percentage}%` }} />
       </div>
 
       {isSearching && (
         <div className="searching-status">
           <div className="pulse-dot"></div>
           <span>
-            {t('progress.searchingStatus', { currentSite: progress.current_site })}
+            {t('progress.searchingStatus', {
+              currentSite: progress.current_site,
+            })}
           </span>
         </div>
       )}

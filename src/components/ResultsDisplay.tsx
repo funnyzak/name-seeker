@@ -20,14 +20,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   query,
   onExportSuccess,
   onExportError,
-  onClearResults
+  onClearResults,
 }) => {
   const { t } = useTranslation(['results', 'common']);
   const [collapsed, setCollapsed] = useState<CollapsedSections>({
     found: false,
-    notFound: true,  // Default collapse Not Found
+    notFound: true, // Default collapse Not Found
     error: false,
-    pending: false
+    pending: false,
   });
   const [filterText, setFilterText] = useState('');
 
@@ -36,12 +36,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
     if (!filterText.trim()) {
       return results;
     }
-    
+
     const searchTerm = filterText.toLowerCase();
-    return results.filter(r => 
-      r.site.toLowerCase().includes(searchTerm) ||
-      (r.category && r.category.toLowerCase().includes(searchTerm)) ||
-      (r.url && r.url.toLowerCase().includes(searchTerm))
+    return results.filter(
+      r =>
+        r.site.toLowerCase().includes(searchTerm) ||
+        (r.category && r.category.toLowerCase().includes(searchTerm)) ||
+        (r.url && r.url.toLowerCase().includes(searchTerm))
     );
   }, [results, filterText]);
 
@@ -55,36 +56,56 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   const toggleSection = (section: keyof CollapsedSections) => {
     setCollapsed(prev => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section],
     }));
   };
 
   if (!hasResults) {
     return (
-      <div className="empty-state" role="status" aria-label={t('results:empty.ariaLabel')}>
-        <div className="empty-icon" aria-hidden="true">🔍</div>
+      <div
+        className="empty-state"
+        role="status"
+        aria-label={t('results:empty.ariaLabel')}
+      >
+        <div className="empty-icon" aria-hidden="true">
+          🔍
+        </div>
         <h3>{t('results:empty.title')}</h3>
         <p className="empty-description">{t('results:empty.description')}</p>
         <div className="empty-features">
           <div className="feature-item">
-            <span className="feature-icon" aria-hidden="true">⚡</span>
+            <span className="feature-icon" aria-hidden="true">
+              ⚡
+            </span>
             <span>{t('results:empty.features.fastSearch')}</span>
           </div>
           <div className="feature-item">
-            <span className="feature-icon" aria-hidden="true">🌐</span>
+            <span className="feature-icon" aria-hidden="true">
+              🌐
+            </span>
             <span>{t('results:empty.features.multiSite')}</span>
           </div>
           <div className="feature-item">
-            <span className="feature-icon" aria-hidden="true">📊</span>
+            <span className="feature-icon" aria-hidden="true">
+              📊
+            </span>
             <span>{t('results:empty.features.export')}</span>
           </div>
         </div>
         <div className="empty-shortcuts">
-          <p className="shortcuts-title">{t('results:empty.shortcuts.title')}</p>
+          <p className="shortcuts-title">
+            {t('results:empty.shortcuts.title')}
+          </p>
           <ul className="shortcuts-list">
-            <li><kbd>/</kbd> {t('results:empty.shortcuts.focus')}</li>
-            <li><kbd>Esc</kbd> {t('results:empty.shortcuts.stop')}</li>
-            <li><kbd>Ctrl+H</kbd> {t('results:empty.shortcuts.help')}</li>
+            <li>
+              <kbd>/</kbd> {t('results:empty.shortcuts.focus')}
+            </li>
+            <li>
+              <kbd>Esc</kbd> {t('results:empty.shortcuts.stop')}
+            </li>
+            <li>
+              <kbd>Ctrl+H</kbd> {t('results:empty.shortcuts.help')}
+            </li>
           </ul>
         </div>
       </div>
@@ -92,71 +113,100 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   }
 
   return (
-    <div className="results-container" role="region" aria-label={t('results:empty.resultsAriaLabel')}>
+    <div
+      className="results-container"
+      role="region"
+      aria-label={t('results:empty.resultsAriaLabel')}
+    >
       {/* Results header: title and export buttons */}
-        <div className="results-header">
-          <h3 className="results-title" id="results-heading">
-            {t('results:title')} <span className="results-count" aria-label={t('results:actions.resultsCount', { filtered: filteredResults.length, total: results.length })}>({filteredResults.length}/{results.length})</span>
-          </h3>
-          <div className="results-actions">
-            <ResultsFilter 
-              onFilterChange={setFilterText}
-              resultsCount={filteredResults.length}
-            />
-                <ExportButton 
-                  results={results} 
-                  username={query}
-                  disabled={isSearching}
-                  onExportSuccess={onExportSuccess}
-                  onExportError={onExportError}
-                />
-                {onClearResults && !isSearching && (
-                  <button
-                    className="btn btn-clear"
-                    onClick={onClearResults}
-                    aria-label={t('results:actions.clearAriaLabel')}
-                  >
-                    <span className="btn-icon" aria-hidden="true">🗑️</span>
-                    <span className="btn-text">{t('results:actions.reset')}</span>
-                  </button>
-                )}
-          </div>
+      <div className="results-header">
+        <h3 className="results-title" id="results-heading">
+          {t('results:title')}{' '}
+          <span
+            className="results-count"
+            aria-label={t('results:actions.resultsCount', {
+              filtered: filteredResults.length,
+              total: results.length,
+            })}
+          >
+            ({filteredResults.length}/{results.length})
+          </span>
+        </h3>
+        <div className="results-actions">
+          <ResultsFilter
+            onFilterChange={setFilterText}
+            resultsCount={filteredResults.length}
+          />
+          <ExportButton
+            results={results}
+            username={query}
+            disabled={isSearching}
+            onExportSuccess={onExportSuccess}
+            onExportError={onExportError}
+          />
+          {onClearResults && !isSearching && (
+            <button
+              className="btn btn-clear"
+              onClick={onClearResults}
+              aria-label={t('results:actions.clearAriaLabel')}
+            >
+              <span className="btn-icon" aria-hidden="true">
+                🗑️
+              </span>
+              <span className="btn-text">{t('results:actions.reset')}</span>
+            </button>
+          )}
         </div>
+      </div>
 
       {/* Progress indicator */}
-      {isSearching && <ProgressIndicator progress={progress} isSearching={isSearching} />}
+      {isSearching && (
+        <ProgressIndicator progress={progress} isSearching={isSearching} />
+      )}
 
       {/* Results area scroll container */}
-      <div className="section-wrapper" role="main" aria-labelledby="results-heading">
+      <div
+        className="section-wrapper"
+        role="main"
+        aria-labelledby="results-heading"
+      >
         {foundResults.length > 0 && (
           <div className="results-section">
-            <h3 
+            <h3
               className="section-header found-header"
               onClick={() => toggleSection('found')}
               role="button"
               tabIndex={0}
               aria-expanded={!collapsed.found}
               aria-controls="found-results-list"
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   toggleSection('found');
                 }
               }}
             >
-              <span>✓ {t('results:categories.foundUsers')} ({foundResults.length})</span>
-              <span className={`collapse-icon ${collapsed.found ? 'collapsed' : ''}`} aria-hidden="true">
+              <span>
+                ✓ {t('results:categories.foundUsers')} ({foundResults.length})
+              </span>
+              <span
+                className={`collapse-icon ${collapsed.found ? 'collapsed' : ''}`}
+                aria-hidden="true"
+              >
                 ▼
               </span>
             </h3>
-            <div 
+            <div
               id="found-results-list"
               className={`results-list ${collapsed.found ? 'collapsed' : ''}`}
               role="list"
               aria-label={t('results:categories.foundUsers')}
             >
               {foundResults.reverse().map((result, index) => (
-                <ResultItem key={`found-${result.site}-${index}`} result={result} />
+                <ResultItem
+                  key={`found-${result.site}-${index}`}
+                  result={result}
+                />
               ))}
             </div>
           </div>
@@ -164,18 +214,27 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
         {pendingResults.length > 0 && isSearching && (
           <div className="results-section">
-            <h3 
+            <h3
               className="section-header pending-header"
               onClick={() => toggleSection('pending')}
             >
-              <span>⏳ {t('results:categories.checking')} ({pendingResults.length})</span>
-              <span className={`collapse-icon ${collapsed.pending ? 'collapsed' : ''}`}>
+              <span>
+                ⏳ {t('results:categories.checking')} ({pendingResults.length})
+              </span>
+              <span
+                className={`collapse-icon ${collapsed.pending ? 'collapsed' : ''}`}
+              >
                 ▼
               </span>
             </h3>
-            <div className={`results-list ${collapsed.pending ? 'collapsed' : ''}`}>
+            <div
+              className={`results-list ${collapsed.pending ? 'collapsed' : ''}`}
+            >
               {pendingResults.reverse().map((result, index) => (
-                <ResultItem key={`pending-${result.site}-${index}`} result={result} />
+                <ResultItem
+                  key={`pending-${result.site}-${index}`}
+                  result={result}
+                />
               ))}
             </div>
           </div>
@@ -183,18 +242,27 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
         {errorResults.length > 0 && (
           <div className="results-section">
-            <h3 
+            <h3
               className="section-header error-header"
               onClick={() => toggleSection('error')}
             >
-              <span>⚠ {t('results:categories.error')} ({errorResults.length})</span>
-              <span className={`collapse-icon ${collapsed.error ? 'collapsed' : ''}`}>
+              <span>
+                ⚠ {t('results:categories.error')} ({errorResults.length})
+              </span>
+              <span
+                className={`collapse-icon ${collapsed.error ? 'collapsed' : ''}`}
+              >
                 ▼
               </span>
             </h3>
-            <div className={`results-list ${collapsed.error ? 'collapsed' : ''}`}>
+            <div
+              className={`results-list ${collapsed.error ? 'collapsed' : ''}`}
+            >
               {errorResults.reverse().map((result, index) => (
-                <ResultItem key={`error-${result.site}-${index}`} result={result} />
+                <ResultItem
+                  key={`error-${result.site}-${index}`}
+                  result={result}
+                />
               ))}
             </div>
           </div>
@@ -202,18 +270,27 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
         {notFoundResults.length > 0 && (
           <div className="results-section">
-            <h3 
+            <h3
               className="section-header not-found-header"
               onClick={() => toggleSection('notFound')}
             >
-              <span>✗ {t('results:categories.notFound')} ({notFoundResults.length})</span>
-              <span className={`collapse-icon ${collapsed.notFound ? 'collapsed' : ''}`}>
+              <span>
+                ✗ {t('results:categories.notFound')} ({notFoundResults.length})
+              </span>
+              <span
+                className={`collapse-icon ${collapsed.notFound ? 'collapsed' : ''}`}
+              >
                 ▼
               </span>
             </h3>
-            <div className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}>
+            <div
+              className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}
+            >
               {notFoundResults.reverse().map((result, index) => (
-                <ResultItem key={`notfound-${result.site}-${index}`} result={result} />
+                <ResultItem
+                  key={`notfound-${result.site}-${index}`}
+                  result={result}
+                />
               ))}
             </div>
           </div>

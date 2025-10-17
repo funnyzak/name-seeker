@@ -1,7 +1,7 @@
 {
   "name": "name-seeker",
   "version": "0.1.5",
-  "description": "Name Seeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.",
+  "description": "NameSeeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.",
   "type": "module",
   "private": false,
   "author": "Leon <silenceace@gmail.com>",
@@ -32,7 +32,13 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "update-version": "bash scripts/update-version.sh"
+    "update-version": "bash scripts/update-version.sh",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 50",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "ci": "npm run type-check && npm run lint && npm run format:check"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -52,7 +58,15 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "prettier": "^3.6.2"
   },
   "engines": {
     "node": ">=20.19.0",

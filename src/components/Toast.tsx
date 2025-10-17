@@ -11,7 +11,13 @@ export interface ToastProps {
   onClose: (id: string) => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ id, message, type, duration = 3000, onClose }) => {
+const Toast: React.FC<ToastProps> = ({
+  id,
+  message,
+  type,
+  duration = 3000,
+  onClose,
+}) => {
   const { t } = useTranslation('toast');
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -37,11 +43,7 @@ const Toast: React.FC<ToastProps> = ({ id, message, type, duration = 3000, onClo
   };
 
   return (
-    <div
-      className={`toast toast-${type}`}
-      role="alert"
-      aria-live="polite"
-    >
+    <div className={`toast toast-${type}`} role="alert" aria-live="polite">
       <div className="toast-icon">{getIcon()}</div>
       <div className="toast-message">{message}</div>
       <button
@@ -57,4 +59,3 @@ const Toast: React.FC<ToastProps> = ({ id, message, type, duration = 3000, onClo
 };
 
 export default Toast;
-

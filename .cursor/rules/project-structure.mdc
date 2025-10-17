@@ -117,6 +117,8 @@ src-tauri/data/                   # Data Resources
 - **TypeScript**: Strict type checking
 - **Vite**: Build tool and development server
 - **CSS**: Modern CSS features with responsive design support
+- **ESLint**: Code linting with TypeScript and React support
+- **Prettier**: Code formatting with consistent style rules
 
 ### Backend Technologies
 - **Rust**: Async programming using Tokio
@@ -154,12 +156,22 @@ npm run dev
 # Full application development (recommended)
 npm run tauri dev
 
+# Code Quality Tools
+npm run type-check      # TypeScript type checking
+npm run lint            # ESLint code linting
+npm run lint:fix         # Auto-fix ESLint issues
+npm run format           # Prettier code formatting
+npm run format:check     # Check code formatting
+npm run ci               # Run all quality checks
+
 # Build production version
 npm run tauri build
 ```
 
 ### Code Quality
 - Use TypeScript strict mode
+- Follow ESLint rules for consistent code style
+- Use Prettier for code formatting
 - Follow clippy suggestions for Rust code
 - Use functional programming for components
 - Use async/await for async operations

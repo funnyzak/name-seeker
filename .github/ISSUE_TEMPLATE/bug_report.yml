@@ -27,8 +27,8 @@ body:
   - type: dropdown
     id: version
     attributes:
-      label: Name Seeker version
-      description: What version of Name Seeker were you running when the bug occurred? You can find the version number on the About page.
+      label: NameSeeker version
+      description: What version of NameSeeker were you running when the bug occurred? You can find the version number on the About page.
       options:
         - v0.1.2
         - v0.1.1

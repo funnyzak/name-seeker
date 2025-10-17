@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - '*'
-      
+
   workflow_dispatch:
 
 permissions:
@@ -26,7 +26,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          name: "Name Seeker v${{ github.ref_name }}"
+          name: 'NameSeeker v${{ github.ref_name }}'
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,7 +86,7 @@ jobs:
       - name: Install Rollup for Ubuntu
         if: matrix.platform.os == 'ubuntu-latest'
         run: |
-          npm install --save-dev @rollup/rollup-linux-x64-gnu @tauri-apps/cli-linux-x64-gnu 
+          npm install --save-dev @rollup/rollup-linux-x64-gnu @tauri-apps/cli-linux-x64-gnu
 
       - name: Install Rollup for Windows
         if: matrix.platform.os == 'windows-latest'
@@ -104,7 +104,7 @@ jobs:
         with:
           releaseId: ${{ needs.release.outputs.release-id }}
           tagName: ${{ github.ref_name }}
-          releaseName: 'Name Seeker v__VERSION__'
+          releaseName: 'NameSeeker v__VERSION__'
           # releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
@@ -121,7 +121,7 @@ jobs:
           curl -X POST \
           -F "tag=ycgo" \
           -F "body=🚀 NameSeeker Release Build Success
-      
+
           📦 Application Information
           • Name: [NameSeeker](https://github.com/${{ github.repository }})
           • Version: ${{ github.ref_name }}
@@ -133,7 +133,7 @@ jobs:
 
           ⏰ Build Time
           • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
-          
+
           📎 Related Links
           • [Release Page](https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }})
           • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
@@ -146,7 +146,7 @@ jobs:
           curl -X POST \
           -F "tag=ycgo" \
           -F "body=❌ NameSeeker Release Build Failed
-      
+
           📦 Application Information
           • Name: [NameSeeker](https://github.com/${{ github.repository }})
           • Version: ${{ github.ref_name }}
@@ -158,7 +158,7 @@ jobs:
 
           ⏰ Build Time
           • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
-          
+
           📎 Related Links
           • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           • [Repository](https://github.com/${{ github.repository }})" \

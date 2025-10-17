@@ -1,7 +1,7 @@
 // Search type enumeration
 export enum SearchType {
   USERNAME = 'username',
-  EMAIL = 'email'
+  EMAIL = 'email',
 }
 
 // Search result status enumeration
@@ -9,7 +9,7 @@ export enum SearchResultStatus {
   FOUND = 'Found',
   NOT_FOUND = 'NotFound',
   ERROR = 'Error',
-  PENDING = 'Pending'
+  PENDING = 'Pending',
 }
 
 // Single search result interface
@@ -71,7 +71,7 @@ export interface AppState {
   disclaimerAccepted: boolean;
   isSearching: boolean;
   searchType: SearchType;
-  query: string;  // username or email
+  query: string; // username or email
   results: SearchResult[];
   progress: SearchProgress;
 }
@@ -100,7 +100,7 @@ export interface ResultsDisplayProps {
   results: SearchResult[];
   progress: SearchProgress;
   isSearching: boolean;
-  query: string;  // username or email
+  query: string; // username or email
   onExportSuccess?: (message: string) => void;
   onExportError?: (message: string) => void;
   onClearResults?: () => void;
@@ -140,13 +140,13 @@ export enum ExportFormat {
   PDF = 'pdf',
   CSV = 'csv',
   JSON = 'json',
-  TXT = 'txt'
+  TXT = 'txt',
 }
 
 // Export options interface
 export interface ExportOptions {
   format: ExportFormat;
-  username: string;  // username or email
+  username: string; // username or email
   results: SearchResult[];
   timestamp?: string;
 }
@@ -154,7 +154,7 @@ export interface ExportOptions {
 // Export button Props
 export interface ExportButtonProps {
   results: SearchResult[];
-  username: string;  // username or email
+  username: string; // username or email
   disabled?: boolean;
   onExportSuccess?: (message: string) => void;
   onExportError?: (message: string) => void;

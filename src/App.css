@@ -1,6 +1,7 @@
 /* CSS Variables - Flat Design for Desktop App */
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.2;
   font-weight: 400;
@@ -44,7 +45,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
- overflow: hidden;
+  overflow: hidden;
 }
 
 #root {
@@ -83,13 +84,21 @@ body {
   position: absolute;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(74, 144, 226, 0.05) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(74, 144, 226, 0.05) 0%,
+    transparent 70%
+  );
   animation: rotate 20s linear infinite;
 }
 
 @keyframes rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-spinner {
@@ -107,8 +116,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -130,8 +143,13 @@ body {
 }
 
 @keyframes fadeInOut {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Toolbar - Compact Header */
@@ -236,12 +254,12 @@ body {
     font-size: 1.5rem;
     gap: 0.5rem;
   }
-  
+
   .app-logo {
     width: 2rem;
     height: 2rem;
   }
-  
+
   .app-name {
     font-size: 1.5rem;
   }
@@ -253,12 +271,12 @@ body {
     font-size: 1.25rem;
     gap: 0.5rem;
   }
-  
+
   .app-logo {
     width: 1.75rem;
     height: 1.75rem;
   }
-  
+
   .app-name {
     font-size: 1.25rem;
   }
@@ -833,8 +851,12 @@ body {
   font-weight: 500;
 }
 
-.stat.found { color: var(--success-color); }
-.stat.error { color: var(--error-color); }
+.stat.found {
+  color: var(--success-color);
+}
+.stat.error {
+  color: var(--error-color);
+}
 
 .progress-bar-container {
   width: 100%;
@@ -869,8 +891,13 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 /* Results Sections */
@@ -1000,10 +1027,18 @@ body {
   font-weight: bold;
 }
 
-.result-item.found .status-icon { color: var(--success-color); }
-.result-item.not-found .status-icon { color: var(--gray-400); }
-.result-item.error .status-icon { color: var(--error-color); }
-.result-item.pending .status-icon { color: var(--warning-color); }
+.result-item.found .status-icon {
+  color: var(--success-color);
+}
+.result-item.not-found .status-icon {
+  color: var(--gray-400);
+}
+.result-item.error .status-icon {
+  color: var(--error-color);
+}
+.result-item.pending .status-icon {
+  color: var(--warning-color);
+}
 
 .result-content {
   flex: 1;
@@ -1113,10 +1148,18 @@ body {
   font-weight: 600;
 }
 
-.summary-stat.found { color: var(--success-color); }
-.summary-stat.not-found { color: var(--gray-500); }
-.summary-stat.error { color: var(--error-color); }
-.summary-stat.total { color: var(--gray-700); }
+.summary-stat.found {
+  color: var(--success-color);
+}
+.summary-stat.not-found {
+  color: var(--gray-500);
+}
+.summary-stat.error {
+  color: var(--error-color);
+}
+.summary-stat.total {
+  color: var(--gray-700);
+}
 
 /* Empty State */
 .empty-state {
@@ -1134,7 +1177,8 @@ body {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -2174,10 +2218,11 @@ button,
   transition: all 0.2s ease;
 }
 
-
 /* Smooth collapse animation */
 .results-list {
-  transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+  transition:
+    max-height 0.3s ease-out,
+    opacity 0.2s ease-out;
   max-height: 10000px;
   opacity: 1;
   overflow: hidden;
@@ -2300,7 +2345,8 @@ button,
 
 /* Pulse animation for status indicator */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -2585,12 +2631,12 @@ button,
     font-size: 0.85rem;
     min-width: 70px;
   }
-  
+
   .language-option {
     padding: 0.6rem 0.75rem;
     font-size: 0.85rem;
   }
-  
+
   .language-button {
     padding: 0.4rem 0.6rem;
     font-size: 0.8rem;
@@ -2626,7 +2672,7 @@ button,
     --gray-400: #888;
     --gray-500: #666;
   }
-  
+
   .result-item {
     border: 1px solid var(--gray-300);
   }
@@ -2650,7 +2696,7 @@ button,
     left: auto;
     max-width: 350px;
   }
-  
+
   .toast {
     min-width: 280px;
     max-width: 350px;
@@ -2660,19 +2706,18 @@ button,
   .toast-message {
     font-size: 0.85rem;
   }
-  
+
   .empty-features {
     gap: 0.875rem;
   }
-  
+
   .feature-item {
     min-width: 90px;
     padding: 0.75rem;
   }
-  
+
   .shortcuts-list {
     flex-wrap: wrap;
     gap: 0.75rem;
   }
 }
-

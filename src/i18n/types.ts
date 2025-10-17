@@ -57,12 +57,12 @@ export type LanguageOption = {
 export const normalizeLanguage = (language: string): SupportedLanguage => {
   // Extract first two characters of language code
   const languageCode = language.toLowerCase().split('-')[0];
-  
+
   // Check if it's a supported language
   if (languageCode === 'zh' || languageCode === 'en') {
     return languageCode as SupportedLanguage;
   }
-  
+
   // Default to English
   return 'en';
 };
@@ -70,7 +70,9 @@ export const normalizeLanguage = (language: string): SupportedLanguage => {
 /**
  * Validate if language code is valid
  */
-export const isValidLanguage = (language: string): language is SupportedLanguage => {
+export const isValidLanguage = (
+  language: string
+): language is SupportedLanguage => {
   return language === 'zh' || language === 'en';
 };
 
@@ -101,7 +103,8 @@ export const setStoredLanguage = (language: SupportedLanguage): void => {
  * Get preferred language from browser
  */
 export const getBrowserLanguage = (): SupportedLanguage => {
-  const browserLang = navigator.language || (navigator as any).userLanguage || '';
+  const browserLang =
+    navigator.language || (navigator as any).userLanguage || '';
   return normalizeLanguage(browserLang);
 };
 

@@ -50,6 +50,6 @@ export const useDisclaimer = () => {
     isLoading,
     acceptDisclaimer,
     declineDisclaimer,
-    checkFirstLaunch
+    checkFirstLaunch,
   };
 };

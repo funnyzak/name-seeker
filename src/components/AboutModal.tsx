@@ -38,10 +38,17 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container about-modal" onClick={e => e.stopPropagation()}>
+      <div
+        className="modal-container about-modal"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="modal-header">
-          <>{t('about.title')} {appInfo?.name}</>
-          <button className="close-button" onClick={onClose}>×</button>
+          <>
+            {t('about.title')} {appInfo?.name}
+          </>
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <div className="modal-content">
@@ -59,7 +66,9 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                     {t('about.longDescription')}
                   </p>
                   {appInfo.long_description && (
-                    <p className="long-description">{appInfo.long_description}</p>
+                    <p className="long-description">
+                      {appInfo.long_description}
+                    </p>
                   )}
                   <div className="info-grid">
                     <div className="info-item">
@@ -67,10 +76,16 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                       <span className="info-value">{appInfo.build_date}</span>
                     </div>
                     <div className="info-item">
-                      <span className="info-label">{t('about.repository')}</span>
+                      <span className="info-label">
+                        {t('about.repository')}
+                      </span>
                       <button
                         className="info-link"
-                        onClick={() => handleOpenUrl('https://github.com/funnyzak/name-seeker')}
+                        onClick={() =>
+                          handleOpenUrl(
+                            'https://github.com/funnyzak/name-seeker'
+                          )
+                        }
                       >
                         funnyzak/name-seeker
                       </button>
@@ -79,14 +94,18 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                       <span className="info-label">{t('about.author')}</span>
                       <button
                         className="info-link"
-                        onClick={() => handleOpenUrl('https://github.com/funnyzak')}
+                        onClick={() =>
+                          handleOpenUrl('https://github.com/funnyzak')
+                        }
                       >
                         funnyzak
                       </button>
                     </div>
                     <div className="info-item">
                       <span className="info-label">{t('about.copyright')}</span>
-                      <span className="info-value">©️ {new Date().getFullYear()} Funnyzak</span>
+                      <span className="info-value">
+                        ©️ {new Date().getFullYear()} Funnyzak
+                      </span>
                     </div>
                   </div>
                 </>
@@ -109,12 +128,12 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
             <div className="about-section">
               <h3>{t('about.dataSource.title')}</h3>
-              <p>
-                {t('about.dataSource.description')}
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: t('about.dataSource.description') }}></p>
               <button
                 className="btn btn-link"
-                onClick={() => handleOpenUrl('https://github.com/WebBreacher/WhatsMyName')}
+                onClick={() =>
+                  handleOpenUrl('https://github.com/WebBreacher/WhatsMyName')
+                }
               >
                 {t('about.dataSource.viewProject')}
               </button>
@@ -122,12 +141,12 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
             <div className="about-section">
               <h3>{t('about.acknowledgments.title')}</h3>
-              <p>
-                {t('about.acknowledgments.description')}
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: t('about.acknowledgments.description') }}></p>
               <button
                 className="btn btn-link"
-                onClick={() => handleOpenUrl('https://github.com/p1ngul1n0/blackbird')}
+                onClick={() =>
+                  handleOpenUrl('https://github.com/p1ngul1n0/blackbird')
+                }
               >
                 {t('about.acknowledgments.viewProject')}
               </button>
@@ -135,9 +154,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
             <div className="about-section">
               <h3>{t('about.usageNotice.title')}</h3>
-              <p>
-                {t('about.usageNotice.description')}
-              </p>
+              <p>{t('about.usageNotice.description')}</p>
             </div>
           </div>
         </div>

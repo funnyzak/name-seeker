@@ -19,10 +19,21 @@ const App: React.FC = () => {
   const [showAbout, setShowAbout] = useState(false);
   const { t } = useTranslation(['common', 'search', 'toast']);
 
-  const { showDisclaimer, isLoading, acceptDisclaimer, declineDisclaimer } = useDisclaimer();
+  const { showDisclaimer, isLoading, acceptDisclaimer, declineDisclaimer } =
+    useDisclaimer();
   const { toasts, removeToast, success, error, info } = useToast();
-  const { isSearching, searchType, query, results, progress, startSearch, stopSearch, clearResults } = useSearch();
-  const { history, addToHistory, clearHistory, removeFromHistory } = useSearchHistory();
+  const {
+    isSearching,
+    searchType,
+    query,
+    results,
+    progress,
+    startSearch,
+    stopSearch,
+    clearResults,
+  } = useSearch();
+  const { history, addToHistory, clearHistory, removeFromHistory } =
+    useSearchHistory();
 
   const handleSearchSubmit = async (searchQuery: string, type: SearchType) => {
     try {
@@ -44,7 +55,9 @@ const App: React.FC = () => {
     {
       key: '/',
       callback: () => {
-        const input = document.querySelector('.search-input') as HTMLInputElement;
+        const input = document.querySelector(
+          '.search-input'
+        ) as HTMLInputElement;
         if (input && !isSearching) {
           input.focus();
         }
@@ -73,16 +86,16 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className='app-loading' role="status" aria-live="polite">
-        <div className='loading-spinner' aria-hidden="true"></div>
-        <p className='loading-text'>{t('common:message.loading')}</p>
-        <p className='loading-subtext'>{t('common:message.pleaseWait')}</p>
+      <div className="app-loading" role="status" aria-live="polite">
+        <div className="loading-spinner" aria-hidden="true"></div>
+        <p className="loading-text">{t('common:message.loading')}</p>
+        <p className="loading-subtext">{t('common:message.pleaseWait')}</p>
       </div>
     );
   }
 
   return (
-    <div className='app'>
+    <div className="app">
       {/* Toast notification container */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -102,37 +115,43 @@ const App: React.FC = () => {
       </a>
 
       {/* Main application content */}
-      <main className='app-main' id="main-content">
-        <div className='container'>
+      <main className="app-main" id="main-content">
+        <div className="container">
           {/* Top toolbar */}
           <header role="banner">
-            <div className='app-toolbar'>
-              <button 
-                className='toolbar-title-button'
+            <div className="app-toolbar">
+              <button
+                className="toolbar-title-button"
                 onClick={() => setShowAbout(true)}
                 aria-label={`${t('common:app.name')} - ${t('common:label.about')}`}
                 title={t('common:label.about')}
               >
-                <h1 className='toolbar-title'>
-                  <img 
+                <h1 className="toolbar-title">
+                  <img
                     src={logoImage}
                     alt={`${t('common:app.name')} Logo`}
-                    className='app-logo'
+                    className="app-logo"
                     aria-hidden="true"
                   />
-                  <span className='app-name'>{t('common:app.name')}</span>
+                  <span className="app-name">{t('common:app.name')}</span>
                 </h1>
               </button>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  alignItems: 'center',
+                }}
+              >
                 {import.meta.env.DEV && (
-                  <LanguageSwitcher 
-                    variant="dropdown" 
+                  <LanguageSwitcher
+                    variant="dropdown"
                     size="small"
-                    onError={(errorMsg) => error(`Language Error: ${errorMsg}`)}
+                    onError={errorMsg => error(`Language Error: ${errorMsg}`)}
                   />
                 )}
-                <button 
-                  className='about-button' 
+                <button
+                  className="about-button"
                   onClick={() => setShowAbout(true)}
                   aria-label={t('common:label.about')}
                 >
@@ -141,7 +160,7 @@ const App: React.FC = () => {
               </div>
             </div>
             {/* Search form */}
-            <section className='search-section'>
+            <section className="search-section">
               <SearchForm
                 isSearching={isSearching}
                 searchType={searchType}
@@ -152,7 +171,7 @@ const App: React.FC = () => {
                 onRemoveFromHistory={removeFromHistory}
                 onClearHistory={clearHistory}
                 onError={error}
-                onWarning={(msg) => info(msg)}
+                onWarning={msg => info(msg)}
               />
             </section>
           </header>

@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LANGUAGE_CONFIG, type SupportedLanguage, normalizeLanguage } from '../i18n/types';
+import {
+  LANGUAGE_CONFIG,
+  type SupportedLanguage,
+  normalizeLanguage,
+} from '../i18n/types';
 
 interface UseLanguageReturn {
   currentLanguage: SupportedLanguage;
@@ -24,27 +28,30 @@ export const useLanguage = (): UseLanguageReturn => {
   const currentLanguage = normalizeLanguage(i18n.language || 'en');
 
   // Use useMemo to cache available languages list
-  const availableLanguages = useMemo(() => 
-    Object.entries(LANGUAGE_CONFIG).map(([code, config]) => ({
-      code: code as SupportedLanguage,
-      name: config.name,
-      nativeName: config.nativeName,
-      flag: config.flag,
-    }))
-  , []);
+  const availableLanguages = useMemo(
+    () =>
+      Object.entries(LANGUAGE_CONFIG).map(([code, config]) => ({
+        code: code as SupportedLanguage,
+        name: config.name,
+        nativeName: config.nativeName,
+        flag: config.flag,
+      })),
+    []
+  );
 
   const setLanguage = async (language: SupportedLanguage): Promise<void> => {
     if (language === currentLanguage) return;
 
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // i18n.changeLanguage will automatically trigger languageChanged event
       // The listener in index.ts will handle localStorage and HTML lang attribute updates
       await i18n.changeLanguage(language);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to change language';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to change language';
       console.error('Failed to change language:', err);
       setError(errorMessage);
     } finally {

@@ -6,7 +6,7 @@ import type {
   SearchProgressPayload,
   ExportOptions,
   SearchType,
-  AppInfo
+  AppInfo,
 } from '../types';
 
 // Tauri API service class
@@ -66,7 +66,7 @@ export class TauriApiService {
         maxConcurrentRequests: options?.maxConcurrentRequests,
         timeoutSeconds: options?.timeoutSeconds,
         excludeNsfw: options?.excludeNsfw,
-        categoryFilter: options?.categoryFilter
+        categoryFilter: options?.categoryFilter,
       });
     } catch (error) {
       console.error('Error starting search:', error);
@@ -149,8 +149,10 @@ export class TauriApiService {
   /**
    * Listen for search update events
    */
-  onSearchUpdate(callback: (payload: SearchUpdatePayload) => void): Promise<() => void> {
-    return listen('search-update', (event) => {
+  onSearchUpdate(
+    callback: (payload: SearchUpdatePayload) => void
+  ): Promise<() => void> {
+    return listen('search-update', event => {
       callback(event.payload as SearchUpdatePayload);
     });
   }
@@ -158,8 +160,10 @@ export class TauriApiService {
   /**
    * Listen for search completion events
    */
-  onSearchFinished(callback: (payload: SearchFinished) => void): Promise<() => void> {
-    return listen('search-finished', (event) => {
+  onSearchFinished(
+    callback: (payload: SearchFinished) => void
+  ): Promise<() => void> {
+    return listen('search-finished', event => {
       callback(event.payload as SearchFinished);
     });
   }
@@ -167,8 +171,10 @@ export class TauriApiService {
   /**
    * Listen for search progress events
    */
-  onSearchProgress(callback: (payload: SearchProgressPayload) => void): Promise<() => void> {
-    return listen('search-progress', (event) => {
+  onSearchProgress(
+    callback: (payload: SearchProgressPayload) => void
+  ): Promise<() => void> {
+    return listen('search-progress', event => {
       callback(event.payload as SearchProgressPayload);
     });
   }
@@ -177,7 +183,7 @@ export class TauriApiService {
    * Listen for search error events
    */
   onSearchError(callback: (error: string) => void): Promise<() => void> {
-    return listen('search-error', (event) => {
+    return listen('search-error', event => {
       callback(event.payload as string);
     });
   }
@@ -225,8 +231,8 @@ export class TauriApiService {
           format: options.format,
           username: options.username,
           results: options.results,
-          timestamp: options.timestamp
-        }
+          timestamp: options.timestamp,
+        },
       });
       return filePath;
     } catch (error) {
@@ -252,4 +258,5 @@ export class TauriApiService {
 export const tauriApi = TauriApiService.getInstance();
 
 // Export convenience functions
-export const exportResults = (options: ExportOptions) => tauriApi.exportResults(options);
+export const exportResults = (options: ExportOptions) =>
+  tauriApi.exportResults(options);

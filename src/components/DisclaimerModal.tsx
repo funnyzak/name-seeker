@@ -5,7 +5,7 @@ import type { DisclaimerModalProps } from '../types';
 const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
   isOpen,
   onAccept,
-  onDecline
+  onDecline,
 }) => {
   const { t } = useTranslation('modals');
 
@@ -27,7 +27,11 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
           <div className="disclaimer-section">
             <h3>{t('modals:disclaimer.sections.terms.title')}</h3>
             <ul>
-              {(t('modals:disclaimer.sections.terms.items', { returnObjects: true }) as string[]).map((item, index) => (
+              {(
+                t('modals:disclaimer.sections.terms.items', {
+                  returnObjects: true,
+                }) as string[]
+              ).map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
@@ -45,16 +49,10 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
         </div>
 
         <div className="modal-footer">
-          <button
-            className="btn btn-decline"
-            onClick={onDecline}
-          >
+          <button className="btn btn-decline" onClick={onDecline}>
             {t('modals:disclaimer.buttons.decline')}
           </button>
-          <button
-            className="btn btn-accept"
-            onClick={onAccept}
-          >
+          <button className="btn btn-accept" onClick={onAccept}>
             {t('modals:disclaimer.buttons.accept')}
           </button>
         </div>

@@ -4,29 +4,35 @@ import SearchHistory from './SearchHistory';
 import { SearchType } from '../types';
 import type { SearchFormProps } from '../types';
 
-const SearchForm: React.FC<SearchFormProps> = ({ 
+const SearchForm: React.FC<SearchFormProps> = ({
   isSearching,
   searchType: initialSearchType,
-  onSubmit, 
+  onSubmit,
   onStopSearch,
   searchHistory,
   onAddToHistory,
   onRemoveFromHistory,
   onClearHistory,
   onError,
-  onWarning
+  onWarning,
 }) => {
   const { t } = useTranslation(['search', 'common']);
   const [query, setQuery] = useState('');
-  const [searchType, setSearchType] = useState<SearchType>(initialSearchType || SearchType.USERNAME);
+  const [searchType, setSearchType] = useState<SearchType>(
+    initialSearchType || SearchType.USERNAME
+  );
   const [showHistory, setShowHistory] = useState(false);
+  const [justSelectedFromHistory, setJustSelectedFromHistory] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close history when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setShowHistory(false);
       }
     };
@@ -52,7 +58,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (emailRegex.test(query.trim())) {
-     setSearchType(SearchType.EMAIL);
+      setSearchType(SearchType.EMAIL);
     } else {
       setSearchType(SearchType.USERNAME);
     }
@@ -66,12 +72,12 @@ const SearchForm: React.FC<SearchFormProps> = ({
     }
 
     setShowHistory(false);
-    
+
     // Add to search history
     if (onAddToHistory) {
       onAddToHistory(query.trim());
     }
-    
+
     onSubmit(query.trim(), searchType);
   };
 
@@ -85,15 +91,23 @@ const SearchForm: React.FC<SearchFormProps> = ({
   // };
 
   const handleInputFocus = () => {
-    if (searchHistory && searchHistory.length > 0) {
+    if (searchHistory && searchHistory.length > 0 && !justSelectedFromHistory) {
       setShowHistory(true);
+    }
+    if (justSelectedFromHistory) {
+      setTimeout(() => {
+        setJustSelectedFromHistory(false);
+      }, 200);
     }
   };
 
   const handleHistorySelect = (selectedQuery: string) => {
     setQuery(selectedQuery);
     setShowHistory(false);
-    inputRef.current?.focus();
+    setJustSelectedFromHistory(true);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   const handleHistoryRemove = (queryToRemove: string) => {
@@ -139,13 +153,21 @@ const SearchForm: React.FC<SearchFormProps> = ({
               value={query}
               onChange={handleInputChange}
               onFocus={handleInputFocus}
-              placeholder={searchType === SearchType.USERNAME ? t('search:form.inputPlaceholder') : t('search:form.inputPlaceholder')}
+              placeholder={
+                searchType === SearchType.USERNAME
+                  ? t('search:form.inputPlaceholder')
+                  : t('search:form.inputPlaceholder')
+              }
               className="search-input"
               disabled={isSearching}
               autoFocus
-              aria-label={searchType === SearchType.USERNAME ? t('search:form.inputLabel') : t('search:form.inputLabel')}
+              aria-label={
+                searchType === SearchType.USERNAME
+                  ? t('search:form.inputLabel')
+                  : t('search:form.inputLabel')
+              }
             />
-            
+
             {/* Search history dropdown */}
             <SearchHistory
               history={searchHistory || []}
@@ -159,21 +181,27 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
         {/* Button group */}
         <div className="button-group-compact">
-         { !isSearching && <button
-            type="submit"
-            disabled={isSearching || !query.trim()}
-            className={`search-button-compact ${isSearching ? 'searching' : ''}`}
-            aria-label={isSearching ? t('common:status.loading') : t('search:form.searchButton')}
-          >
-            {isSearching ? (
-              <>
-                <div className="spinner" aria-hidden="true"></div>
-                {t('common:status.loading')}
-              </>
-            ) : (
-              t('search:form.searchButton')
-            )}
-          </button>}
+          {!isSearching && (
+            <button
+              type="submit"
+              disabled={isSearching || !query.trim()}
+              className={`search-button-compact ${isSearching ? 'searching' : ''}`}
+              aria-label={
+                isSearching
+                  ? t('common:status.loading')
+                  : t('search:form.searchButton')
+              }
+            >
+              {isSearching ? (
+                <>
+                  <div className="spinner" aria-hidden="true"></div>
+                  {t('common:status.loading')}
+                </>
+              ) : (
+                t('search:form.searchButton')
+              )}
+            </button>
+          )}
 
           {isSearching && (
             <button
@@ -182,7 +210,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
               className="stop-button-compact"
               aria-label={t('search:form.stopButton')}
             >
-              <div className="stop-icon" aria-hidden="true">⏹</div>
+              <div className="stop-icon" aria-hidden="true">
+                ⏹
+              </div>
               {t('search:form.stopButton')}
             </button>
           )}

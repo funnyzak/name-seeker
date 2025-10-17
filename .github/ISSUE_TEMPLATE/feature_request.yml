@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        We're always looking for suggestions on how we could improve Name Seeker!
+        We're always looking for suggestions on how we could improve NameSeeker!
   - type: textarea
     id: problem
     attributes:

@@ -290,10 +290,19 @@ const result: SearchResult = {
 
 ## 📝 Code Quality
 
-### Code Style
-- Use Prettier to format code
-- Use ESLint to check code quality
-- Maintain consistent indentation and naming
+### Code Style and Linting
+- Use Prettier to format code consistently
+- Use ESLint to check code quality and enforce rules
+- Follow TypeScript strict mode guidelines
+- Maintain consistent indentation and naming conventions
+- Run `npm run lint:fix` to auto-fix ESLint issues
+- Run `npm run format` to format code with Prettier
+
+### Development Workflow
+- Run `npm run ci` before committing to ensure code quality
+- Use `npm run type-check` to verify TypeScript types
+- Use `npm run lint` to check for code issues
+- Use `npm run format:check` to verify code formatting
 
 ### Comment Standards
 - Add comments for complex logic
