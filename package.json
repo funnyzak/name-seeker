@@ -1,6 +1,6 @@
 {
   "name": "name-seeker",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Name Seeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.",
   "type": "module",
   "private": false,
