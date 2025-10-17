@@ -25,6 +25,9 @@
     "osint",
     "cross-platform"
   ],
+  "overrides": {
+     "rollup": "^4.0.0"
+   },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
