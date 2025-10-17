@@ -5,10 +5,10 @@ NameSeeker is a powerful username search tool inspired by OSINT tools. It provid
 ## Development
 
 ```bash
-# Frontend-only development (Vite dev server on port 1420)
+# Frontend-only development
 npm run dev
 
-# Full application development (recommended)
+# Full application development
 npm run tauri dev
 
 # Code Quality Tools
@@ -39,3 +39,7 @@ This tool is intended for educational and legitimate OSINT (Open Source Intellig
 - Not use the tool for malicious purposes
 
 The developers are not responsible for misuse or abuse of this tool.
+
+## License
+
+MIT License.
