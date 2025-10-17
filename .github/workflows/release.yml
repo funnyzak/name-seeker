@@ -25,6 +25,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: false
+          name: "Name Seeker v${{ github.ref_name }}"
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
