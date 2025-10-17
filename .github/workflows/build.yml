@@ -57,7 +57,7 @@ jobs:
       - name: Install Dependencies
         run: |
           npm cache clean --force
-          npm ci --include=optional
+          npm install --include=optional
 
       - name: Build Frontend
         run: npm run build
