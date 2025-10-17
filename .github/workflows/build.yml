@@ -9,7 +9,22 @@ permissions:
   contents: write
 
 jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.github_release.outputs.changelog }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: changelog
     strategy:
       fail-fast: false
       matrix:
@@ -63,12 +78,12 @@ jobs:
       - name: Install Rollup for Ubuntu
         if: matrix.platform.os == 'ubuntu-latest'
         run: |
-          npm install --save-dev @rollup/rollup-linux-x64-gnu
+          npm install --save-dev @rollup/rollup-linux-x64-gnu @tauri-apps/cli-linux-x64-gnu
 
       - name: Install Rollup for Windows
         if: matrix.platform.os == 'windows-latest'
         run: |
-          npm install --save-dev @rollup/rollup-windows-x64-msvc
+          npm install --save-dev @rollup/rollup-windows-x64-msvc @tauri-apps/cli-windows-x64-msvc
 
       - name: Build Frontend
         run: npm run build
@@ -81,7 +96,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Name Seeker v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseBody: ${{ needs.changelog.outputs.changelog }}
           releaseDraft: true
           prerelease: false
           args: --target ${{ matrix.platform.rust_target }}
