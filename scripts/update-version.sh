@@ -139,13 +139,18 @@ update_cargo_toml() {
     
     print_info "Updating $file..."
     
-    # Check operating system to use compatible sed command
+    # Update version in [package] section specifically
+    # This ensures we only update the package version, not dependency versions
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        sed -i '' "0,/^version = .*$/s//version = \"$version\"/" "$file"
+        sed -i '' '/^\[package\]/,/^\[/ {
+            /^version = /s/version = ".*"/version = "'"$version"'"/
+        }' "$file"
     else
         # Linux
-        sed -i "0,/^version = .*$/s//version = \"$version\"/" "$file"
+        sed -i '/^\[package\]/,/^\[/ {
+            /^version = /s/version = ".*"/version = "'"$version"'"/
+        }' "$file"
     fi
     
     print_success "Updated $file"
