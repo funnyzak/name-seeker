@@ -68,7 +68,7 @@ jobs:
       - name: Install Rollup for Windows
         if: matrix.platform.os == 'windows-latest'
         run: |
-          npm install --save-dev @rollup/rollup-win32-x64-msvc
+          npm install --save-dev @rollup/rollup-win32-x64-msvc @tauri-apps/cli-win32-x64-msvc
 
       - name: Build Frontend
         run: npm run build
