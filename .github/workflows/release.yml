@@ -9,7 +9,28 @@ permissions:
   contents: write
 
 jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      release-id: ${{ steps.create-release.outputs.id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.ref }}
+
+      - name: Release
+        id: create-release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
+    needs: release
     strategy:
       fail-fast: false
       matrix:
@@ -79,15 +100,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
+          releaseId: ${{ needs.release.outputs.release-id }}
           tagName: ${{ github.ref_name }}
           releaseName: 'Name Seeker v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          # releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
           args: --target ${{ matrix.platform.rust_target }}
 
   notify:
-    needs: build
+    needs: [release, build]
     runs-on: ubuntu-latest
     if: always()
     steps:
