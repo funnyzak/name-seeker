@@ -86,8 +86,13 @@ jobs:
           prerelease: false
           args: --target ${{ matrix.platform.rust_target }}
 
+  notify:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
       - name: Send Success Notification
-        if: success()
+        if: needs.build.result == 'success'
         run: |
           curl -X POST \
           -F "tag=ycgo" \
@@ -96,12 +101,11 @@ jobs:
           📦 Application Information
           • Name: [NameSeeker](https://github.com/${{ github.repository }})
           • Version: ${{ github.ref_name }}
-          • Platform: ${{ matrix.platform.rust_target }}
+          • Platforms: All targets built successfully
 
           💻 Build Details
-          • OS: ${{ matrix.platform.os }}
-          • Target: ${{ matrix.platform.rust_target }}
           • Status: ✅ Success
+          • All platforms completed
 
           ⏰ Build Time
           • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
@@ -113,7 +117,7 @@ jobs:
           "${{ secrets.APPRISE_HTTP_URL }}"
 
       - name: Send Failure Notification
-        if: failure()
+        if: needs.build.result == 'failure'
         run: |
           curl -X POST \
           -F "tag=ycgo" \
@@ -122,12 +126,11 @@ jobs:
           📦 Application Information
           • Name: [NameSeeker](https://github.com/${{ github.repository }})
           • Version: ${{ github.ref_name }}
-          • Platform: ${{ matrix.platform.rust_target }}
+          • Status: Build failed on one or more platforms
 
           💻 Build Details
-          • OS: ${{ matrix.platform.os }}
-          • Target: ${{ matrix.platform.rust_target }}
           • Status: ❌ Failed
+          • Check individual platform logs for details
 
           ⏰ Build Time
           • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
