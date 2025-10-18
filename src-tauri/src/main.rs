@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    search_my_name_lib::run()
+    name_seeker_lib::run()
 }

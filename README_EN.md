@@ -48,11 +48,11 @@ Download the latest version from [GitHub Releases](https://github.com/funnyzak/n
   <table>
     <tr>
           <td align="center">
-        <img src="https://github.com/user-attachments/assets/6c997443-a241-4955-98ec-631c14bfcd85" alt="NameSeeker Search Results" width="400"/>
+        <img src="https://github.com/user-attachments/assets/5b4d2e9e-a821-4a2d-9426-d06ed02abc5b" alt="NameSeeker Search Results" width="400"/>
         <p><em>Submit Username Search</em></p>
       </td>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/6cb7d988-f280-4aa5-af08-e024f9f01f39" alt="NameSeeker Main Interface" width="400"/>
+        <img src="https://github.com/user-attachments/assets/032da5d6-9333-4e50-a4b7-8bfb519ad34e" alt="NameSeeker Main Interface" width="400"/>
         <p><em>Username Search Results</em></p>
       </td>
     </tr>

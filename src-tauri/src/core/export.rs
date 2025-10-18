@@ -23,7 +23,7 @@ pub fn export_results(options: ExportOptions) -> Result<String, AppError> {
         .unwrap_or_else(|| chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string());
 
     let filename = format!(
-        "search_my_name_{}_{}.{}",
+        "name_seeker_{}_{}.{}",
         options.username,
         timestamp,
         match options.format {
