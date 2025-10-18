@@ -1,0 +1,322 @@
+---
+globs: *.ts,*.tsx
+description: React and TypeScript Development Rules
+---
+
+# React + TypeScript Development Rules
+
+## 🎯 Component Development Standards
+
+### Function Components First
+- Use function components and React Hooks
+- Avoid class components
+- Use PascalCase for component names
+
+```typescript
+// ✅ Correct
+const SearchForm: React.FC<SearchFormProps> = ({ onSubmit, isSearching }) => {
+  // Component logic
+};
+
+// ❌ Avoid
+class SearchForm extends React.Component<SearchFormProps> {
+  // Class component logic
+}
+```
+
+### TypeScript Type Definitions
+- All props must have type definitions
+- Use interfaces for complex types
+- Export types for use by other components
+
+```typescript
+// ✅ Correct type definitions
+interface SearchFormProps {
+  onSubmit: (query: string, type: SearchType) => void;
+  isSearching: boolean;
+  searchType: SearchType;
+}
+
+// ✅ Use union types
+type SearchType = 'username' | 'email';
+```
+
+## 🪝 Hook Development Standards
+
+### Custom Hook Naming
+- Start with `use`
+- Describe the Hook's functionality
+- Return objects instead of arrays (unless it's a state pair)
+
+```typescript
+// ✅ Correct Hook definition
+export const useSearch = () => {
+  const [isSearching, setIsSearching] = useState(false);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  
+  return {
+    isSearching,
+    results,
+    startSearch,
+    stopSearch
+  };
+};
+```
+
+### Hook Dependency Management
+- Use `useCallback` to optimize function references
+- Use `useMemo` to optimize computed values
+- Set dependency arrays correctly
+
+```typescript
+// ✅ Correct dependency management
+const handleSubmit = useCallback((query: string, type: SearchType) => {
+  // Handle logic
+}, [onSubmit, isSearching]);
+
+const filteredResults = useMemo(() => {
+  return results.filter(result => result.status === 'found');
+}, [results]);
+```
+
+## 📦 Component Organization
+
+### Component File Structure
+- One component per file
+- Related components in the same directory
+- Use `index.ts` for unified exports
+
+```typescript
+// components/index.ts
+export { default as SearchForm } from './SearchForm';
+export { default as ResultsDisplay } from './ResultsDisplay';
+export { default as ProgressIndicator } from './ProgressIndicator';
+```
+
+### Component Responsibility Separation
+- UI components only handle rendering
+- Business logic in Hooks
+- Data fetching in service layer
+
+```typescript
+// ✅ Component only handles UI
+const SearchForm: React.FC<SearchFormProps> = ({ onSubmit, isSearching }) => {
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* UI logic */}
+    </form>
+  );
+};
+
+// ✅ Business logic in Hook
+const useSearch = () => {
+  const startSearch = async (query: string) => {
+    // Business logic
+  };
+  
+  return { startSearch };
+};
+```
+
+## 🎨 Styling and CSS
+
+### CSS Class Naming
+- Use kebab-case
+- Semantic naming
+- Avoid deep nesting
+
+```css
+/* ✅ Correct class naming */
+.search-form {
+  /* styles */
+}
+
+.search-form__input {
+  /* child element styles */
+}
+
+.search-form--loading {
+  /* modifier styles */
+}
+```
+
+### Responsive Design
+- Use CSS variables to define themes
+- Support mobile and desktop
+- Use media queries
+
+```css
+/* ✅ Responsive design */
+.app {
+  --primary-color: #007bff;
+  --spacing: 1rem;
+}
+
+@media (max-width: 768px) {
+  .search-form {
+    padding: var(--spacing);
+  }
+}
+```
+
+## 🔧 State Management
+
+### State Structure Design
+- Use `useState` for local state
+- Use `useReducer` for complex state
+- Avoid excessive state nesting
+
+```typescript
+// ✅ Correct state structure
+interface SearchState {
+  isSearching: boolean;
+  results: SearchResult[];
+  progress: SearchProgress;
+  error: string | null;
+}
+
+const [searchState, setSearchState] = useState<SearchState>({
+  isSearching: false,
+  results: [],
+  progress: { percentage: 0, currentSite: null },
+  error: null
+});
+```
+
+### State Update Patterns
+- Use functional updates
+- Avoid direct state mutation
+- Use spread operator
+
+```typescript
+// ✅ Correct state updates
+setSearchState(prev => ({
+  ...prev,
+  isSearching: true,
+  error: null
+}));
+```
+
+## 🚀 Performance Optimization
+
+### Component Optimization
+- Use `React.memo` to avoid unnecessary re-renders
+- Use `useCallback` and `useMemo` for performance optimization
+- Avoid creating objects in render
+
+```typescript
+// ✅ Performance optimization
+const SearchForm = React.memo<SearchFormProps>(({ onSubmit, isSearching }) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(query, type);
+  }, [onSubmit, query, type]);
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Component content */}
+    </form>
+  );
+});
+```
+
+### Async Operations
+- Use `useEffect` to handle side effects
+- Clean up async operations correctly
+- Handle loading and error states
+
+```typescript
+// ✅ Correct async operations
+useEffect(() => {
+  let isCancelled = false;
+  
+  const fetchData = async () => {
+    try {
+      const data = await api.getData();
+      if (!isCancelled) {
+        setData(data);
+      }
+    } catch (error) {
+      if (!isCancelled) {
+        setError(error.message);
+      }
+    }
+  };
+  
+  fetchData();
+  
+  return () => {
+    isCancelled = true;
+  };
+}, []);
+```
+
+## 🧪 Error Handling
+
+### Error Boundaries
+- Use error boundaries to catch component errors
+- Provide friendly error messages
+- Log error information
+
+```typescript
+// ✅ Error handling
+const [error, setError] = useState<string | null>(null);
+
+const handleError = useCallback((error: Error) => {
+  console.error('Search error:', error);
+  setError(error.message);
+}, []);
+```
+
+### Type Safety
+- Use strict TypeScript configuration
+- Avoid using `any` type
+- Use type assertions carefully
+
+```typescript
+// ✅ Type safety
+interface SearchResult {
+  site: string;
+  url: string;
+  status: 'found' | 'not_found' | 'error';
+}
+
+const result: SearchResult = {
+  site: 'example.com',
+  url: 'https://example.com/user',
+  status: 'found'
+};
+```
+
+## 📝 Code Quality
+
+### Code Style and Linting
+- Use Prettier to format code consistently
+- Use ESLint to check code quality and enforce rules
+- Follow TypeScript strict mode guidelines
+- Maintain consistent indentation and naming conventions
+- Run `npm run lint:fix` to auto-fix ESLint issues
+- Run `npm run format` to format code with Prettier
+
+### Development Workflow
+- Run `npm run ci` before committing to ensure code quality
+- Use `npm run type-check` to verify TypeScript types
+- Use `npm run lint` to check for code issues
+- Use `npm run format:check` to verify code formatting
+
+### Comment Standards
+- Add comments for complex logic
+- Use JSDoc comments for functions
+- Avoid obvious comments
+
+```typescript
+/**
+ * Start search operation
+ * @param query Search query
+ * @param type Search type
+ * @returns Promise<void>
+ */
+const startSearch = async (query: string, type: SearchType): Promise<void> => {
+  // Implementation logic
+};
+```

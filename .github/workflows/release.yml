@@ -1,0 +1,171 @@
+name: Release App
+on:
+  push:
+    tags:
+      - '*'
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      release-id: ${{ steps.create-release.outputs.id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.ref }}
+
+      - name: Release
+        id: create-release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          name: 'NameSeeker v${{ github.ref_name }}'
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - os: macos-latest
+            rust_target: aarch64-apple-darwin
+          - os: macos-latest
+            rust_target: x86_64-apple-darwin
+          - os: ubuntu-latest
+            rust_target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            rust_target: x86_64-pc-windows-msvc
+
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.rust_target }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Ubuntu Dependencies
+        if: matrix.platform.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install Dependencies
+        run: |
+          npm cache clean --force
+          npm install --include=optional
+
+      - name: Install Rollup for Ubuntu
+        if: matrix.platform.os == 'ubuntu-latest'
+        run: |
+          npm install --save-dev @rollup/rollup-linux-x64-gnu @tauri-apps/cli-linux-x64-gnu
+
+      - name: Install Rollup for Windows
+        if: matrix.platform.os == 'windows-latest'
+        run: |
+          npm install --save-dev @rollup/rollup-win32-x64-msvc @tauri-apps/cli-win32-x64-msvc
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Build Tauri App
+        uses: tauri-apps/tauri-action@v0.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        with:
+          releaseId: ${{ needs.release.outputs.release-id }}
+          tagName: ${{ github.ref_name }}
+          releaseName: 'NameSeeker v__VERSION__'
+          # releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false
+          args: --target ${{ matrix.platform.rust_target }}
+
+  notify:
+    needs: [release, build]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send Success Notification
+        if: needs.build.result == 'success'
+        run: |
+          curl -X POST \
+          -F "tag=ycgo" \
+          -F "body=🚀 NameSeeker Release Build Success
+
+          📦 Application Information
+          • Name: [NameSeeker](https://github.com/${{ github.repository }})
+          • Version: ${{ github.ref_name }}
+          • Platforms: All targets built successfully
+
+          💻 Build Details
+          • Status: ✅ Success
+          • All platforms completed
+
+          ⏰ Build Time
+          • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
+
+          📎 Related Links
+          • [Release Page](https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }})
+          • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          • [Repository](https://github.com/${{ github.repository }})" \
+          "${{ secrets.APPRISE_HTTP_URL }}"
+
+      - name: Send Failure Notification
+        if: needs.build.result == 'failure'
+        run: |
+          curl -X POST \
+          -F "tag=ycgo" \
+          -F "body=❌ NameSeeker Release Build Failed
+
+          📦 Application Information
+          • Name: [NameSeeker](https://github.com/${{ github.repository }})
+          • Version: ${{ github.ref_name }}
+          • Status: Build failed on one or more platforms
+
+          💻 Build Details
+          • Status: ❌ Failed
+          • Check individual platform logs for details
+
+          ⏰ Build Time
+          • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
+
+          📎 Related Links
+          • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          • [Repository](https://github.com/${{ github.repository }})" \
+          "${{ secrets.APPRISE_HTTP_URL }}"

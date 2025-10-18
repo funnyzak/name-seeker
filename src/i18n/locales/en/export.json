@@ -1,0 +1,69 @@
+{
+  "title": "Export Results",
+  "formats": {
+    "csv": "CSV",
+    "json": "JSON",
+    "txt": "Text",
+    "pdf": "PDF"
+  },
+  "options": {
+    "title": "Export Options",
+    "includeAll": "Include All Results",
+    "includeFound": "Include Found Only",
+    "includeNotFound": "Include Not Found",
+    "includeErrors": "Include Errors",
+    "includeMetadata": "Include Metadata",
+    "includeTimestamp": "Include Timestamp",
+    "includeSearchQuery": "Include Search Query",
+    "includeProgress": "Include Progress Info"
+  },
+  "actions": {
+    "export": "Export",
+    "exporting": "Exporting...",
+    "copyToClipboard": "Copy to Clipboard",
+    "exportAsPDF": "Export as PDF",
+    "exportAsCSV": "Export as CSV",
+    "exportAsJSON": "Export as JSON",
+    "exportAsTXT": "Export as TXT",
+    "download": "Download",
+    "openFolder": "Open Folder",
+    "preview": "Preview"
+  },
+  "messages": {
+    "exporting": "Exporting",
+    "exportingResults": "Exporting results...",
+    "exported": "Results exported successfully",
+    "exportSuccess": "Successfully exported as {{format}} to {{path}}",
+    "exportFailed": "Export failed",
+    "copied": "Copied {{count}} results to clipboard",
+    "copyFailed": "Copy failed: {{error}}",
+    "openDirectoryFailed": "Failed to open directory: {{error}}",
+    "downloading": "Downloading file...",
+    "downloadComplete": "Download complete",
+    "downloadFailed": "Download failed",
+    "noResults": "No results to export",
+    "selectFormat": "Please select an export format",
+    "selectResults": "Please select results to export",
+    "exportResults": "Export search results",
+    "unknownError": "Unknown error",
+    "resultHeader": "Search Results - {{username}}\nGenerated: {{time}}\nFound {{count}} results\n\n"
+  },
+  "preview": {
+    "title": "Export Preview",
+    "filename": "Filename: {{name}}",
+    "size": "Size: {{size}}",
+    "format": "Format: {{format}}",
+    "results": "Results: {{count}}",
+    "close": "Close Preview"
+  },
+  "settings": {
+    "title": "Export Settings",
+    "defaultFormat": "Default Format",
+    "defaultFilename": "Default Filename",
+    "includeHeaders": "Include Headers",
+    "separator": "Separator",
+    "encoding": "Encoding",
+    "dateFormat": "Date Format",
+    "timeFormat": "Time Format"
+  }
+}

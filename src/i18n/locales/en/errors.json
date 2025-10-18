@@ -1,0 +1,84 @@
+{
+  "network": {
+    "connectionFailed": "Failed to connect to server",
+    "timeout": "Request timeout",
+    "dnsError": "DNS resolution failed",
+    "sslError": "SSL certificate error",
+    "proxyError": "Proxy connection failed",
+    "rateLimit": "Rate limit exceeded",
+    "serverUnavailable": "Server unavailable",
+    "networkUnreachable": "Network unreachable"
+  },
+  "validation": {
+    "invalidInput": "Invalid input provided",
+    "requiredField": "Required field is missing",
+    "invalidFormat": "Invalid format",
+    "tooShort": "Input is too short",
+    "tooLong": "Input is too long",
+    "invalidCharacters": "Invalid characters detected",
+    "invalidEmail": "Invalid email format",
+    "invalidUsername": "Invalid username format",
+    "emptyQuery": "Search query cannot be empty"
+  },
+  "file": {
+    "notFound": "File not found",
+    "accessDenied": "Access denied",
+    "readError": "Failed to read file",
+    "writeError": "Failed to write file",
+    "deleteError": "Failed to delete file",
+    "moveError": "Failed to move file",
+    "copyError": "Failed to copy file",
+    "invalidPath": "Invalid file path",
+    "diskFull": "Disk space full",
+    "permissionDenied": "Permission denied"
+  },
+  "search": {
+    "noSitesAvailable": "No sites available for search",
+    "searchInProgress": "Search already in progress",
+    "searchNotStarted": "No search in progress",
+    "invalidSearchType": "Invalid search type",
+    "searchCancelled": "Search was cancelled",
+    "searchTimeout": "Search timeout",
+    "tooManyConcurrent": "Too many concurrent requests",
+    "siteUnavailable": "Site is temporarily unavailable",
+    "blockedBySite": "Blocked by website",
+    "invalidResponse": "Invalid response from site"
+  },
+  "export": {
+    "noResults": "No results to export",
+    "invalidFormat": "Invalid export format",
+    "exportInProgress": "Export already in progress",
+    "fileCreationFailed": "Failed to create export file",
+    "dataProcessingError": "Failed to process data for export",
+    "templateError": "Export template error",
+    "encodingError": "Character encoding error"
+  },
+  "system": {
+    "outOfMemory": "Out of memory",
+    "diskSpaceLow": "Low disk space",
+    "permissionDenied": "Permission denied",
+    "resourceUnavailable": "Resource unavailable",
+    "configurationError": "Configuration error",
+    "initializationFailed": "Initialization failed",
+    "shutdownError": "Shutdown error",
+    "updateError": "Update failed"
+  },
+  "user": {
+    "actionCancelled": "Action cancelled by user",
+    "invalidSelection": "Invalid selection",
+    "confirmationRequired": "Confirmation required",
+    "sessionExpired": "Session expired",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden"
+  },
+  "general": {
+    "unknownError": "An unknown error occurred",
+    "internalError": "Internal application error",
+    "notImplemented": "Feature not implemented",
+    "deprecated": "Feature is deprecated",
+    "maintenance": "Application is under maintenance",
+    "serviceUnavailable": "Service unavailable",
+    "temporaryFailure": "Temporary failure",
+    "retryLater": "Please try again later"
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "title": "Search Results",
+  "summary": {
+    "title": "Search Summary",
+    "totalSites": "Total Sites: {{count}}",
+    "foundProfiles": "Found Profiles: {{count}}",
+    "notFound": "Not Found: {{count}}",
+    "errors": "Errors: {{count}}",
+    "pending": "Pending: {{count}}",
+    "duration": "Search Duration: {{duration}}",
+    "averageTime": "Average per site: {{time}}",
+    "found": "Found",
+    "error": "Errors",
+    "total": "Total"
+  },
+  "categories": {
+    "found": "Found Profiles",
+    "foundUsers": "Found Users",
+    "notFound": "Not Found",
+    "error": "Errors",
+    "pending": "Pending",
+    "checking": "Checking"
+  },
+  "item": {
+    "site": "Site",
+    "url": "URL",
+    "status": "Status",
+    "responseTime": "Response Time",
+    "lastChecked": "Last Checked",
+    "openProfile": "Open Profile",
+    "copyUrl": "Copy URL",
+    "visitSite": "Visit Site",
+    "checkAgain": "Check Again",
+    "clickToVisit": "Click to visit profile page",
+    "opening": "Opening...",
+    "viewProfile": "View Profile",
+    "userNotFound": "User not found",
+    "searchStopped": "Search stopped",
+    "checking": "Checking...",
+    "detailsTitle": "Details:",
+    "statusAriaLabel": "Status: {{status}}"
+  },
+  "filter": {
+    "title": "Filter Results",
+    "all": "All",
+    "found": "Found Only",
+    "notFound": "Not Found Only",
+    "error": "Errors Only",
+    "pending": "Pending Only",
+    "bySite": "Filter by Site",
+    "byCategory": "Filter by Category",
+    "byStatus": "Filter by Status",
+    "clear": "Clear Filters",
+    "placeholder": "Search results...",
+    "filterPlaceholder": "Filter results...",
+    "filterAriaLabel": "Filter search results",
+    "clearFilter": "Clear filter",
+    "clearFilterTitle": "Clear filter",
+    "showingResults": "Showing {{count}} results"
+  },
+  "sort": {
+    "title": "Sort Results",
+    "bySite": "Sort by Site",
+    "byStatus": "Sort by Status",
+    "byTime": "Sort by Time",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "default": "Default Order"
+  },
+  "actions": {
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "refresh": "Refresh Results",
+    "clear": "Clear Results",
+    "reset": "Reset",
+    "clearAriaLabel": "Clear search results",
+    "clearTitle": "Clear all search results",
+    "resultsCount": "Showing {{filtered}} of {{total}} results"
+  },
+  "empty": {
+    "title": "Start Your Search",
+    "description": "Enter a username or email to search across hundreds of websites",
+    "startSearch": "Start Search",
+    "checkSettings": "Check Settings",
+    "ariaLabel": "No search results yet",
+    "resultsAriaLabel": "Search results",
+    "features": {
+      "fastSearch": "Fast Search",
+      "multiSite": "Multi-site Coverage",
+      "export": "Export Results"
+    },
+    "shortcuts": {
+      "title": "Keyboard Shortcuts:",
+      "focus": "Focus search box",
+      "stop": "Stop search",
+      "help": "Show help"
+    }
+  },
+  "loading": {
+    "title": "Searching...",
+    "description": "Checking websites for profiles",
+    "currentSite": "Currently checking: {{site}}",
+    "progress": "Progress: {{current}}/{{total}}"
+  }
+}

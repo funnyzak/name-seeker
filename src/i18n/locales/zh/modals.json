@@ -1,0 +1,152 @@
+{
+  "disclaimer": {
+    "title": "使用条款与免责声明",
+    "subtitle": "使用本应用程序前，请阅读并接受以下条款",
+    "sections": {
+      "warning": {
+        "title": "⚠️ 重要提示",
+        "text": "本工具仅用于教育和合法的自助研究目的。使用本工具搜索用户名时，您必须遵守适用的法律法规和服务条款。"
+      },
+      "terms": {
+        "title": "📋 使用条件",
+        "items": [
+          "仅用于搜索您自己的用户名或获得明确授权的用户名",
+          "不得用于恶意目的、骚扰或侵犯他人隐私",
+          "遵守所有相关网站的条款和服务协议",
+          "尊重他人的隐私权和数字身份"
+        ]
+      },
+      "disclaimer": {
+        "title": "⚖️ 免责声明",
+        "text": "本工具按\"原样\"提供，不提供任何明示或暗示的保证。开发者不对使用本工具产生的任何后果承担责任。用户需自行承担使用风险。"
+      },
+      "privacy": {
+        "title": "🔒 隐私说明",
+        "text": "本工具仅在本地运行，不会收集、存储或传输任何个人信息。所有搜索操作都在您的设备上完成。"
+      }
+    },
+    "content": {
+      "purpose": "用途",
+      "purposeText": "本应用程序仅用于教育和道德自我研究目的。它帮助您发现自己在各个网站上的公开个人资料。",
+      "usage": "使用指南",
+      "usageText": "• 仅搜索您自己的用户名和邮箱地址\n• 不要使用此工具搜索他人的信息\n• 遵守网站服务条款和robots.txt文件\n• 负责任和道德地使用",
+      "privacy": "隐私声明",
+      "privacyText": "• 所有搜索都在您的设备本地执行\n• 不会向外部服务器发送个人数据\n• 搜索结果本地存储，可随时清除\n• 我们不收集或存储您的搜索查询",
+      "limitations": "限制",
+      "limitationsText": "• 结果可能不是100%准确\n• 某些网站可能阻止自动化请求\n• 搜索结果取决于网站可用性\n• 此工具仅用于信息目的",
+      "disclaimer": "免责声明",
+      "disclaimerText": "本应用程序按\"现状\"提供，不提供任何保证。用户有责任遵守适用法律和网站服务条款。开发者不对此工具的误用承担责任。"
+    },
+    "buttons": {
+      "accept": "我已阅读并同意",
+      "decline": "拒绝并退出"
+    }
+  },
+  "about": {
+    "title": "关于",
+    "version": "版本 {{version}}",
+    "description": "一个跨平台桌面应用程序，用于在数百个网站中发现公开个人资料。",
+    "loading": "加载中...",
+    "longDescription": "NameSeeker 是一款强大的跨平台桌面应用，可以在数百个网站上搜索用户名和邮箱，帮助你快速发现你的数字足迹。基于 WhatsMyName 项目数据，支持导出搜索结果为 PDF、CSV、JSON 等格式。",
+    "buildDate": "构建日期",
+    "author": "作者",
+    "copyright": "版权",
+    "repository": "源代码",
+    "features": {
+      "title": "主要功能",
+      "search": "在600+个网站中搜索用户名和邮箱",
+      "realtime": "实时搜索进度和结果",
+      "export": "多种格式导出结果（CSV、JSON、PDF、TXT）",
+      "filter": "高级筛选和排序选项",
+      "history": "搜索历史记录，快速访问",
+      "privacy": "本地处理 - 不向外部服务器发送数据",
+      "searching": "在数百个网站上搜索用户名和邮箱",
+      "realtimeDisplay": "实时显示搜索进度",
+      "localPrivacy": "本地运行，保护隐私",
+      "crossPlatform": "跨平台桌面应用",
+      "multipleFormats": "支持多种导出格式",
+      "smartFilter": "智能过滤和分类"
+    },
+    "technology": {
+      "title": "技术栈",
+      "frontend": "React 19 + TypeScript + Vite",
+      "backend": "Rust + Tauri 2.x",
+      "data": "WhatsMyName项目（600+网站）",
+      "communication": "Tauri事件系统，实时更新"
+    },
+    "legal": {
+      "title": "法律信息",
+      "license": "开源许可证",
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "contact": "联系信息"
+    },
+    "dataSource": {
+      "title": "数据来源",
+      "description": "本应用基于 <strong>WhatsMyName</strong> 项目的数据源，该项目维护了 600+ 个网站的搜索规则。感谢 <strong>WebBreacher</strong> 团队的开源贡献。",
+      "viewProject": "查看 WhatsMyName 项目"
+    },
+    "acknowledgments": {
+      "title": "特别感谢",
+      "description": "感谢 <strong>Blackbird</strong> 项目的启发和参考。Blackbird 是一个强大的 OSINT 工具，集成了 AI 分析功能。",
+      "viewProject": "查看 Blackbird 项目"
+    },
+    "usageNotice": {
+      "title": "使用声明",
+      "description": "本工具仅供教育和合法的自助研究目的使用。请遵守相关法律法规，负责任地使用本工具。不得用于非法用途或侵犯他人隐私。"
+    },
+    "buttons": {
+      "close": "关闭",
+      "confirm": "确定",
+      "website": "访问网站",
+      "github": "在GitHub上查看",
+      "report": "报告问题",
+      "update": "检查更新"
+    }
+  },
+  "help": {
+    "title": "帮助与支持",
+    "gettingStarted": {
+      "title": "开始使用",
+      "step1": "在搜索字段中输入用户名或邮箱地址",
+      "step2": "选择搜索类型（用户名或邮箱）",
+      "step3": "点击\"搜索\"开始搜索过程",
+      "step4": "实时查看出现的结果",
+      "step5": "以您喜欢的格式导出结果"
+    },
+    "features": {
+      "title": "功能指南",
+      "search": "搜索功能",
+      "searchText": "在600+个网站中搜索用户名和邮箱地址",
+      "results": "结果管理",
+      "resultsText": "按各种条件查看、筛选和排序搜索结果",
+      "export": "导出选项",
+      "exportText": "将结果导出为CSV、JSON、PDF或纯文本格式",
+      "history": "搜索历史",
+      "historyText": "访问您的最近搜索，节省重复查询的时间"
+    },
+    "troubleshooting": {
+      "title": "故障排除",
+      "slowSearch": "搜索很慢",
+      "slowSearchText": "尝试在设置中减少并发请求数量",
+      "noResults": "未找到结果",
+      "noResultsText": "检查用户名/邮箱是否存在，尝试不同的变体",
+      "errors": "很多错误",
+      "errorsText": "某些网站可能暂时不可用或阻止请求"
+    },
+    "shortcuts": {
+      "title": "键盘快捷键",
+      "focus": "/ - 聚焦搜索字段",
+      "stop": "Esc - 停止当前搜索",
+      "clear": "Ctrl+L - 清除结果",
+      "export": "Ctrl+E - 导出结果",
+      "help": "Ctrl+H - 显示此帮助",
+      "settings": "Ctrl+, - 打开设置"
+    },
+    "buttons": {
+      "close": "关闭",
+      "contact": "联系支持",
+      "feedback": "发送反馈"
+    }
+  }
+}

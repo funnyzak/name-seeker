@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-format:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm cache clean --force
+          npm ci
+
+      - name: Type Check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check Formatting
+        run: npm run format:check
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm cache clean --force
+          npm ci
+
+      - name: Build Frontend
+        run: npm run build
+
+  notify:
+    name: Notify
+    needs: [lint-and-format, build]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send Success Notification
+        if: needs.lint-and-format.result == 'success' && needs.build.result == 'success'
+        run: |
+          curl -X POST \
+          -F "tag=ci" \
+          -F "body=✅ NameSeeker CI Pipeline Success
+
+          📦 Application Information
+          • Name: [NameSeeker](https://github.com/${{ github.repository }})
+          • Branch: ${{ github.ref_name }}
+          • Commit: ${{ github.sha }}
+          • Author: ${{ github.actor }}
+
+          🔍 CI Results
+          • Lint & Format: ✅ Passed
+          • Build: ✅ Passed
+
+          ⏰ Build Time
+          • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
+
+          📎 Related Links
+          • [Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          • [Repository](https://github.com/${{ github.repository }})" \
+          "${{ secrets.APPRISE_HTTP_URL }}"
+
+      - name: Send Failure Notification
+        if: needs.lint-and-format.result == 'failure' || needs.build.result == 'failure'
+        run: |
+          curl -X POST \
+          -F "tag=devops" \
+          -F "body=❌ NameSeeker CI Pipeline Failed
+
+          📦 Application Information
+          • Name: [NameSeeker](https://github.com/${{ github.repository }})
+          • Branch: ${{ github.ref_name }}
+          • Commit: ${{ github.sha }}
+          • Author: ${{ github.actor }}
+
+          🔍 CI Results
+          • Lint & Format: ${{ needs.lint-and-format.result == 'success' && '✅ Passed' || '❌ Failed' }}
+          • Build: ${{ needs.build.result == 'success' && '✅ Passed' || '❌ Failed' }}
+
+          ⏰ Build Time
+          • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
+
+          📎 Related Links
+          • [Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          • [Repository](https://github.com/${{ github.repository }})" \
+          "${{ secrets.APPRISE_HTTP_URL }}"

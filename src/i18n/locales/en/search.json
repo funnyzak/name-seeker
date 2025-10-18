@@ -1,0 +1,76 @@
+{
+  "title": "Search",
+  "form": {
+    "title": "Search for Profiles",
+    "subtitle": "Enter a username or email to search across multiple platforms",
+    "inputLabel": "Search Query",
+    "inputPlaceholder": "Enter username or email...",
+    "searchTypeLabel": "Search Type",
+    "searchTypeUsername": "Username",
+    "searchTypeEmail": "Email",
+    "searchButton": "Search",
+    "stopButton": "Stop",
+    "clearButton": "Clear",
+    "historyButton": "Search History"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidUsername": "Invalid username format",
+    "invalidEmail": "Invalid email format",
+    "usernameTooShort": "Username must be at least 2 characters",
+    "usernameTooLong": "Username must be less than 50 characters",
+    "emailTooLong": "Email must be less than 100 characters",
+    "specialCharacters": "Username contains invalid characters",
+    "emptyQuery": "Please enter a search query"
+  },
+  "progress": {
+    "title": "Search Progress",
+    "currentSite": "Checking {{site}}...",
+    "checked": "Checked {{count}} of {{total}} sites",
+    "found": "Found {{count}} profiles",
+    "errors": "{{count}} errors",
+    "percentage": "{{percentage}}% complete",
+    "estimatedTime": "Estimated time remaining: {{time}}",
+    "elapsedTime": "Elapsed time: {{time}}",
+    "progressLabel": "Progress: {{checked}} / {{total}}",
+    "foundLabel": "Found: {{count}}",
+    "errorLabel": "Errors: {{count}}",
+    "searchingStatus": "Searching {{currentSite}}..."
+  },
+  "settings": {
+    "title": "Search Settings",
+    "concurrency": "Concurrent Requests",
+    "concurrencyDescription": "Number of simultaneous requests (1-50)",
+    "timeout": "Request Timeout",
+    "timeoutDescription": "Timeout in seconds (5-60)",
+    "excludeNsfw": "Exclude Adult Content",
+    "excludeNsfwDescription": "Skip websites with adult content",
+    "categoryFilter": "Category Filter",
+    "categoryFilterDescription": "Search only specific categories"
+  },
+  "history": {
+    "title": "Search History",
+    "empty": "No search history",
+    "clear": "Clear History",
+    "recent": "Recent Searches",
+    "frequent": "Frequent Searches",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this search from history?",
+    "maxItems": "Maximum 10 items",
+    "recentSearches": "Recent Searches",
+    "clearHistory": "Clear",
+    "clearHistoryAriaLabel": "Clear search history",
+    "deleteRecord": "Delete {{item}}",
+    "deleteRecordTitle": "Delete this record",
+    "searchPrefix": "Search: {{item}}"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "focus": "Focus search (/)",
+    "stop": "Stop search (Esc)",
+    "clear": "Clear results (Ctrl+L)",
+    "export": "Export results (Ctrl+E)",
+    "help": "Show help (Ctrl+H)",
+    "settings": "Open settings (Ctrl+,)"
+  }
+}

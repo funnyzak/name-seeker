@@ -1,0 +1,79 @@
+{
+  "name": "name-seeker",
+  "version": "0.2.5",
+  "description": "NameSeeker is a powerful username search tool inspired by OSINT tools. It provides a user-friendly graphical interface for discovering public profiles based on usernames, designed for educational and ethical self-research purposes.",
+  "type": "module",
+  "private": false,
+  "author": "Leon <silenceace@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/funnyzak/name-seeker",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:funnyzak/name-seeker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/funnyzak/name-seeker/issues"
+  },
+  "keywords": [
+    "tauri",
+    "react",
+    "typescript",
+    "desktop",
+    "username-search",
+    "email-search",
+    "whatsmyname",
+    "osint",
+    "cross-platform"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "update-version": "bash scripts/update-version.sh",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 50",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky",
+    "pre-commit": "lint-staged",
+    "pre-commit:check": "npm run type-check && npm run lint && npm run format:check"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-clipboard-manager": "~2.3.0",
+    "@tauri-apps/plugin-dialog": "~2.4.0",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-process": "~2.3.0",
+    "i18next": "^25.6.0",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-i18next": "^16.0.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.4",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4"
+  },
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.9.0"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "success": {
+    "searchStarted": "搜索已成功开始",
+    "searchCompleted": "搜索已成功完成",
+    "searchStopped": "搜索已停止",
+    "resultsExported": "结果导出成功",
+    "resultsCopied": "结果已复制到剪贴板",
+    "resultsCleared": "已清除搜索结果",
+    "settingsSaved": "设置保存成功",
+    "historyCleared": "搜索历史已清除",
+    "disclaimerAccepted": "免责声明已接受",
+    "languageChanged": "语言已更改为 {{language}}",
+    "fileDownloaded": "文件下载成功",
+    "clipboardCopied": "已复制到剪贴板",
+    "operationCompleted": "操作成功完成"
+  },
+  "error": {
+    "searchFailed": "搜索失败",
+    "exportFailed": "导出失败",
+    "copyFailed": "复制到剪贴板失败",
+    "downloadFailed": "下载失败",
+    "settingsSaveFailed": "保存设置失败",
+    "historyClearFailed": "清除历史失败",
+    "fileOpenFailed": "打开文件失败",
+    "clipboardCopyFailed": "复制到剪贴板失败",
+    "networkError": "网络错误",
+    "serverError": "服务器错误",
+    "timeoutError": "请求超时",
+    "unknownError": "发生未知错误",
+    "validationError": "验证错误",
+    "permissionError": "权限被拒绝",
+    "fileNotFound": "文件未找到",
+    "invalidFormat": "文件格式无效",
+    "operationFailed": "操作失败"
+  },
+  "warning": {
+    "searchInProgress": "搜索已在进行中",
+    "noResultsToExport": "没有结果可导出",
+    "unsavedChanges": "您有未保存的更改",
+    "lowDiskSpace": "磁盘空间不足",
+    "slowConnection": "检测到网络连接较慢",
+    "manyErrors": "搜索过程中发生许多错误",
+    "timeoutWarning": "某些请求超时",
+    "rateLimitWarning": "某些网站超出速率限制",
+    "incompleteResults": "搜索结果可能不完整"
+  },
+  "info": {
+    "searchStarting": "正在开始搜索...",
+    "searchProgress": "搜索进行中...",
+    "searchPaused": "搜索已暂停",
+    "searchResumed": "搜索已恢复",
+    "searchStopped": "搜索已停止",
+    "exporting": "正在导出结果...",
+    "downloading": "正在下载文件...",
+    "processing": "处理中...",
+    "loading": "加载中...",
+    "saving": "保存中...",
+    "connecting": "连接中...",
+    "updating": "更新中...",
+    "refreshing": "刷新中...",
+    "checking": "检查中...",
+    "validating": "验证中...",
+    "preparing": "准备中..."
+  },
+  "common": {
+    "close": "关闭通知",
+    "closeAriaLabel": "关闭通知"
+  }
+}

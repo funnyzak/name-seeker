@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "NameSeeker",
+  "version": "0.2.5",
+  "identifier": "com.leon.name-seeker",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "NameSeeker",
+        "minWidth": 520,
+        "minHeight": 700,
+        "maxWidth": 700,
+        "maxHeight": 900,
+        "width": 520,
+        "height": 700,
+        "decorations": true,
+        "resizable": true,
+        "center": true,
+        "hiddenTitle": false,
+        "acceptFirstMouse": true,
+        "contentProtected": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'",
+      "dangerousDisableAssetCspModification": false
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Utility",
+    "shortDescription": "Multi-platform search tool for usernames and emails",
+    "longDescription": "NameSeeker is a powerful cross-platform desktop application that searches for usernames and email addresses across hundreds of websites to help you quickly discover your digital footprint. Based on WhatsMyName project data, it supports exporting search results to PDF, CSV, JSON and other formats.",
+    "copyright": "Copyright © 2025 Funnyzak",
+    "resources": [
+      "data/*"
+    ],
+    "externalBin": [],
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "10.13",
+      "exceptionDomain": ""
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVDRTkwN0YyMDYwRDc3MDcKUldRSGR3MEc4Z2ZwWExRWWxvMjhudGFPTDJWV3NHUGN1WTl2TS9DMVpocnNXUFpmMVJUQVVlVEoK",
+      "endpoints": [
+        "https://github.com/funnyzak/name-seeker/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

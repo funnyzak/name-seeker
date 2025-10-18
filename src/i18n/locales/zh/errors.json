@@ -1,0 +1,84 @@
+{
+  "network": {
+    "connectionFailed": "连接服务器失败",
+    "timeout": "请求超时",
+    "dnsError": "DNS解析失败",
+    "sslError": "SSL证书错误",
+    "proxyError": "代理连接失败",
+    "rateLimit": "超出速率限制",
+    "serverUnavailable": "服务器不可用",
+    "networkUnreachable": "网络不可达"
+  },
+  "validation": {
+    "invalidInput": "提供的输入无效",
+    "requiredField": "缺少必填字段",
+    "invalidFormat": "格式无效",
+    "tooShort": "输入太短",
+    "tooLong": "输入太长",
+    "invalidCharacters": "检测到无效字符",
+    "invalidEmail": "邮箱格式无效",
+    "invalidUsername": "用户名格式无效",
+    "emptyQuery": "搜索查询不能为空"
+  },
+  "file": {
+    "notFound": "文件未找到",
+    "accessDenied": "访问被拒绝",
+    "readError": "读取文件失败",
+    "writeError": "写入文件失败",
+    "deleteError": "删除文件失败",
+    "moveError": "移动文件失败",
+    "copyError": "复制文件失败",
+    "invalidPath": "文件路径无效",
+    "diskFull": "磁盘空间已满",
+    "permissionDenied": "权限被拒绝"
+  },
+  "search": {
+    "noSitesAvailable": "没有可用的搜索网站",
+    "searchInProgress": "搜索已在进行中",
+    "searchNotStarted": "没有进行中的搜索",
+    "invalidSearchType": "搜索类型无效",
+    "searchCancelled": "搜索已取消",
+    "searchTimeout": "搜索超时",
+    "tooManyConcurrent": "并发请求过多",
+    "siteUnavailable": "网站暂时不可用",
+    "blockedBySite": "被网站阻止",
+    "invalidResponse": "网站响应无效"
+  },
+  "export": {
+    "noResults": "没有结果可导出",
+    "invalidFormat": "导出格式无效",
+    "exportInProgress": "导出已在进行中",
+    "fileCreationFailed": "创建导出文件失败",
+    "dataProcessingError": "处理导出数据失败",
+    "templateError": "导出模板错误",
+    "encodingError": "字符编码错误"
+  },
+  "system": {
+    "outOfMemory": "内存不足",
+    "diskSpaceLow": "磁盘空间不足",
+    "permissionDenied": "权限被拒绝",
+    "resourceUnavailable": "资源不可用",
+    "configurationError": "配置错误",
+    "initializationFailed": "初始化失败",
+    "shutdownError": "关闭错误",
+    "updateError": "更新失败"
+  },
+  "user": {
+    "actionCancelled": "用户取消了操作",
+    "invalidSelection": "选择无效",
+    "confirmationRequired": "需要确认",
+    "sessionExpired": "会话已过期",
+    "unauthorized": "未授权访问",
+    "forbidden": "访问被禁止"
+  },
+  "general": {
+    "unknownError": "发生未知错误",
+    "internalError": "应用程序内部错误",
+    "notImplemented": "功能未实现",
+    "deprecated": "功能已弃用",
+    "maintenance": "应用程序正在维护中",
+    "serviceUnavailable": "服务不可用",
+    "temporaryFailure": "临时故障",
+    "retryLater": "请稍后重试"
+  }
+}

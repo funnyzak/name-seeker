@@ -1,0 +1,152 @@
+{
+  "disclaimer": {
+    "title": "Terms of Use and Disclaimer",
+    "subtitle": "Please read and accept the following terms before using this application",
+    "sections": {
+      "warning": {
+        "title": "⚠️ Important Notice",
+        "text": "This tool is intended for educational and legitimate self-research purposes only. When using this tool to search for usernames, you must comply with applicable laws, regulations, and terms of service."
+      },
+      "terms": {
+        "title": "📋 Terms of Use",
+        "items": [
+          "Only search for your own usernames or those you are explicitly authorized to search",
+          "Do not use for malicious purposes, harassment, or privacy infringement",
+          "Comply with all relevant website terms and service agreements",
+          "Respect others' privacy rights and digital identities"
+        ]
+      },
+      "disclaimer": {
+        "title": "⚖️ Disclaimer",
+        "text": "This tool is provided 'as is' without any express or implied warranties. The developers are not liable for any consequences arising from the use of this tool. Users assume all risks."
+      },
+      "privacy": {
+        "title": "🔒 Privacy Notice",
+        "text": "This tool runs locally only and does not collect, store, or transmit any personal information. All search operations are performed on your device."
+      }
+    },
+    "buttons": {
+      "accept": "I Have Read and Agree",
+      "decline": "Decline and Exit"
+    },
+    "content": {
+      "purpose": "Purpose",
+      "purposeText": "This application is designed for educational and ethical self-research purposes only. It helps you discover your own public profiles across various websites.",
+      "usage": "Usage Guidelines",
+      "usageText": "• Only search for your own usernames and email addresses\n• Do not use this tool to search for other people's information\n• Respect website terms of service and robots.txt files\n• Use responsibly and ethically",
+      "privacy": "Privacy Notice",
+      "privacyText": "• All searches are performed locally on your device\n• No personal data is sent to external servers\n• Search results are stored locally and can be cleared at any time\n• We do not collect or store your search queries",
+      "limitations": "Limitations",
+      "limitationsText": "• Results may not be 100% accurate\n• Some websites may block automated requests\n• Search results depend on website availability\n• This tool is for informational purposes only",
+      "disclaimer": "Disclaimer",
+      "disclaimerText": "This application is provided 'as is' without warranty. Users are responsible for complying with applicable laws and website terms of service. The developers are not liable for any misuse of this tool."
+    }
+  },
+  "about": {
+    "title": "About",
+    "version": "Version {{version}}",
+    "description": "A cross-platform desktop application for discovering public profiles across hundreds of websites.",
+    "loading": "Loading...",
+    "longDescription": "NameSeeker is a powerful cross-platform desktop application that searches for usernames and emails across hundreds of websites, helping you quickly discover your digital footprint. Based on WhatsMyName project data, supports exporting search results to PDF, CSV, JSON and other formats.",
+    "buildDate": "Build Date",
+    "author": "Author",
+    "copyright": "Copyright",
+    "repository": "Repository",
+    "features": {
+      "title": "Key Features",
+      "search": "Username and email search across 600+ websites",
+      "realtime": "Real-time search progress and results",
+      "export": "Export results in multiple formats (CSV, JSON, PDF, TXT)",
+      "filter": "Advanced filtering and sorting options",
+      "history": "Search history with quick access",
+      "privacy": "Local processing - no data sent to external servers",
+      "searching": "Search usernames and emails across hundreds of websites",
+      "realtimeDisplay": "Real-time search progress display",
+      "localPrivacy": "Local operation protects privacy",
+      "crossPlatform": "Cross-platform desktop application",
+      "multipleFormats": "Support multiple export formats",
+      "smartFilter": "Smart filtering and categorization"
+    },
+    "technology": {
+      "title": "Technology Stack",
+      "frontend": "React 19 + TypeScript + Vite",
+      "backend": "Rust + Tauri 2.x",
+      "data": "WhatsMyName project (600+ websites)",
+      "communication": "Tauri event system for real-time updates"
+    },
+    "legal": {
+      "title": "Legal Information",
+      "license": "Open Source License",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact Information"
+    },
+    "dataSource": {
+      "title": "Data Source",
+      "description": "This application is based on data from the <strong>WhatsMyName</strong> project, which maintains search rules for 600+ websites. Thanks to the <strong>WebBreacher</strong> team for their open source contributions.",
+      "viewProject": "View WhatsMyName Project"
+    },
+    "acknowledgments": {
+      "title": "Special Thanks",
+      "description": "Thanks to the <strong>Blackbird</strong> project for inspiration and reference. Blackbird is a powerful OSINT tool with integrated AI analysis capabilities.",
+      "viewProject": "View Blackbird Project"
+    },
+    "usageNotice": {
+      "title": "Usage Notice",
+      "description": "This tool is for educational and legal self-research purposes only. Please comply with relevant laws and regulations, use this tool responsibly. Do not use for illegal purposes or infringe on others' privacy."
+    },
+    "buttons": {
+      "close": "Close",
+      "confirm": "Confirm",
+      "website": "Visit Website",
+      "github": "View on GitHub",
+      "report": "Report Issue",
+      "update": "Check for Updates"
+    }
+  },
+  "help": {
+    "title": "Help & Support",
+    "gettingStarted": {
+      "title": "Getting Started",
+      "step1": "Enter a username or email address in the search field",
+      "step2": "Select the search type (Username or Email)",
+      "step3": "Click 'Search' to start the search process",
+      "step4": "View results in real-time as they appear",
+      "step5": "Export results in your preferred format"
+    },
+    "features": {
+      "title": "Features Guide",
+      "search": "Search Functionality",
+      "searchText": "Search across 600+ websites for usernames and email addresses",
+      "results": "Results Management",
+      "resultsText": "View, filter, and sort search results by various criteria",
+      "export": "Export Options",
+      "exportText": "Export results to CSV, JSON, PDF, or plain text formats",
+      "history": "Search History",
+      "historyText": "Access your recent searches and save time on repeated queries"
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "slowSearch": "Search is slow",
+      "slowSearchText": "Try reducing the number of concurrent requests in settings",
+      "noResults": "No results found",
+      "noResultsText": "Check if the username/email exists and try different variations",
+      "errors": "Many errors",
+      "errorsText": "Some websites may be temporarily unavailable or blocking requests"
+    },
+    "shortcuts": {
+      "title": "Keyboard Shortcuts",
+      "focus": "/ - Focus search field",
+      "stop": "Esc - Stop current search",
+      "clear": "Ctrl+L - Clear results",
+      "export": "Ctrl+E - Export results",
+      "help": "Ctrl+H - Show this help",
+      "settings": "Ctrl+, - Open settings"
+    },
+    "buttons": {
+      "close": "Close",
+      "contact": "Contact Support",
+      "feedback": "Send Feedback"
+    }
+  }
+}

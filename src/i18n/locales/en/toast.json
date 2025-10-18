@@ -1,0 +1,69 @@
+{
+  "success": {
+    "searchStarted": "Search started successfully",
+    "searchCompleted": "Search completed successfully",
+    "searchStopped": "Search stopped",
+    "resultsExported": "Results exported successfully",
+    "resultsCopied": "Results copied to clipboard",
+    "resultsCleared": "Search results cleared",
+    "settingsSaved": "Settings saved successfully",
+    "historyCleared": "Search history cleared",
+    "disclaimerAccepted": "Disclaimer accepted",
+    "languageChanged": "Language changed to {{language}}",
+    "fileDownloaded": "File downloaded successfully",
+    "clipboardCopied": "Copied to clipboard",
+    "operationCompleted": "Operation completed successfully"
+  },
+  "error": {
+    "searchFailed": "Search failed",
+    "exportFailed": "Export failed",
+    "copyFailed": "Failed to copy to clipboard",
+    "downloadFailed": "Download failed",
+    "settingsSaveFailed": "Failed to save settings",
+    "historyClearFailed": "Failed to clear history",
+    "fileOpenFailed": "Failed to open file",
+    "clipboardCopyFailed": "Failed to copy to clipboard",
+    "networkError": "Network error occurred",
+    "serverError": "Server error occurred",
+    "timeoutError": "Request timeout",
+    "unknownError": "An unknown error occurred",
+    "validationError": "Validation error",
+    "permissionError": "Permission denied",
+    "fileNotFound": "File not found",
+    "invalidFormat": "Invalid file format",
+    "operationFailed": "Operation failed"
+  },
+  "warning": {
+    "searchInProgress": "Search is already in progress",
+    "noResultsToExport": "No results to export",
+    "unsavedChanges": "You have unsaved changes",
+    "lowDiskSpace": "Low disk space",
+    "slowConnection": "Slow network connection detected",
+    "manyErrors": "Many errors occurred during search",
+    "timeoutWarning": "Some requests timed out",
+    "rateLimitWarning": "Rate limit exceeded for some sites",
+    "incompleteResults": "Search results may be incomplete"
+  },
+  "info": {
+    "searchStarting": "Starting search...",
+    "searchProgress": "Search in progress...",
+    "searchPaused": "Search paused",
+    "searchResumed": "Search resumed",
+    "searchStopped": "Search stopped",
+    "exporting": "Exporting results...",
+    "downloading": "Downloading file...",
+    "processing": "Processing...",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "connecting": "Connecting...",
+    "updating": "Updating...",
+    "refreshing": "Refreshing...",
+    "checking": "Checking...",
+    "validating": "Validating...",
+    "preparing": "Preparing..."
+  },
+  "common": {
+    "close": "Close notification",
+    "closeAriaLabel": "Close notification"
+  }
+}
