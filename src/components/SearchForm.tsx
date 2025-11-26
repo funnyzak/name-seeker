@@ -56,20 +56,21 @@ const SearchForm: React.FC<SearchFormProps> = ({
       return;
     }
 
+    const trimmed = query.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(query.trim())) {
-      setSearchType(SearchType.EMAIL);
-    } else {
-      setSearchType(SearchType.USERNAME);
-    }
+    const detectedType = emailRegex.test(trimmed)
+      ? SearchType.EMAIL
+      : SearchType.USERNAME;
 
     // Basic length validation
-    if (searchType === SearchType.USERNAME && query.trim().length < 2) {
+    if (detectedType === SearchType.USERNAME && trimmed.length < 2) {
       if (onWarning) {
         onWarning(t('search:validation.usernameTooShort'));
       }
       return;
     }
+
+    setSearchType(detectedType);
 
     setShowHistory(false);
 
@@ -78,7 +79,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       onAddToHistory(query.trim());
     }
 
-    onSubmit(query.trim(), searchType);
+    onSubmit(trimmed, detectedType);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

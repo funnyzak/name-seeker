@@ -1,6 +1,6 @@
 [package]
 name = "name-seeker"
-version = "0.2.5"
+version = "0.2.6"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -45,4 +45,4 @@ sha2 = "0.10"
 md-5 = "0.10"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-process = "2"
-
+scraper = "0.19"

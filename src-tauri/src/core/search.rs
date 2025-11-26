@@ -4,7 +4,7 @@ use crate::core::models::{
     SearchUpdatePayload,
 };
 use crate::core::sites::SitesManager;
-use crate::core::utils::{extract_html_data, extract_json_data, random_delay_ms};
+use crate::core::utils::{append_log_line, extract_html_data, extract_json_data, random_delay_ms};
 use futures::future::join_all;
 use reqwest::Client;
 use serde_json::Value;
@@ -17,17 +17,27 @@ use tokio::time::timeout;
 pub struct SearchEngine {
     client: Client,
     config: SearchConfig,
+    user_agents: Vec<String>,
 }
 
 impl SearchEngine {
     /// Create a new search engine instance
     pub fn new(config: SearchConfig) -> AppResult<Self> {
-        let client = Client::builder()
+        let mut builder = Client::builder()
             .user_agent(&config.user_agent)
-            .timeout(Duration::from_secs(config.timeout_seconds))
-            .build()?;
+            .timeout(Duration::from_secs(config.timeout_seconds));
 
-        Ok(Self { client, config })
+        if let Some(proxy_url) = &config.proxy {
+            builder = builder.proxy(reqwest::Proxy::all(proxy_url)?);
+        }
+
+        let client = builder.build()?;
+
+        Ok(Self {
+            client,
+            user_agents: config.user_agents.clone(),
+            config,
+        })
     }
 
     /// Get the total number of websites to search
@@ -198,80 +208,116 @@ impl SearchEngine {
         let delay_ms = random_delay_ms(100, 500);
         tokio::time::sleep(Duration::from_millis(delay_ms)).await;
 
-        // Build HTTP request
-        let mut request_builder = match site.method.to_uppercase().as_str() {
-            "POST" => {
-                let mut builder = self.client.post(&url);
-                if let Some(data) = post_data {
-                    builder = builder.body(data);
-                }
-                builder
-            }
-            _ => self.client.get(&url),
-        };
+        // Build HTTP request with retries and per-request User-Agent
+        let mut last_error: Option<String> = None;
 
-        // Add custom request headers
-        if let Some(headers) = &site.headers {
-            if let Some(headers_obj) = headers.as_object() {
-                for (key, value) in headers_obj {
-                    if let Some(val_str) = value.as_str() {
-                        request_builder = request_builder.header(key, val_str);
+        for attempt in 1..=self.config.max_retries.max(1) {
+            let user_agent = self.pick_user_agent();
+
+            let mut request_builder = match site.method.to_uppercase().as_str() {
+                "POST" => {
+                    let mut builder = self.client.post(&url);
+                    if let Some(data) = post_data.clone() {
+                        builder = builder.body(data);
+                    }
+                    builder
+                }
+                _ => self.client.get(&url),
+            };
+
+            request_builder = request_builder.header("User-Agent", user_agent);
+
+            if let Some(headers) = &site.headers {
+                if let Some(headers_obj) = headers.as_object() {
+                    for (key, value) in headers_obj {
+                        if let Some(val_str) = value.as_str() {
+                            request_builder = request_builder.header(key, val_str);
+                        }
                     }
                 }
             }
+
+            let response_result = timeout(
+                Duration::from_secs(self.config.timeout_seconds),
+                request_builder.send(),
+            )
+            .await;
+
+            match response_result {
+                Ok(Ok(response)) => {
+                    let status_code = response.status().as_u16();
+                    let content_result = response.text().await;
+
+                    let content = match content_result {
+                        Ok(content) => content,
+                        Err(e) => {
+                            last_error = Some(format!("Failed to read response content: {}", e));
+                            continue;
+                        }
+                    };
+
+                    // Check if account exists
+                    let (status, metadata) = self
+                        .analyze_response(site, &content, status_code, metadata_config)
+                        .await?;
+
+                    return Ok(SearchResult {
+                        status,
+                        metadata: if metadata.is_empty() {
+                            None
+                        } else {
+                            Some(metadata)
+                        },
+                        ..result
+                    });
+                }
+                Ok(Err(e)) => {
+                    let message = format!("HTTP request failed: {}", e);
+                    last_error = Some(message.clone());
+
+                    if attempt == self.config.max_retries {
+                        append_log_line(
+                            &crate::core::config::APP_CONFIG.log_path,
+                            &format!("{} - request failed after retries: {}", site.name, message),
+                        )
+                        .await;
+                        return Ok(SearchResult {
+                            status: SearchResultStatus::Error,
+                            error: Some(message),
+                            ..result
+                        });
+                    }
+                }
+                Err(_) => {
+                    let message = "Request timeout".to_string();
+                    last_error = Some(message.clone());
+
+                    if attempt == self.config.max_retries {
+                        append_log_line(
+                            &crate::core::config::APP_CONFIG.log_path,
+                            &format!("{} - request timed out after retries", site.name),
+                        )
+                        .await;
+                        return Ok(SearchResult {
+                            status: SearchResultStatus::Error,
+                            error: Some(message),
+                            ..result
+                        });
+                    }
+                }
+            }
+
+            let backoff_factor = 2u64.pow((attempt.saturating_sub(1)) as u32);
+            let backoff = self
+                .config
+                .retry_backoff_ms
+                .saturating_mul(backoff_factor);
+            tokio::time::sleep(Duration::from_millis(backoff)).await;
         }
 
-        // Send HTTP request
-        let response_result = timeout(
-            Duration::from_secs(self.config.timeout_seconds),
-            request_builder.send(),
-        )
-        .await;
-
-        let response = match response_result {
-            Ok(Ok(response)) => response,
-            Ok(Err(e)) => {
-                return Ok(SearchResult {
-                    status: SearchResultStatus::Error,
-                    error: Some(format!("HTTP request failed: {}", e)),
-                    ..result
-                });
-            }
-            Err(_) => {
-                return Ok(SearchResult {
-                    status: SearchResultStatus::Error,
-                    error: Some("Request timeout".to_string()),
-                    ..result
-                });
-            }
-        };
-
-        let status_code = response.status().as_u16();
-        let content_result = response.text().await;
-
-        let content = match content_result {
-            Ok(content) => content,
-            Err(e) => {
-                return Ok(SearchResult {
-                    status: SearchResultStatus::Error,
-                    error: Some(format!("Failed to read response content: {}", e)),
-                    ..result
-                });
-            }
-        };
-
-        // Check if account exists
-        let (status, metadata) = self
-            .analyze_response(site, &content, status_code, metadata_config)
-            .await?;
-
         Ok(SearchResult {
-            status,
-            metadata: if metadata.is_empty() {
-                None
-            } else {
-                Some(metadata)
-            },
+            status: SearchResultStatus::Error,
+            error: last_error,
             ..result
         })
     }
@@ -412,6 +458,20 @@ impl SearchEngine {
             None => Ok(input.to_string()),
         }
     }
+
+    fn pick_user_agent(&self) -> String {
+        use rand::seq::SliceRandom;
+
+        if let Some(ua) = self
+            .user_agents
+            .choose(&mut rand::thread_rng())
+            .cloned()
+        {
+            ua
+        } else {
+            self.config.user_agent.clone()
+        }
+    }
 }
 
 impl Clone for SearchEngine {
@@ -419,6 +479,7 @@ impl Clone for SearchEngine {
         Self {
             client: self.client.clone(),
             config: self.config.clone(),
+            user_agents: self.user_agents.clone(),
         }
     }
 }

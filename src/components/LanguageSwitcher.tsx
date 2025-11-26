@@ -1,42 +1,28 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../hooks/useLanguage';
 import { LANGUAGE_CONFIG, type SupportedLanguage } from '../i18n/types';
 
 interface LanguageSwitcherProps {
   className?: string;
-  variant?: 'dropdown' | 'buttons';
   size?: 'small' | 'medium' | 'large';
   onError?: (error: string) => void;
 }
 
 const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   className = '',
-  variant = 'dropdown',
   size = 'medium',
   onError,
 }) => {
   const { t } = useTranslation('common');
   const { currentLanguage, setLanguage, isLoading, error } = useLanguage();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const languageOrder = useMemo(
+    () => Object.keys(LANGUAGE_CONFIG) as SupportedLanguage[],
+    []
+  );
 
   const currentConfig = LANGUAGE_CONFIG[currentLanguage];
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Listen for errors and notify parent component
   useEffect(() => {
@@ -45,90 +31,43 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     }
   }, [error, onError]);
 
-  const handleLanguageChange = async (language: SupportedLanguage) => {
-    if (language === currentLanguage || isLoading) return;
+  const nextLanguage = useMemo(() => {
+    const currentIndex = languageOrder.indexOf(currentLanguage);
+    const nextIndex = (currentIndex + 1) % languageOrder.length;
+    return languageOrder[nextIndex];
+  }, [currentLanguage, languageOrder]);
 
-    await setLanguage(language);
-    setIsOpen(false);
+  const handleCycleLanguage = async () => {
+    if (isLoading) return;
+    await setLanguage(nextLanguage);
   };
 
-  const toggleDropdown = () => {
-    if (!isLoading) {
-      setIsOpen(!isOpen);
-    }
-  };
+  const wrapperClassName = ['language-switcher-cycle', size, className]
+    .filter(Boolean)
+    .join(' ');
 
-  if (variant === 'buttons') {
-    return (
-      <div className={`language-switcher-buttons ${className}`}>
-        {Object.entries(LANGUAGE_CONFIG).map(([code, config]) => (
-          <button
-            key={code}
-            onClick={() => handleLanguageChange(code as SupportedLanguage)}
-            className={`
-              language-button
-              ${currentLanguage === code ? 'active' : ''}
-              ${size}
-            `}
-            title={config.name}
-            aria-label={`Switch to ${config.name}`}
-            disabled={isLoading}
-            aria-disabled={isLoading}
-          >
-            <span className="flag">{config.flag}</span>
-            <span className="code">{config.code.toUpperCase()}</span>
-          </button>
-        ))}
-      </div>
-    );
-  }
+  const nextConfig = LANGUAGE_CONFIG[nextLanguage];
 
   return (
-    <div
-      className={`language-switcher-dropdown ${className}`}
-      ref={dropdownRef}
-    >
+    <div className={wrapperClassName}>
       <button
-        onClick={toggleDropdown}
-        className={`
-          language-dropdown-trigger
-          ${isOpen ? 'open' : ''}
-          ${size}
-        `}
-        aria-label={t('label.language')}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
+        onClick={handleCycleLanguage}
+        className="language-cycle-button"
+        aria-label={`${t('label.language')}: ${currentConfig.nativeName} → ${nextConfig.nativeName}`}
+        title={`${currentConfig.name} → ${nextConfig.name}`}
         disabled={isLoading}
         aria-disabled={isLoading}
       >
-        <span className="flag">{currentConfig.flag}</span>
-        <span className="code">{currentConfig.code.toUpperCase()}</span>
-        <span className="arrow">{isLoading ? '⏳' : '▼'}</span>
-      </button>
-
-      {isOpen && !isLoading && (
-        <div className="language-dropdown-menu">
-          {Object.entries(LANGUAGE_CONFIG).map(([code, config]) => (
-            <button
-              key={code}
-              onClick={() => handleLanguageChange(code as SupportedLanguage)}
-              className={`
-                language-option
-                ${currentLanguage === code ? 'active' : ''}
-              `}
-              aria-label={`Switch to ${config.name}`}
-              disabled={currentLanguage === code}
-            >
-              <span className="flag">{config.flag}</span>
-              <div className="language-info">
-                <span className="name">{config.nativeName}</span>
-                <span className="english-name">{config.name}</span>
-              </div>
-              {currentLanguage === code && <span className="checkmark">✓</span>}
-            </button>
-          ))}
+        <div className="language-current">
+          <span className="flag">{currentConfig.flag}</span>
+          <span className="code">{currentConfig.code.toUpperCase()}</span>
         </div>
-      )}
+        <span className="separator">→</span>
+        <div className="language-next">
+          <span className="flag muted">{nextConfig.flag}</span>
+          <span className="code muted">{nextConfig.code.toUpperCase()}</span>
+        </div>
+      </button>
     </div>
   );
 };

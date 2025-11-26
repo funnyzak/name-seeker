@@ -31,7 +31,10 @@ const App: React.FC = () => {
     startSearch,
     stopSearch,
     clearResults,
-  } = useSearch();
+  } = useSearch({
+    onError: msg => error(t('toast:error.searchFailed', { defaultValue: msg })),
+    onStopped: () => info(t('toast:info.searchStopped')),
+  });
   const { history, addToHistory, clearHistory, removeFromHistory } =
     useSearchHistory();
 
@@ -44,8 +47,7 @@ const App: React.FC = () => {
         categoryFilter: undefined,
       });
       info(t('toast:info.searchStarting'));
-    } catch (err) {
-      console.error('Search failed:', err);
+    } catch {
       error(t('toast:error.searchFailed'));
     }
   };
@@ -143,13 +145,10 @@ const App: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-                {import.meta.env.DEV && (
-                  <LanguageSwitcher
-                    variant="dropdown"
-                    size="small"
-                    onError={errorMsg => error(`Language Error: ${errorMsg}`)}
-                  />
-                )}
+                <LanguageSwitcher
+                  size="small"
+                  onError={errorMsg => error(`Language Error: ${errorMsg}`)}
+                />
                 <button
                   className="about-button"
                   onClick={() => setShowAbout(true)}

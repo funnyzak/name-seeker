@@ -160,8 +160,12 @@ pub struct SearchConfig {
     pub max_concurrent_requests: usize,
     pub timeout_seconds: u64,
     pub user_agent: String,
+    pub user_agents: Vec<String>,
     pub exclude_nsfw: bool,
     pub category_filter: Option<String>,
+    pub max_retries: u8,
+    pub retry_backoff_ms: u64,
+    pub proxy: Option<String>,
 }
 
 impl Default for SearchConfig {
@@ -172,8 +176,12 @@ impl Default for SearchConfig {
             max_concurrent_requests: 30,
             timeout_seconds: 30,
             user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36".to_string(),
+            user_agents: Vec::new(),
             exclude_nsfw: true,
             category_filter: None,
+            max_retries: 3,
+            retry_backoff_ms: 300,
+            proxy: None,
         }
     }
 }
