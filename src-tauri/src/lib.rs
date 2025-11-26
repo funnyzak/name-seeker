@@ -65,6 +65,11 @@ async fn start_search(
     }
 
     // Create search configuration
+    let user_agents = APP_CONFIG
+        .read_user_agents()
+        .await
+        .unwrap_or_default();
+
     let search_config = SearchConfig {
         search_type,
         query: query.clone(),
@@ -74,8 +79,12 @@ async fn start_search(
             .get_random_user_agent()
             .await
             .map_err(|e| e.to_string())?,
+        user_agents,
         exclude_nsfw: exclude_nsfw.unwrap_or(true),
         category_filter,
+        max_retries: 3,
+        retry_backoff_ms: 300,
+        proxy: std::env::var("NAMESEEKER_PROXY").ok(),
     };
 
     // Create search engine

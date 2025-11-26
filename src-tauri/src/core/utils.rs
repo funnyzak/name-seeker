@@ -1,5 +1,7 @@
 use crate::core::error::{AppError, AppResult};
 use serde_json::Value;
+use std::path::Path;
+use tokio::io::AsyncWriteExt;
 
 /// Collection of utility functions
 
@@ -13,22 +15,23 @@ pub fn extract_json_data(path: &[String], data: &Value) -> AppResult<Option<Valu
     for segment in path {
         match current {
             Value::Object(map) => {
-                current = map
-                    .get(segment)
-                    .ok_or_else(|| AppError::SearchError(format!("Path segment '{}' does not exist", segment)))?;
+                current = match map.get(segment) {
+                    Some(val) => val,
+                    None => return Ok(None),
+                };
             }
             Value::Array(arr) => {
-                let index = segment
-                    .parse::<usize>()
-                    .map_err(|_| AppError::SearchError(format!("Invalid array index: {}", segment)))?;
-                current = arr
-                    .get(index)
-                    .ok_or_else(|| AppError::SearchError(format!("Array index {} out of bounds", index)))?;
+                let index = match segment.parse::<usize>() {
+                    Ok(i) => i,
+                    Err(_) => return Ok(None),
+                };
+                current = match arr.get(index) {
+                    Some(val) => val,
+                    None => return Ok(None),
+                };
             }
             _ => {
-                return Err(AppError::SearchError(
-                    "Path traversal encountered non-object/array value".to_string(),
-                ));
+                return Ok(None);
             }
         }
     }
@@ -36,50 +39,35 @@ pub fn extract_json_data(path: &[String], data: &Value) -> AppResult<Option<Valu
     Ok(Some(current.clone()))
 }
 
-/// Extract data from HTML content (using simple regex patterns)
-pub fn extract_html_data(pattern: &str, content: &str) -> AppResult<Option<String>> {
-    // This is a simple implementation, real projects might need more complex HTML parsing
-    // Here we use basic string matching to simulate regex patterns
-    if pattern.contains("href=") {
-        // Simple link extraction
-        if let Some(start) = content.find("href=") {
-            let start = start + 6; // Length of "href="
-            if let Some(end_pos) = content[start..].find('"') {
-                let end = start + end_pos;
-                let url = &content[start..end];
-                return Ok(Some(url.to_string()));
+/// Extract data from HTML using CSS selectors (scraper)
+pub fn extract_html_data(selector: &str, content: &str) -> AppResult<Option<String>> {
+    use scraper::{Html, Selector};
+
+    let document = Html::parse_document(content);
+
+    // Support a simple "selector::attr(name)" syntax for attribute extraction
+    let (selector_str, attr) = if let Some((sel, attr_part)) = selector.split_once("::attr(") {
+        let attr_name = attr_part.trim_end_matches(')');
+        (sel.trim(), Some(attr_name.trim().to_string()))
+    } else {
+        (selector, None)
+    };
+
+    let selector = match Selector::parse(selector_str) {
+        Ok(s) => s,
+        Err(_) => return Ok(None),
+    };
+
+    if let Some(element) = document.select(&selector).next() {
+        if let Some(attr_name) = attr {
+            if let Some(val) = element.value().attr(&attr_name) {
+                return Ok(Some(val.to_string()));
             }
         }
-    }
 
-    // Simple title extraction
-    if pattern.contains("<title>") {
-        if let Some(start) = content.find("<title>") {
-            let start = start + 7; // Length of "<title>"
-            if let Some(end) = content[start..].find("</title>") {
-                let end = start + end;
-                let title = &content[start..end];
-                return Ok(Some(title.to_string()));
-            }
-        }
-    }
-
-    // Simple h1-h6 heading extraction
-    for tag in ["h1", "h2", "h3", "h4", "h5", "h6"] {
-        if pattern.contains(&format!("<{}", tag)) {
-            let open_tag = format!("<{} ", tag);
-            let close_tag = format!("</{}>", tag);
-            if let Some(start) = content.find(&open_tag) {
-                let start = start + open_tag.len();
-                if let Some(end) = content[start..].find('>') {
-                    let start = start + end + 1;
-                    if let Some(end) = content[start..].find(&close_tag) {
-                        let end = start + end;
-                        let title = content[start..end].trim();
-                        return Ok(Some(title.to_string()));
-                    }
-                }
-            }
+        let text = element.text().collect::<Vec<_>>().join(" ").trim().to_string();
+        if !text.is_empty() {
+            return Ok(Some(text));
         }
     }
 
@@ -225,6 +213,25 @@ pub fn remove_duplicates<T: Clone + Eq + std::hash::Hash>(items: Vec<T>) -> Vec<
     }
 
     result
+}
+
+/// Append a single log line to the given path (best-effort)
+pub async fn append_log_line(path: &Path, line: &str) {
+    if let Some(parent) = path.parent() {
+        let _ = tokio::fs::create_dir_all(parent).await;
+    }
+
+    let ts = chrono::Utc::now().to_rfc3339();
+    let content = format!("[{ts}] {line}\n");
+
+    if let Ok(mut file) = tokio::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .await
+    {
+        let _ = tokio::io::AsyncWriteExt::write_all(&mut file, content.as_bytes()).await;
+    }
 }
 
 #[cfg(test)]

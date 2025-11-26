@@ -10,7 +10,10 @@ import type {
   SearchResultStatus,
 } from '../types';
 
-export const useSearch = () => {
+export const useSearch = (callbacks?: {
+  onError?: (message: string) => void;
+  onStopped?: () => void;
+}) => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchType, setSearchType] = useState<SearchType>(SearchType.USERNAME);
   const [query, setQuery] = useState<string>('');
@@ -85,11 +88,16 @@ export const useSearch = () => {
   }, []);
 
   // Search error handling
-  const handleSearchError = useCallback((error: string) => {
-    console.error('Search error:', error);
-    setIsSearching(false);
-    // Error notification logic can be added here
-  }, []);
+  const handleSearchError = useCallback(
+    (error: string) => {
+      setIsSearching(false);
+      setProgress(prev => ({ ...prev, current_site: undefined }));
+      if (callbacks?.onError) {
+        callbacks.onError(error);
+      }
+    },
+    [callbacks]
+  );
 
   // Search stop handling
   const handleSearchStopped = useCallback(() => {
@@ -113,7 +121,11 @@ export const useSearch = () => {
       ...prev,
       current_site: undefined,
     }));
-  }, []);
+
+    if (callbacks?.onStopped) {
+      callbacks.onStopped();
+    }
+  }, [callbacks]);
 
   // Start search
   const startSearch = useCallback(
@@ -164,10 +176,9 @@ export const useSearch = () => {
 
       try {
         await tauriApi.startSearch(searchQuery.trim(), type, options);
-      } catch (error) {
-        console.error('Failed to start search:', error);
+      } catch (err) {
         setIsSearching(false);
-        throw error;
+        throw err;
       }
     },
     []
@@ -178,8 +189,7 @@ export const useSearch = () => {
     try {
       const stopped = await tauriApi.stopSearch();
       return stopped;
-    } catch (error) {
-      console.error('Failed to stop search:', error);
+    } catch {
       return false;
     }
   }, []);
@@ -204,8 +214,10 @@ export const useSearch = () => {
           unsubError,
           unsubStopped,
         ];
-      } catch (error) {
-        console.error('Failed to setup search listeners:', error);
+      } catch {
+        if (callbacks?.onError) {
+          callbacks.onError('Failed to setup search listeners');
+        }
       }
     };
 
@@ -220,6 +232,7 @@ export const useSearch = () => {
     finishSearch,
     handleSearchError,
     handleSearchStopped,
+    callbacks,
   ]);
 
   // Filter results by status

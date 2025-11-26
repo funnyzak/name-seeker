@@ -72,6 +72,7 @@ Thanks to the inspiration and reference from the [**Blackbird**](https://github.
 - **Local Processing**: All searches are executed locally without uploading data to external servers
 - **No Tracking**: No collection of user data or analytics information
 - **Open Source Transparency**: Fully open source with auditable code
+- **Proxy Support**: If you need to route traffic through a proxy, set `NAMESEEKER_PROXY=http://user:pass@host:port` before launching.
 
 ## Disclaimer
 

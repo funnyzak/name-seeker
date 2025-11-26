@@ -1,10 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useLayoutEffect,
+  useEffect,
+} from 'react';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { useTranslation } from 'react-i18next';
 import ResultItem from './ResultItem';
 import ProgressIndicator from './ProgressIndicator';
 import ExportButton from './ExportButton';
 import ResultsFilter from './ResultsFilter';
-import type { ResultsDisplayProps } from '../types';
+import type { ResultsDisplayProps, SearchResult } from '../types';
 
 interface CollapsedSections {
   found: boolean;
@@ -30,6 +37,44 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
     pending: false,
   });
   const [filterText, setFilterText] = useState('');
+  const [listWidth, setListWidth] = useState<number>(360);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Measure container width for virtualized lists
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (containerRef.current && typeof window !== 'undefined') {
+        const style = window.getComputedStyle(containerRef.current);
+        const padding =
+          parseFloat(style.paddingLeft || '0') +
+          parseFloat(style.paddingRight || '0');
+        const width = Math.max(240, containerRef.current.clientWidth - padding);
+        setListWidth(width);
+      }
+    };
+    measure();
+
+    const ObserverCtor =
+      typeof window !== 'undefined' && 'ResizeObserver' in window
+        ? window.ResizeObserver
+        : null;
+    const observer = ObserverCtor ? new ObserverCtor(measure) : null;
+    if (observer && containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer?.disconnect();
+  }, [collapsed]);
+
+  // Fallback update on window resize if ResizeObserver is unavailable
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setListWidth(containerRef.current.clientWidth);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Use useMemo to cache filtered results
   const filteredResults = useMemo(() => {
@@ -58,6 +103,60 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
       ...prev,
       [section]: !prev[section],
     }));
+  };
+
+  const renderVirtualList = (
+    sectionId: string,
+    data: typeof results,
+    estimatedHeight: number,
+    ariaLabel: string
+  ) => {
+    const displayData = [...data].reverse();
+
+    if (displayData.length < 120) {
+      return (
+        <div
+          id={sectionId}
+          className="results-list"
+          role="list"
+          aria-label={ariaLabel}
+        >
+          {displayData.map((result, index) => (
+            <ResultItem
+              key={`${sectionId}-${result.site}-${index}`}
+              result={result}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    const Row = ({
+      index,
+      style,
+      data,
+    }: ListChildComponentProps<SearchResult[]>) => (
+      <div style={style} role="listitem">
+        <ResultItem result={data[index]} />
+      </div>
+    );
+
+    const height = Math.min(estimatedHeight, displayData.length * 72);
+    const width = Math.max(listWidth, 320);
+
+    return (
+      <div id={sectionId} className="results-list" role="list">
+        <List
+          height={height}
+          itemCount={displayData.length}
+          itemSize={72}
+          width={width}
+          itemData={displayData}
+        >
+          {Row}
+        </List>
+      </div>
+    );
   };
 
   if (!hasResults) {
@@ -169,6 +268,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         className="section-wrapper"
         role="main"
         aria-labelledby="results-heading"
+        ref={containerRef}
       >
         {foundResults.length > 0 && (
           <div className="results-section">
@@ -202,12 +302,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               role="list"
               aria-label={t('results:categories.foundUsers')}
             >
-              {[...foundResults].reverse().map((result, index) => (
-                <ResultItem
-                  key={`found-${result.site}-${index}`}
-                  result={result}
-                />
-              ))}
+              {!collapsed.found &&
+                renderVirtualList(
+                  'found-results-list',
+                  foundResults,
+                  420,
+                  t('results:categories.foundUsers')
+                )}
             </div>
           </div>
         )}
@@ -230,12 +331,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             <div
               className={`results-list ${collapsed.pending ? 'collapsed' : ''}`}
             >
-              {[...pendingResults].reverse().map((result, index) => (
-                <ResultItem
-                  key={`pending-${result.site}-${index}`}
-                  result={result}
-                />
-              ))}
+              {!collapsed.pending &&
+                renderVirtualList(
+                  'pending-results',
+                  pendingResults,
+                  300,
+                  t('results:categories.checking')
+                )}
             </div>
           </div>
         )}
@@ -258,12 +360,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             <div
               className={`results-list ${collapsed.error ? 'collapsed' : ''}`}
             >
-              {[...errorResults].reverse().map((result, index) => (
-                <ResultItem
-                  key={`error-${result.site}-${index}`}
-                  result={result}
-                />
-              ))}
+              {!collapsed.error &&
+                renderVirtualList(
+                  'error-results',
+                  errorResults,
+                  360,
+                  t('results:categories.error')
+                )}
             </div>
           </div>
         )}
@@ -286,12 +389,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             <div
               className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}
             >
-              {[...notFoundResults].reverse().map((result, index) => (
-                <ResultItem
-                  key={`notfound-${result.site}-${index}`}
-                  result={result}
-                />
-              ))}
+              {!collapsed.notFound &&
+                renderVirtualList(
+                  'notfound-results',
+                  notFoundResults,
+                  420,
+                  t('results:categories.notFound')
+                )}
             </div>
           </div>
         )}
