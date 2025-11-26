@@ -94,22 +94,40 @@ impl SitesManager {
         const WMN_DATA_URL: &str =
             "https://raw.githubusercontent.com/WebBreacher/WhatsMyName/main/wmn-data.json";
 
+        // If missing locally, download once and cache ETag
         if !config.sites_data_path.exists() {
-            log::info!("Downloading website data file...");
-            self.download_sites_data(WMN_DATA_URL, &config.sites_data_path)
-                .await?;
+            log::info!("Downloading website data file (no local cache)…");
+            let downloaded_etag =
+                self.download_sites_data(WMN_DATA_URL, &config.sites_data_path)
+                    .await?;
+            if let Some(etag) = downloaded_etag {
+                self.write_local_etag(&config.sites_data_path, &etag).await?;
+            }
             return Ok(());
         }
 
-        // Check if remote data has updates
+        // Check remote ETag and compare to local cache
         match self.check_for_updates(WMN_DATA_URL).await {
-            Ok(Some(_)) => {
-                log::info!("Update detected, re-downloading website data...");
-                self.download_sites_data(WMN_DATA_URL, &config.sites_data_path)
-                    .await?;
+            Ok(Some(remote_etag)) => {
+                let local_etag = self.read_local_etag(&config.sites_data_path).await?;
+
+                if let Some(local) = local_etag {
+                    if local == remote_etag {
+                        log::info!("Website data is up to date (ETag match)");
+                        return Ok(());
+                    }
+                }
+
+                log::info!("Website data updated upstream, re-downloading…");
+                let downloaded_etag =
+                    self.download_sites_data(WMN_DATA_URL, &config.sites_data_path)
+                        .await?;
+                if let Some(etag) = downloaded_etag {
+                    self.write_local_etag(&config.sites_data_path, &etag).await?;
+                }
             }
             Ok(None) => {
-                log::info!("Website data is up to date");
+                log::info!("Remote ETag not provided, keeping local website data");
             }
             Err(e) => {
                 log::warn!("Failed to check for updates: {}, using local data", e);
@@ -120,8 +138,13 @@ impl SitesManager {
     }
 
     /// Download website data
-    async fn download_sites_data(&self, url: &str, path: &Path) -> AppResult<()> {
+    async fn download_sites_data(&self, url: &str, path: &Path) -> AppResult<Option<String>> {
         let response = self.client.get(url).send().await?;
+        let etag = response
+            .headers()
+            .get("etag")
+            .and_then(|value| value.to_str().ok())
+            .map(|s| s.trim().to_string());
         let content = response.text().await?;
 
         // Ensure directory exists
@@ -130,7 +153,13 @@ impl SitesManager {
         }
 
         async_fs::write(path, content).await?;
-        Ok(())
+
+        // Persist ETag alongside data for future comparisons
+        if let Some(ref tag) = etag {
+            self.write_local_etag(path, tag).await?;
+        }
+
+        Ok(etag)
     }
 
     /// Check for updates
@@ -143,6 +172,25 @@ impl SitesManager {
             .map(|s| s.to_string());
 
         Ok(remote_etag)
+    }
+
+    async fn read_local_etag(&self, data_path: &Path) -> AppResult<Option<String>> {
+        let etag_path = data_path.with_extension("etag");
+        if !etag_path.exists() {
+            return Ok(None);
+        }
+
+        let content = async_fs::read_to_string(etag_path).await?;
+        Ok(Some(content.trim().to_string()))
+    }
+
+    async fn write_local_etag(&self, data_path: &Path, etag: &str) -> AppResult<()> {
+        let etag_path = data_path.with_extension("etag");
+        if let Some(parent) = etag_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        async_fs::write(etag_path, etag).await?;
+        Ok(())
     }
 
     /// Load website data from file

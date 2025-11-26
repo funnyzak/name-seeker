@@ -143,13 +143,11 @@ const App: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-                {import.meta.env.DEV && (
-                  <LanguageSwitcher
-                    variant="dropdown"
-                    size="small"
-                    onError={errorMsg => error(`Language Error: ${errorMsg}`)}
-                  />
-                )}
+                <LanguageSwitcher
+                  variant="dropdown"
+                  size="small"
+                  onError={errorMsg => error(`Language Error: ${errorMsg}`)}
+                />
                 <button
                   className="about-button"
                   onClick={() => setShowAbout(true)}

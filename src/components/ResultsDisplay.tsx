@@ -202,7 +202,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               role="list"
               aria-label={t('results:categories.foundUsers')}
             >
-              {foundResults.reverse().map((result, index) => (
+              {[...foundResults].reverse().map((result, index) => (
                 <ResultItem
                   key={`found-${result.site}-${index}`}
                   result={result}
@@ -230,7 +230,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             <div
               className={`results-list ${collapsed.pending ? 'collapsed' : ''}`}
             >
-              {pendingResults.reverse().map((result, index) => (
+              {[...pendingResults].reverse().map((result, index) => (
                 <ResultItem
                   key={`pending-${result.site}-${index}`}
                   result={result}
@@ -258,7 +258,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             <div
               className={`results-list ${collapsed.error ? 'collapsed' : ''}`}
             >
-              {errorResults.reverse().map((result, index) => (
+              {[...errorResults].reverse().map((result, index) => (
                 <ResultItem
                   key={`error-${result.site}-${index}`}
                   result={result}
@@ -286,7 +286,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             <div
               className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}
             >
-              {notFoundResults.reverse().map((result, index) => (
+              {[...notFoundResults].reverse().map((result, index) => (
                 <ResultItem
                   key={`notfound-${result.site}-${index}`}
                   result={result}

@@ -19,6 +19,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const { t } = useTranslation('common');
   const { currentLanguage, setLanguage, isLoading, error } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentConfig = LANGUAGE_CONFIG[currentLanguage];
@@ -54,9 +55,28 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   const toggleDropdown = () => {
     if (!isLoading) {
-      setIsOpen(!isOpen);
+      const nextOpen = !isOpen;
+      setIsOpen(nextOpen);
+
+      if (nextOpen && dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setDropUp(spaceBelow < 240);
+      }
     }
   };
+
+  useEffect(() => {
+    if (!isOpen || !dropdownRef.current) return;
+    const handleResize = () => {
+      const rect = dropdownRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setDropUp(spaceBelow < 240);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isOpen]);
 
   if (variant === 'buttons') {
     return (
@@ -85,7 +105,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   return (
     <div
-      className={`language-switcher-dropdown ${className}`}
+      className={`language-switcher-dropdown ${dropUp ? 'drop-up' : ''} ${className}`}
       ref={dropdownRef}
     >
       <button
@@ -107,7 +127,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       </button>
 
       {isOpen && !isLoading && (
-        <div className="language-dropdown-menu">
+        <div className="language-dropdown-menu" role="menu">
           {Object.entries(LANGUAGE_CONFIG).map(([code, config]) => (
             <button
               key={code}

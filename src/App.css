@@ -2503,6 +2503,15 @@ button,
   z-index: 100;
   overflow: hidden;
   animation: slideDown 0.2s ease-out;
+  max-height: 260px;
+  overflow-y: auto;
+  min-width: 200px;
+}
+
+.language-switcher-dropdown.drop-up .language-dropdown-menu {
+  top: auto;
+  bottom: calc(100% + 0.5rem);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .language-option {
