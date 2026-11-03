@@ -116,6 +116,15 @@ pub struct Site {
     /// Request data (for POST requests)
     #[serde(default)]
     pub data: Option<String>,
+    /// WhatsMyName request body; its presence selects POST.
+    #[serde(default)]
+    pub post_body: Option<String>,
+    #[serde(default)]
+    pub strip_bad_char: Option<String>,
+    #[serde(default)]
+    pub valid: Option<bool>,
+    #[serde(default)]
+    pub uri_pretty: Option<String>,
     /// Request headers
     #[serde(default)]
     pub headers: Option<serde_json::Value>,

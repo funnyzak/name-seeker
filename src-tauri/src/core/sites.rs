@@ -196,18 +196,52 @@ impl SitesManager {
     /// Load website data from file
     async fn load_sites_from_file(&self, path: &Path) -> AppResult<Vec<Site>> {
         if !path.exists() {
-            return Err(AppError::SiteDataError("Website data file does not exist".to_string()));
+            return Err(AppError::SiteDataError(
+                "Website data file does not exist".to_string(),
+            ));
         }
 
         let content = async_fs::read_to_string(path).await?;
         let data: serde_json::Value = serde_json::from_str(&content)?;
 
-        let sites = data["sites"]
+        Self::parse_sites(&data)
+    }
+
+    fn parse_sites(data: &serde_json::Value) -> AppResult<Vec<Site>> {
+        let entries = data["sites"]
             .as_array()
-            .ok_or_else(|| AppError::SiteDataError("Invalid website data format".to_string()))?
-            .iter()
-            .filter_map(|site| serde_json::from_value(site.clone()).ok())
-            .collect();
+            .ok_or_else(|| AppError::SiteDataError("Invalid website data format".to_string()))?;
+        let mut sites = Vec::new();
+        let mut invalid = 0;
+        let mut disabled = 0;
+        for entry in entries {
+            match serde_json::from_value::<Site>(entry.clone()) {
+                Ok(site) if site.valid == Some(false) => disabled += 1,
+                Ok(site) => sites.push(site),
+                Err(error) => {
+                    invalid += 1;
+                    log::warn!(
+                        "Skipping website {:?}: {}",
+                        entry
+                            .get("name")
+                            .and_then(|name| name.as_str())
+                            .unwrap_or("<unnamed>"),
+                        error
+                    );
+                }
+            }
+        }
+        log::info!(
+            "Loaded {} websites; skipped {} disabled and {} invalid entries",
+            sites.len(),
+            disabled,
+            invalid
+        );
+        if sites.is_empty() {
+            return Err(AppError::SiteDataError(
+                "No usable websites in data file".to_string(),
+            ));
+        }
 
         Ok(sites)
     }
@@ -290,3 +324,51 @@ impl SitesManager {
 /// Global site manager instance
 pub static SITES_MANAGER: std::sync::LazyLock<SitesManager> =
     std::sync::LazyLock::new(|| SitesManager::new());
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn skips_disabled_and_invalid_sites() {
+        let enabled = serde_json::json!({"name": "Enabled", "uri_check": "https://example.com/{account}",
+            "e_code": 200, "e_string": "exists", "m_code": 404, "m_string": "missing", "cat": "social"});
+        let mut disabled = enabled.clone();
+        disabled["valid"] = serde_json::json!(false);
+        let mut invalid = enabled.clone();
+        invalid["e_code"] = serde_json::json!("invalid");
+        let sites =
+            SitesManager::parse_sites(&serde_json::json!({"sites": [enabled, disabled, invalid]}))
+                .unwrap();
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].name, "Enabled");
+    }
+
+    #[test]
+    fn rejects_empty_or_invalid_dataset() {
+        for data in [
+            serde_json::json!({}),
+            serde_json::json!({"sites": []}),
+            serde_json::json!({"sites": [{"name": "Broken"}]}),
+        ] {
+            assert!(SitesManager::parse_sites(&data).is_err());
+        }
+    }
+
+    #[test]
+    fn bundled_datasets_remain_compatible() {
+        for content in [
+            include_str!("../../data/wmn-data.json"),
+            include_str!("../../data/email-data.json"),
+        ] {
+            let data: serde_json::Value = serde_json::from_str(content).unwrap();
+            let sites = SitesManager::parse_sites(&data).unwrap();
+            assert_eq!(sites.len(), data["sites"].as_array().unwrap().len());
+            for (site, entry) in sites.iter().zip(data["sites"].as_array().unwrap()) {
+                assert_eq!(site.post_body.as_deref(), entry["post_body"].as_str());
+                assert_eq!(site.data.as_deref(), entry["data"].as_str());
+                assert_eq!(site.method, entry["method"].as_str().unwrap_or("GET"));
+            }
+        }
+    }
+}
