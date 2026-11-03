@@ -5,6 +5,14 @@ on:
       - '*'
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to rebuild, for example 0.2.7'
+        required: true
+        type: string
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 permissions:
   contents: write
@@ -19,14 +27,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.ref }}
+          ref: refs/tags/${{ env.RELEASE_TAG }}
 
       - name: Release
         id: create-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: false
-          name: 'NameSeeker v${{ github.ref_name }}'
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: 'NameSeeker v${{ env.RELEASE_TAG }}'
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,6 +59,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -108,8 +119,9 @@ jobs:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         with:
+          tauriScript: npm run tauri
           releaseId: ${{ needs.release.outputs.release-id }}
-          tagName: ${{ github.ref_name }}
+          tagName: ${{ env.RELEASE_TAG }}
           releaseName: 'NameSeeker v__VERSION__'
           # releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
@@ -130,7 +142,7 @@ jobs:
 
           📦 Application Information
           • Name: [NameSeeker](https://github.com/${{ github.repository }})
-          • Version: ${{ github.ref_name }}
+          • Version: $RELEASE_TAG
           • Platforms: All targets built successfully
 
           💻 Build Details
@@ -141,7 +153,7 @@ jobs:
           • $(TZ='UTC' date +'%Y-%m-%d %H:%M:%S UTC')
 
           📎 Related Links
-          • [Release Page](https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }})
+          • [Release Page](https://github.com/${{ github.repository }}/releases/tag/$RELEASE_TAG)
           • [Build Log](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           • [Repository](https://github.com/${{ github.repository }})" \
           "${{ secrets.APPRISE_HTTP_URL }}"
@@ -155,7 +167,7 @@ jobs:
 
           📦 Application Information
           • Name: [NameSeeker](https://github.com/${{ github.repository }})
-          • Version: ${{ github.ref_name }}
+          • Version: $RELEASE_TAG
           • Status: Build failed on one or more platforms
 
           💻 Build Details
