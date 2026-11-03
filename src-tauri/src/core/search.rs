@@ -182,23 +182,54 @@ impl SearchEngine {
         site: &crate::core::models::Site,
         metadata_config: &std::collections::HashMap<String, Vec<Value>>,
     ) -> AppResult<SearchResult> {
-        // Process input operations (such as email hashing)
-        let processed_query =
-            self.process_input(&self.config.query, site.input_operation.as_deref())?;
+        // Remove site-specific characters before applying input operations.
+        let query: String = self
+            .config
+            .query
+            .chars()
+            .filter(|character| {
+                !site
+                    .strip_bad_char
+                    .as_deref()
+                    .unwrap_or("")
+                    .contains(*character)
+            })
+            .collect();
+        let processed_query = self.process_input(&query, site.input_operation.as_deref())?;
 
         // Replace placeholders in URL
         let url = site.uri_check.replace("{account}", &processed_query);
 
         // Process POST data
         let post_data = site
-            .data
+            .post_body
             .as_ref()
+            .or(site.data.as_ref())
             .map(|d| d.replace("{account}", &processed_query));
+
+        let profile_url = site
+            .uri_pretty
+            .as_ref()
+            .and_then(|template| {
+                let candidate = template.replace("{account}", &processed_query);
+                match url::Url::parse(&candidate) {
+                    Ok(parsed)
+                        if matches!(parsed.scheme(), "http" | "https") && parsed.has_host() =>
+                    {
+                        Some(candidate)
+                    }
+                    _ => {
+                        log::warn!("Ignoring invalid profile URL for website {:?}", site.name);
+                        None
+                    }
+                }
+            })
+            .unwrap_or_else(|| url.clone());
 
         let result = SearchResult {
             site: site.name.clone(),
             status: SearchResultStatus::Pending,
-            url: Some(url.clone()),
+            url: Some(profile_url),
             error: None,
             category: Some(site.cat.clone()),
             metadata: None,
@@ -214,16 +245,16 @@ impl SearchEngine {
         for attempt in 1..=self.config.max_retries.max(1) {
             let user_agent = self.pick_user_agent();
 
-            let mut request_builder = match site.method.to_uppercase().as_str() {
-                "POST" => {
+            let mut request_builder =
+                if site.post_body.is_some() || site.method.eq_ignore_ascii_case("POST") {
                     let mut builder = self.client.post(&url);
                     if let Some(data) = post_data.clone() {
                         builder = builder.body(data);
                     }
                     builder
-                }
-                _ => self.client.get(&url),
-            };
+                } else {
+                    self.client.get(&url)
+                };
 
             request_builder = request_builder.header("User-Agent", user_agent);
 
@@ -481,5 +512,159 @@ impl Clone for SearchEngine {
             config: self.config.clone(),
             user_agents: self.user_agents.clone(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    // Capture the actual HTTP bytes, including the body, without contacting a provider.
+    async fn check_request(
+        extra: Value,
+        expected_method: &str,
+        expected_body: &str,
+    ) -> SearchResult {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = tokio::spawn(async move {
+            let (mut socket, _) = listener.accept().await.unwrap();
+            let mut request = Vec::new();
+            loop {
+                let mut buffer = [0; 4096];
+                let count = socket.read(&mut buffer).await.unwrap();
+                assert!(count > 0, "request ended before body was received");
+                request.extend_from_slice(&buffer[..count]);
+                if let Some(end) = request.windows(4).position(|part| part == b"\r\n\r\n") {
+                    let headers = String::from_utf8_lossy(&request[..end]).to_lowercase();
+                    let length = headers
+                        .lines()
+                        .find_map(|line| {
+                            line.strip_prefix("content-length:")
+                                .map(|value| value.trim().parse::<usize>().unwrap())
+                        })
+                        .unwrap_or(0);
+                    if request.len() >= end + 4 + length {
+                        break;
+                    }
+                }
+            }
+            socket
+                .write_all(
+                    b"HTTP/1.1 200 OK\r\nContent-Length: 6\r\nConnection: close\r\n\r\nexists",
+                )
+                .await
+                .unwrap();
+            String::from_utf8(request).unwrap()
+        });
+        let mut entry = serde_json::json!({
+            "name": "Mock", "uri_check": format!("http://{address}/check/{{account}}"),
+            "e_code": 200, "e_string": "exists", "m_code": 404,
+            "m_string": "missing", "cat": "social"
+        });
+        entry
+            .as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        let site = serde_json::from_value(entry).unwrap();
+        let engine = SearchEngine::new(SearchConfig {
+            query: "alice.test".into(),
+            timeout_seconds: 3,
+            max_retries: 1,
+            ..SearchConfig::default()
+        })
+        .unwrap();
+        let result = engine.check_site(&site, &Default::default()).await.unwrap();
+        let request = timeout(Duration::from_secs(5), server)
+            .await
+            .unwrap()
+            .unwrap();
+        assert!(
+            request.starts_with(&format!("{expected_method} /check/alicetest HTTP/1.1\r\n")),
+            "{request}"
+        );
+        assert_eq!(request.split_once("\r\n\r\n").unwrap().1, expected_body);
+        assert_eq!(result.status, SearchResultStatus::Found);
+        if let Some(content_type) = extra["headers"]["Content-Type"].as_str() {
+            assert!(request
+                .to_lowercase()
+                .contains(&format!("content-type: {}", content_type.to_lowercase())));
+        }
+        result
+    }
+
+    fn fields(extra: Value) -> Value {
+        let mut fields = serde_json::json!({"strip_bad_char": ".", "uri_pretty": "https://example.com/{account}"});
+        fields
+            .as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        fields
+    }
+
+    #[tokio::test]
+    async fn wmn_json_post() {
+        let result = check_request(fields(serde_json::json!({"post_body": "{\"username\":\"{account}\"}", "headers": {"Content-Type": "application/json"}})), "POST", "{\"username\":\"alicetest\"}").await;
+        assert_eq!(result.url.as_deref(), Some("https://example.com/alicetest"));
+    }
+
+    #[tokio::test]
+    async fn wmn_form_post() {
+        check_request(fields(serde_json::json!({"post_body": "username={account}", "headers": {"Content-Type": "application/x-www-form-urlencoded"}})), "POST", "username=alicetest").await;
+    }
+
+    #[tokio::test]
+    async fn legacy_email_post() {
+        check_request(fields(serde_json::json!({"method": "post", "data": "email={account}", "headers": {"Content-Type": "application/x-www-form-urlencoded"}})), "POST", "email=alicetest").await;
+    }
+
+    #[tokio::test]
+    async fn default_get() {
+        check_request(fields(serde_json::json!({})), "GET", "").await;
+    }
+
+    #[tokio::test]
+    async fn post_body_takes_precedence() {
+        check_request(
+            fields(
+                serde_json::json!({"method": "GET", "data": "ignored", "post_body": "{account}"}),
+            ),
+            "POST",
+            "alicetest",
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn empty_post_body_still_selects_post() {
+        check_request(fields(serde_json::json!({"post_body": ""})), "POST", "").await;
+    }
+
+    #[tokio::test]
+    async fn invalid_profile_urls_fall_back_to_check_url() {
+        for profile in [
+            "file:///Applications/Calculator.app",
+            "custom://open",
+            "javascript:alert(1)",
+            "invalid",
+            "",
+        ] {
+            let result = check_request(
+                fields(serde_json::json!({"uri_pretty": profile})),
+                "GET",
+                "",
+            )
+            .await;
+            let url = result.url.unwrap();
+            assert!(url.starts_with("http://127.0.0.1:"), "{url}");
+            assert!(url.ends_with("/check/alicetest"), "{url}");
+        }
+    }
+
+    #[tokio::test]
+    async fn absent_profile_url_falls_back_to_check_url() {
+        let result = check_request(serde_json::json!({"strip_bad_char": "."}), "GET", "").await;
+        assert!(result.url.unwrap().ends_with("/check/alicetest"));
     }
 }
