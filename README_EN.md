@@ -47,13 +47,13 @@ Download the latest version from [GitHub Releases](https://github.com/funnyzak/n
 <div align="center">
   <table>
     <tr>
-          <td align="center">
-        <img src="https://github.com/user-attachments/assets/5b4d2e9e-a821-4a2d-9426-d06ed02abc5b" alt="NameSeeker Search Results" width="400"/>
-        <p><em>Submit Username Search</em></p>
+      <td align="center">
+        <img src="output/ui-design/readme/search.png" alt="Search window with octocat entered" width="400"/>
+        <p><em>Enter a username</em></p>
       </td>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/032da5d6-9333-4e50-a4b7-8bfb519ad34e" alt="NameSeeker Main Interface" width="400"/>
-        <p><em>Username Search Results</em></p>
+        <img src="output/ui-design/readme/results.png" alt="Search results with matching sites and the export button" width="400"/>
+        <p><em>Example search results</em></p>
       </td>
     </tr>
   </table>
