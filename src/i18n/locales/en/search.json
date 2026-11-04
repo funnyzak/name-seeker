@@ -3,7 +3,7 @@
   "form": {
     "title": "Search for Profiles",
     "subtitle": "Enter a username or email to search across multiple platforms",
-    "inputLabel": "Search Query",
+    "inputLabel": "Username or email",
     "inputPlaceholder": "Enter username or email...",
     "searchTypeLabel": "Search Type",
     "searchTypeUsername": "Username",
@@ -11,14 +11,16 @@
     "searchButton": "Search",
     "stopButton": "Stop",
     "clearButton": "Clear",
-    "historyButton": "Search History"
+    "historyButton": "Search History",
+    "example": "e.g. leon or leon@example.com",
+    "submitHint": "Press Enter to search for public profiles"
   },
   "validation": {
     "required": "This field is required",
     "invalidUsername": "Invalid username format",
     "invalidEmail": "Invalid email format",
     "usernameTooShort": "Username must be at least 2 characters",
-    "usernameTooLong": "Username must be less than 50 characters",
+    "usernameTooLong": "Username exceeds 100 bytes",
     "emailTooLong": "Email must be less than 100 characters",
     "specialCharacters": "Username contains invalid characters",
     "emptyQuery": "Please enter a search query"
@@ -62,7 +64,8 @@
     "clearHistoryAriaLabel": "Clear search history",
     "deleteRecord": "Delete {{item}}",
     "deleteRecordTitle": "Delete this record",
-    "searchPrefix": "Search: {{item}}"
+    "searchPrefix": "Search: {{item}}",
+    "runAgain": "Search again"
   },
   "shortcuts": {
     "title": "Keyboard Shortcuts",

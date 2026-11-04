@@ -11,7 +11,13 @@ export const useSearchHistory = () => {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          return parsed;
+          return [
+            ...new Set(
+              parsed
+                .filter((s): s is string => typeof s === 'string' && !!s.trim())
+                .map(s => s.trim())
+            ),
+          ].slice(0, MAX_HISTORY_ITEMS);
         }
       }
     } catch (error) {

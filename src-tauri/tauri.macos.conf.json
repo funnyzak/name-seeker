@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "windows": [
+      {
+        "title": "NameSeeker",
+        "minWidth": 520,
+        "minHeight": 700,
+        "maxWidth": 700,
+        "maxHeight": 900,
+        "width": 520,
+        "height": 700,
+        "decorations": true,
+        "resizable": true,
+        "center": true,
+        "acceptFirstMouse": true,
+        "contentProtected": false,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay"
+      }
+    ]
+  }
+}

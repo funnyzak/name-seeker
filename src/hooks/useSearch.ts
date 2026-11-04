@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { tauriApi } from '../services/tauriApi';
 import { SearchType } from '../types';
 import type {
@@ -14,6 +14,16 @@ export const useSearch = (callbacks?: {
   onError?: (message: string) => void;
   onStopped?: () => void;
 }) => {
+  const listening = useRef<Promise<boolean> | null>(null);
+  const active = useRef(false);
+  const callbackRef = useRef(callbacks);
+  useEffect(() => {
+    callbackRef.current = callbacks;
+  }, [callbacks]);
+  const [outcome, setOutcome] = useState<'complete' | 'stopped' | 'failed'>(
+    'complete'
+  );
+  const [searchNumber, setSearchNumber] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
   const [searchType, setSearchType] = useState<SearchType>(SearchType.USERNAME);
   const [query, setQuery] = useState<string>('');
@@ -28,6 +38,7 @@ export const useSearch = (callbacks?: {
 
   // Update single search result
   const updateResult = useCallback((payload: SearchUpdatePayload) => {
+    if (!active.current) return;
     setResults(prevResults => {
       const existingIndex = prevResults.findIndex(r => r.site === payload.site);
 
@@ -52,6 +63,7 @@ export const useSearch = (callbacks?: {
 
   // Update search progress
   const updateProgress = useCallback((payload: SearchProgressPayload) => {
+    if (!active.current) return;
     setProgress({
       total_sites: payload.total_sites,
       checked_sites: payload.checked_sites,
@@ -62,6 +74,8 @@ export const useSearch = (callbacks?: {
   }, []);
 
   const finishSearch = useCallback((payload: SearchFinished) => {
+    if (!active.current) return;
+    active.current = false;
     setIsSearching(false);
 
     setProgress(prev => ({
@@ -72,14 +86,14 @@ export const useSearch = (callbacks?: {
       current_site: undefined,
     }));
 
-    // Ensure all remaining Pending statuses are handled correctly
+    // A missing site response cannot establish that the account does not exist.
     setResults(prevResults =>
       prevResults.map(result => {
         if (result.status === 'Pending') {
           return {
             ...result,
-            status: 'NotFound' as SearchResultStatus,
-            error: 'Check completed, user not found',
+            status: 'Error' as SearchResultStatus,
+            error: 'No site response',
           };
         }
         return result;
@@ -88,19 +102,21 @@ export const useSearch = (callbacks?: {
   }, []);
 
   // Search error handling
-  const handleSearchError = useCallback(
-    (error: string) => {
-      setIsSearching(false);
-      setProgress(prev => ({ ...prev, current_site: undefined }));
-      if (callbacks?.onError) {
-        callbacks.onError(error);
-      }
-    },
-    [callbacks]
-  );
+  const handleSearchError = useCallback((error: string) => {
+    if (!active.current) return;
+    active.current = false;
+    setIsSearching(false);
+    setProgress(prev => ({ ...prev, current_site: undefined }));
+    setOutcome('failed');
+    if (callbackRef.current?.onError) {
+      callbackRef.current.onError(error);
+    }
+  }, []);
 
   // Search stop handling
   const handleSearchStopped = useCallback(() => {
+    if (!active.current) return;
+    active.current = false;
     setIsSearching(false);
 
     setResults(prevResults =>
@@ -122,10 +138,11 @@ export const useSearch = (callbacks?: {
       current_site: undefined,
     }));
 
-    if (callbacks?.onStopped) {
-      callbacks.onStopped();
+    setOutcome('stopped');
+    if (callbackRef.current?.onStopped) {
+      callbackRef.current.onStopped();
     }
-  }, [callbacks]);
+  }, []);
 
   // Start search
   const startSearch = useCallback(
@@ -161,7 +178,12 @@ export const useSearch = (callbacks?: {
         );
       }
 
+      if (!(await listening.current))
+        throw new Error('Search events unavailable');
+      active.current = true;
       // Reset state
+      setSearchNumber(n => n + 1);
+      setOutcome('complete');
       setSearchType(type);
       setQuery(searchQuery.trim());
       setResults([]);
@@ -177,7 +199,9 @@ export const useSearch = (callbacks?: {
       try {
         await tauriApi.startSearch(searchQuery.trim(), type, options);
       } catch (err) {
+        active.current = false;
         setIsSearching(false);
+        setOutcome('failed');
         throw err;
       }
     },
@@ -188,7 +212,7 @@ export const useSearch = (callbacks?: {
   const stopSearch = useCallback(async () => {
     try {
       const stopped = await tauriApi.stopSearch();
-      return stopped;
+      return stopped || !active.current;
     } catch {
       return false;
     }
@@ -196,34 +220,28 @@ export const useSearch = (callbacks?: {
 
   // Setup event listeners
   useEffect(() => {
-    let unsubscribers: (() => void)[] = [];
-
-    const setupListeners = async () => {
-      try {
-        const unsubUpdate = await tauriApi.onSearchUpdate(updateResult);
-        const unsubProgress = await tauriApi.onSearchProgress(updateProgress);
-        const unsubFinished = await tauriApi.onSearchFinished(finishSearch);
-        const unsubError = await tauriApi.onSearchError(handleSearchError);
-        const unsubStopped =
-          await tauriApi.onSearchStopped(handleSearchStopped);
-
-        unsubscribers = [
-          unsubUpdate,
-          unsubProgress,
-          unsubFinished,
-          unsubError,
-          unsubStopped,
-        ];
-      } catch {
-        if (callbacks?.onError) {
-          callbacks.onError('Failed to setup search listeners');
-        }
-      }
-    };
-
-    setupListeners();
-
+    let disposed = false;
+    const unsubscribers: (() => void)[] = [];
+    async function subscribe(subscription: Promise<() => void>) {
+      const unsubscribe = await subscription;
+      if (disposed) unsubscribe();
+      else unsubscribers.push(unsubscribe);
+    }
+    listening.current = Promise.all([
+      subscribe(tauriApi.onSearchUpdate(updateResult)),
+      subscribe(tauriApi.onSearchProgress(updateProgress)),
+      subscribe(tauriApi.onSearchFinished(finishSearch)),
+      subscribe(tauriApi.onSearchError(handleSearchError)),
+      subscribe(tauriApi.onSearchStopped(handleSearchStopped)),
+    ])
+      .then(() => !disposed)
+      .catch(() => {
+        if (!disposed)
+          callbackRef.current?.onError?.('Failed to setup search listeners');
+        return false;
+      });
     return () => {
+      disposed = true;
       unsubscribers.forEach(unsub => unsub());
     };
   }, [
@@ -232,7 +250,6 @@ export const useSearch = (callbacks?: {
     finishSearch,
     handleSearchError,
     handleSearchStopped,
-    callbacks,
   ]);
 
   // Filter results by status
@@ -274,6 +291,8 @@ export const useSearch = (callbacks?: {
     progress,
     startSearch,
     stopSearch,
+    searchNumber,
+    outcome,
     clearResults,
     getResultsByStatus,
     getStats,

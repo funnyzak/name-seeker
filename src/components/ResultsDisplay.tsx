@@ -1,432 +1,143 @@
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useLayoutEffect,
-  useEffect,
-} from 'react';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  SearchResultStatus as Status,
+  type ResultsDisplayProps,
+} from '../types';
 import ResultItem from './ResultItem';
-import ProgressIndicator from './ProgressIndicator';
 import ExportButton from './ExportButton';
-import ResultsFilter from './ResultsFilter';
-import type { ResultsDisplayProps, SearchResult } from '../types';
 
-interface CollapsedSections {
-  found: boolean;
-  notFound: boolean;
-  error: boolean;
-  pending: boolean;
-}
-
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
+const groups = [
+  [Status.FOUND, 'summary.found'],
+  [Status.NOT_FOUND, 'categories.notFound'],
+  [Status.ERROR, 'summary.error'],
+] as const;
+export default function ResultsDisplay({
   results,
   progress,
   isSearching,
+  outcome,
   query,
   onExportSuccess,
   onExportError,
   onClearResults,
-}) => {
-  const { t } = useTranslation(['results', 'common']);
-  const [collapsed, setCollapsed] = useState<CollapsedSections>({
-    found: false,
-    notFound: true, // Default collapse Not Found
-    error: false,
-    pending: false,
-  });
-  const [filterText, setFilterText] = useState('');
-  const [listWidth, setListWidth] = useState<number>(360);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Measure container width for virtualized lists
-  useLayoutEffect(() => {
-    const measure = () => {
-      if (containerRef.current && typeof window !== 'undefined') {
-        const style = window.getComputedStyle(containerRef.current);
-        const padding =
-          parseFloat(style.paddingLeft || '0') +
-          parseFloat(style.paddingRight || '0');
-        const width = Math.max(240, containerRef.current.clientWidth - padding);
-        setListWidth(width);
-      }
-    };
-    measure();
-
-    const ObserverCtor =
-      typeof window !== 'undefined' && 'ResizeObserver' in window
-        ? window.ResizeObserver
-        : null;
-    const observer = ObserverCtor ? new ObserverCtor(measure) : null;
-    if (observer && containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-    return () => observer?.disconnect();
-  }, [collapsed]);
-
-  // Fallback update on window resize if ResizeObserver is unavailable
+}: ResultsDisplayProps) {
+  const { t } = useTranslation('results');
+  const [group, setGroup] = useState<Status>(Status.FOUND);
+  const [filter, setFilter] = useState('');
+  const filterInput = useRef<HTMLInputElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        setListWidth(containerRef.current.clientWidth);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Use useMemo to cache filtered results
-  const filteredResults = useMemo(() => {
-    if (!filterText.trim()) {
-      return results;
-    }
-
-    const searchTerm = filterText.toLowerCase();
-    return results.filter(
+    scroller.current?.scrollTo(0, 0);
+  }, [group, filter]);
+  const term = filter.trim().toLowerCase();
+  const visible = results
+    .filter(
       r =>
-        r.site.toLowerCase().includes(searchTerm) ||
-        (r.category && r.category.toLowerCase().includes(searchTerm)) ||
-        (r.url && r.url.toLowerCase().includes(searchTerm))
-    );
-  }, [results, filterText]);
-
-  const foundResults = filteredResults.filter(r => r.status === 'Found');
-  const notFoundResults = filteredResults.filter(r => r.status === 'NotFound');
-  const errorResults = filteredResults.filter(r => r.status === 'Error');
-  const pendingResults = filteredResults.filter(r => r.status === 'Pending');
-
-  const hasResults = results.length > 0 || isSearching;
-
-  const toggleSection = (section: keyof CollapsedSections) => {
-    setCollapsed(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const renderVirtualList = (
-    sectionId: string,
-    data: typeof results,
-    estimatedHeight: number,
-    ariaLabel: string
-  ) => {
-    const displayData = [...data].reverse();
-
-    if (displayData.length < 120) {
-      return (
-        <div
-          id={sectionId}
-          className="results-list"
-          role="list"
-          aria-label={ariaLabel}
-        >
-          {displayData.map((result, index) => (
-            <ResultItem
-              key={`${sectionId}-${result.site}-${index}`}
-              result={result}
-            />
-          ))}
-        </div>
-      );
-    }
-
-    const Row = ({
-      index,
-      style,
-      data,
-    }: ListChildComponentProps<SearchResult[]>) => (
-      <div style={style} role="listitem">
-        <ResultItem result={data[index]} />
-      </div>
-    );
-
-    const height = Math.min(estimatedHeight, displayData.length * 72);
-    const width = Math.max(listWidth, 320);
-
-    return (
-      <div id={sectionId} className="results-list" role="list">
-        <List
-          height={height}
-          itemCount={displayData.length}
-          itemSize={72}
-          width={width}
-          itemData={displayData}
-        >
-          {Row}
-        </List>
-      </div>
-    );
-  };
-
-  if (!hasResults) {
-    return (
-      <div
-        className="empty-state"
-        role="status"
-        aria-label={t('results:empty.ariaLabel')}
-      >
-        <div className="empty-icon" aria-hidden="true">
-          🔍
-        </div>
-        <h3>{t('results:empty.title')}</h3>
-        <p className="empty-description">{t('results:empty.description')}</p>
-        <div className="empty-features">
-          <div className="feature-item">
-            <span className="feature-icon" aria-hidden="true">
-              ⚡
-            </span>
-            <span>{t('results:empty.features.fastSearch')}</span>
-          </div>
-          <div className="feature-item">
-            <span className="feature-icon" aria-hidden="true">
-              🌐
-            </span>
-            <span>{t('results:empty.features.multiSite')}</span>
-          </div>
-          <div className="feature-item">
-            <span className="feature-icon" aria-hidden="true">
-              📊
-            </span>
-            <span>{t('results:empty.features.export')}</span>
-          </div>
-        </div>
-        <div className="empty-shortcuts">
-          <p className="shortcuts-title">
-            {t('results:empty.shortcuts.title')}
-          </p>
-          <ul className="shortcuts-list">
-            <li>
-              <kbd>/</kbd> {t('results:empty.shortcuts.focus')}
-            </li>
-            <li>
-              <kbd>Esc</kbd> {t('results:empty.shortcuts.stop')}
-            </li>
-            <li>
-              <kbd>Ctrl+H</kbd> {t('results:empty.shortcuts.help')}
-            </li>
-          </ul>
-        </div>
-      </div>
-    );
-  }
-
+        r.status === group &&
+        [r.site, r.category, r.url].some(v => v?.toLowerCase().includes(term))
+    )
+    .reverse();
   return (
-    <div
-      className="results-container"
-      role="region"
-      aria-label={t('results:empty.resultsAriaLabel')}
-    >
-      {/* Results header: title and export buttons */}
-      <div className="results-header">
-        <h3 className="results-title" id="results-heading">
-          {t('results:title')}{' '}
-          <span
-            className="results-count"
-            aria-label={t('results:actions.resultsCount', {
-              filtered: filteredResults.length,
-              total: results.length,
-            })}
-          >
-            ({filteredResults.length}/{results.length})
-          </span>
-        </h3>
-        <div className="results-actions">
-          <ResultsFilter
-            onFilterChange={setFilterText}
-            resultsCount={filteredResults.length}
-          />
-          <ExportButton
-            results={results}
-            username={query}
-            disabled={isSearching}
-            onExportSuccess={onExportSuccess}
-            onExportError={onExportError}
-          />
-          {onClearResults && !isSearching && (
-            <button
-              className="btn btn-clear"
-              onClick={onClearResults}
-              aria-label={t('results:actions.clearAriaLabel')}
-            >
-              <span className="btn-icon" aria-hidden="true">
-                🗑️
-              </span>
-              <span className="btn-text">{t('results:actions.reset')}</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Progress indicator */}
+    <section className="lookup-results">
+      <header className="lookup-heading">
+        <h2>{t(isSearching ? 'ui.running' : 'title')}</h2>
+        <span>
+          {isSearching
+            ? progress.total_sites
+              ? progress.checked_sites + ' / ' + progress.total_sites
+              : ''
+            : t('ui.checked', { count: progress.checked_sites })}
+        </span>
+      </header>
       {isSearching && (
-        <ProgressIndicator progress={progress} isSearching={isSearching} />
+        <progress
+          aria-label={t('ui.running')}
+          max={progress.total_sites || 1}
+          value={progress.total_sites ? progress.checked_sites : undefined}
+        />
       )}
-
-      {/* Results area scroll container */}
       <div
-        className="section-wrapper"
-        role="main"
-        aria-labelledby="results-heading"
-        ref={containerRef}
+        className="status-switch"
+        role="group"
+        aria-label={t('filter.byStatus')}
       >
-        {foundResults.length > 0 && (
-          <div className="results-section">
-            <h3
-              className="section-header found-header"
-              onClick={() => toggleSection('found')}
-              role="button"
-              tabIndex={0}
-              aria-expanded={!collapsed.found}
-              aria-controls="found-results-list"
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  toggleSection('found');
-                }
-              }}
-            >
-              <span>
-                ✓ {t('results:categories.foundUsers')} ({foundResults.length})
-              </span>
-              <span
-                className={`collapse-icon ${collapsed.found ? 'collapsed' : ''}`}
-                aria-hidden="true"
+        {groups.map(([status, label]) => (
+          <button
+            key={status}
+            aria-pressed={status === group}
+            onClick={() => setGroup(status)}
+          >
+            {t(label)}{' '}
+            <span>{results.filter(r => r.status === status).length}</span>
+          </button>
+        ))}
+      </div>
+      <div className="lookup-tools">
+        <input
+          ref={filterInput}
+          type="search"
+          aria-label={t('filter.filterAriaLabel')}
+          placeholder={t('filter.filterPlaceholder')}
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          onKeyDown={event => {
+            if (
+              event.key === 'Escape' &&
+              filter &&
+              !event.nativeEvent.isComposing
+            ) {
+              event.preventDefault();
+              event.stopPropagation();
+              setFilter('');
+            }
+          }}
+        />
+        <ExportButton
+          results={results}
+          username={query}
+          disabled={isSearching}
+          onExportSuccess={onExportSuccess}
+          onExportError={onExportError}
+        />
+      </div>
+      <div
+        ref={scroller}
+        className="lookup-list"
+        role="list"
+        aria-label={t('title')}
+      >
+        {visible.map(r => (
+          <ResultItem key={r.site} result={r} />
+        ))}
+        {!visible.length && (
+          <p className="no-match" role="status">
+            {t(term ? 'ui.noMatch' : isSearching ? 'ui.waiting' : 'ui.none')}
+            {term && (
+              <button
+                onClick={() => {
+                  setFilter('');
+                  filterInput.current?.focus();
+                }}
               >
-                ▼
-              </span>
-            </h3>
-            <div
-              id="found-results-list"
-              className={`results-list ${collapsed.found ? 'collapsed' : ''}`}
-              role="list"
-              aria-label={t('results:categories.foundUsers')}
-            >
-              {!collapsed.found &&
-                renderVirtualList(
-                  'found-results-list',
-                  foundResults,
-                  420,
-                  t('results:categories.foundUsers')
-                )}
-            </div>
-          </div>
-        )}
-
-        {pendingResults.length > 0 && isSearching && (
-          <div className="results-section">
-            <h3
-              className="section-header pending-header"
-              onClick={() => toggleSection('pending')}
-            >
-              <span>
-                ⏳ {t('results:categories.checking')} ({pendingResults.length})
-              </span>
-              <span
-                className={`collapse-icon ${collapsed.pending ? 'collapsed' : ''}`}
-              >
-                ▼
-              </span>
-            </h3>
-            <div
-              className={`results-list ${collapsed.pending ? 'collapsed' : ''}`}
-            >
-              {!collapsed.pending &&
-                renderVirtualList(
-                  'pending-results',
-                  pendingResults,
-                  300,
-                  t('results:categories.checking')
-                )}
-            </div>
-          </div>
-        )}
-
-        {errorResults.length > 0 && (
-          <div className="results-section">
-            <h3
-              className="section-header error-header"
-              onClick={() => toggleSection('error')}
-            >
-              <span>
-                ⚠ {t('results:categories.error')} ({errorResults.length})
-              </span>
-              <span
-                className={`collapse-icon ${collapsed.error ? 'collapsed' : ''}`}
-              >
-                ▼
-              </span>
-            </h3>
-            <div
-              className={`results-list ${collapsed.error ? 'collapsed' : ''}`}
-            >
-              {!collapsed.error &&
-                renderVirtualList(
-                  'error-results',
-                  errorResults,
-                  360,
-                  t('results:categories.error')
-                )}
-            </div>
-          </div>
-        )}
-
-        {notFoundResults.length > 0 && (
-          <div className="results-section">
-            <h3
-              className="section-header not-found-header"
-              onClick={() => toggleSection('notFound')}
-            >
-              <span>
-                ✗ {t('results:categories.notFound')} ({notFoundResults.length})
-              </span>
-              <span
-                className={`collapse-icon ${collapsed.notFound ? 'collapsed' : ''}`}
-              >
-                ▼
-              </span>
-            </h3>
-            <div
-              className={`results-list ${collapsed.notFound ? 'collapsed' : ''}`}
-            >
-              {!collapsed.notFound &&
-                renderVirtualList(
-                  'notfound-results',
-                  notFoundResults,
-                  420,
-                  t('results:categories.notFound')
-                )}
-            </div>
-          </div>
+                {t('filter.clear')}
+              </button>
+            )}
+          </p>
         )}
       </div>
-
-      {!isSearching && (results.length > 0 || progress.checked_sites > 0) && (
-        <div className="search-summary">
-          {/* {progress.current_site === undefined && progress.checked_sites < progress.total_sites && (
-            <div className="search-stopped-notice">
-              <span className="stopped-icon">⏸️</span>
-              Search was stopped, showing completed checked results
-            </div>
-          )} */}
-          <div className="summary-stats">
-            <span className="summary-stat found">
-              {t('results:summary.found')}: {foundResults.length}
-            </span>
-            <span className="summary-stat not-found">
-              {t('results:categories.notFound')}: {notFoundResults.length}
-            </span>
-            <span className="summary-stat error">
-              {t('results:summary.error')}: {errorResults.length}
-            </span>
-            <span className="summary-stat total">
-              {t('results:summary.total')}: {results.length}
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
+      <footer>
+        <span role="status">
+          {t(isSearching ? 'ui.stopHint' : 'ui.' + outcome)}
+          {!isSearching &&
+            outcome === 'stopped' &&
+            results.length > 0 &&
+            ' · ' + t('ui.retained')}
+        </span>
+        {!isSearching && (
+          <button onClick={onClearResults}>{t('actions.reset')}</button>
+        )}
+      </footer>
+    </section>
   );
-};
-
-export default ResultsDisplay;
+}

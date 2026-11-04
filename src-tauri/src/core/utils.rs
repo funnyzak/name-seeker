@@ -164,8 +164,8 @@ pub fn normalize_url(url: &str) -> String {
         normalized = format!("https://{}", normalized);
     }
 
-    // Remove trailing slash (unless it's root path)
-    if normalized.ends_with('/') && normalized.matches('/').count() > 3 {
+    // Preserve trailing slashes that belong to query or fragment values.
+    if normalized.ends_with('/') && !normalized.ends_with("://") && !normalized.contains(['?', '#']) {
         normalized.pop();
     }
 

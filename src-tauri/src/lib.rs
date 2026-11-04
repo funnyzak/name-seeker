@@ -16,7 +16,7 @@ use tokio::sync::Mutex;
 // Application state
 #[derive(Default)]
 pub struct AppState {
-    pub search_handle: Arc<Mutex<Option<tauri::async_runtime::JoinHandle<()>>>>,
+    pub search_handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
 }
 
 /// Check if this is the first launch
@@ -94,31 +94,31 @@ async fn start_search(
     // Create single result update callback
     let app_for_update = app.clone();
     let update_callback = move |payload: SearchUpdatePayload| {
-        let app = app_for_update.clone();
-        tauri::async_runtime::spawn(async move {
-            if let Err(e) = app.emit("search-update", &payload) {
-                log::error!("Failed to emit search update event: {}", e);
-            }
-        });
+        if let Err(e) = app_for_update.emit("search-update", &payload) {
+            log::error!("Failed to emit search-update event: {}", e);
+        }
     };
 
     // Create progress update callback
     let app_for_progress = app.clone();
     let progress_callback = move |payload: SearchProgressPayload| {
-        let app = app_for_progress.clone();
-        tauri::async_runtime::spawn(async move {
-            if let Err(e) = app.emit("search-progress", &payload) {
-                log::error!("Failed to emit progress update event: {}", e);
-            }
-        });
+        if let Err(e) = app_for_progress.emit("search-progress", &payload) {
+            log::error!("Failed to emit search-progress event: {}", e);
+        }
     };
 
     // Clone necessary data
     let app_for_search = app.clone();
     let search_engine_clone = search_engine.clone();
 
+    // Serialize ownership of the task with stop_search.
+    let mut handle = state.search_handle.lock().await;
+    if handle.as_ref().is_some_and(|task| !task.is_finished()) {
+        return Err("A search is already running".to_string());
+    }
+
     // Start search task
-    let search_handle = tauri::async_runtime::spawn(async move {
+    let search_handle = tokio::spawn(async move {
         let start_time = std::time::Instant::now();
 
         // Get total number of sites to search
@@ -191,11 +191,7 @@ async fn start_search(
         log::debug!("Search task completed, handle will be automatically cleaned up");
     });
 
-    // Save search handle
-    {
-        let mut search_handle_guard = state.search_handle.lock().await;
-        *search_handle_guard = Some(search_handle);
-    }
+    *handle = Some(search_handle);
 
     Ok(())
 }
@@ -207,6 +203,11 @@ async fn stop_search(app: AppHandle, state: tauri::State<'_, AppState>) -> Resul
 
     if let Some(search_handle) = search_handle_guard.take() {
         search_handle.abort();
+        match search_handle.await {
+            Ok(()) => return Ok(false),
+            Err(error) if !error.is_cancelled() => return Err(error.to_string()),
+            Err(_) => {}
+        }
 
         // Send search stopped event
         if let Err(e) = app.emit("search-stopped", &()) {
@@ -255,7 +256,11 @@ async fn validate_email_format(email: String) -> Result<bool, String> {
 /// Open external URL
 #[tauri::command]
 async fn open_url(url: String) -> Result<(), String> {
-    match open::that(&url) {
+    let target = url::Url::parse(&url).map_err(|e| e.to_string())?;
+    if !matches!(target.scheme(), "http" | "https") || !target.has_host() {
+        return Err("Only HTTP and HTTPS profile links are supported".to_string());
+    }
+    match open::that(target.as_str()) {
         Ok(_) => Ok(()),
         Err(e) => Err(format!("Failed to open URL: {}", e)),
     }
@@ -348,7 +353,10 @@ pub fn run() {
 
     log::info!("Starting NameSeeker application");
 
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(desktop)]
+    let builder = builder.menu(tauri::menu::Menu::default);
+    builder
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())

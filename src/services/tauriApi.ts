@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type {
   SearchUpdatePayload,
@@ -26,12 +26,7 @@ export class TauriApiService {
    * Check if it's the first launch
    */
   async isFirstLaunch(): Promise<boolean> {
-    try {
-      return await invoke<boolean>('is_first_launch');
-    } catch (error) {
-      console.error('Error checking first launch:', error);
-      return false;
-    }
+    return isTauri() ? invoke<boolean>('is_first_launch') : false;
   }
 
   /**

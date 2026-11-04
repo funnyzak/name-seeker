@@ -1,3 +1,4 @@
+import ModalOverlay from './ModalOverlay';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DisclaimerModalProps } from '../types';
@@ -6,13 +7,15 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
   isOpen,
   onAccept,
   onDecline,
+  failure,
+  busy,
 }) => {
   const { t } = useTranslation('modals');
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
+    <ModalOverlay label={t('disclaimer.title')}>
       <div className="modal-container">
         <div className="modal-header">
           <h2>{t('modals:disclaimer.title')}</h2>
@@ -48,16 +51,25 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
           </div>
         </div>
 
+        {failure && (
+          <p className="dialog-error" role="alert">
+            {t('disclaimer.' + failure)}
+          </p>
+        )}
         <div className="modal-footer">
-          <button className="btn btn-decline" onClick={onDecline}>
+          <button
+            disabled={busy}
+            className="btn btn-decline"
+            onClick={onDecline}
+          >
             {t('modals:disclaimer.buttons.decline')}
           </button>
-          <button className="btn btn-accept" onClick={onAccept}>
+          <button disabled={busy} className="btn btn-accept" onClick={onAccept}>
             {t('modals:disclaimer.buttons.accept')}
           </button>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

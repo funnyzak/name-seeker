@@ -47,13 +47,13 @@ NameSeeker 是一款强大的跨平台桌面应用，可以在数百个网站上
 <div align="center">
   <table>
     <tr>
-          <td align="center">
-        <img src="https://github.com/user-attachments/assets/5b4d2e9e-a821-4a2d-9426-d06ed02abc5b" alt="NameSeeker 搜索结果" width="400"/>
-        <p><em>提交用户名搜索</em></p>
+      <td align="center">
+        <img src="output/ui-design/readme/search.png" alt="英文版搜索窗口，已输入 octocat" width="400"/>
+        <p><em>输入用户名</em></p>
       </td>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/032da5d6-9333-4e50-a4b7-8bfb519ad34e" alt="NameSeeker 主界面" width="400"/>
-        <p><em>用户名搜索结果</em></p>
+        <img src="output/ui-design/readme/results.png" alt="英文版搜索结果，显示站点和导出按钮" width="400"/>
+        <p><em>搜索结果示例</em></p>
       </td>
     </tr>
   </table>

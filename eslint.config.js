@@ -29,7 +29,10 @@ export default [
         clearTimeout: 'readonly',
         global: 'readonly',
         HTMLElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        PointerEvent: 'readonly',
         HTMLInputElement: 'readonly',
+        HTMLDialogElement: 'readonly',
         HTMLDivElement: 'readonly',
         MouseEvent: 'readonly',
         KeyboardEvent: 'readonly',
@@ -68,6 +71,8 @@ export default [
   prettier,
   {
     ignores: [
+      'temp_files/**',
+      'output/**',
       'dist/**',
       'node_modules/**',
       'src-tauri/target/**',

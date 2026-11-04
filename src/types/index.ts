@@ -78,25 +78,26 @@ export interface AppState {
 
 // Component Props types
 export interface DisclaimerModalProps {
+  failure: 'saveFailed' | 'exitFailed' | null;
+  busy: boolean;
   isOpen: boolean;
   onAccept: () => void;
   onDecline: () => void;
 }
 
 export interface SearchFormProps {
+  idle: boolean;
   isSearching: boolean;
-  searchType: SearchType;
-  onSubmit: (query: string, searchType: SearchType) => void;
+  onSubmit: (query: string, searchType: SearchType) => Promise<boolean>;
   onStopSearch?: () => void;
   searchHistory?: string[];
   onAddToHistory?: (query: string) => void;
   onRemoveFromHistory?: (query: string) => void;
   onClearHistory?: () => void;
-  onError?: (message: string) => void;
-  onWarning?: (message: string) => void;
 }
 
 export interface ResultsDisplayProps {
+  outcome: 'complete' | 'stopped' | 'failed';
   results: SearchResult[];
   progress: SearchProgress;
   isSearching: boolean;

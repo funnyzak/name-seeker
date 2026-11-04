@@ -31,7 +31,8 @@
     "permissionError": "权限被拒绝",
     "fileNotFound": "文件未找到",
     "invalidFormat": "文件格式无效",
-    "operationFailed": "操作失败"
+    "operationFailed": "操作失败",
+    "stopFailed": "未能停止搜索，请重试。"
   },
   "warning": {
     "searchInProgress": "搜索已在进行中",

@@ -33,12 +33,14 @@
     "checkAgain": "Check Again",
     "clickToVisit": "Click to visit profile page",
     "opening": "Opening...",
-    "viewProfile": "View Profile",
+    "viewProfile": "Open ↗",
     "userNotFound": "User not found",
     "searchStopped": "Search stopped",
     "checking": "Checking...",
     "detailsTitle": "Details:",
-    "statusAriaLabel": "Status: {{status}}"
+    "statusAriaLabel": "Status: {{status}}",
+    "openFailed": "Could not open the link. Try again.",
+    "noResponse": "No site response"
   },
   "filter": {
     "title": "Filter Results",
@@ -52,7 +54,7 @@
     "byStatus": "Filter by Status",
     "clear": "Clear Filters",
     "placeholder": "Search results...",
-    "filterPlaceholder": "Filter results...",
+    "filterPlaceholder": "Filter sites or categories",
     "filterAriaLabel": "Filter search results",
     "clearFilter": "Clear filter",
     "clearFilterTitle": "Clear filter",
@@ -74,7 +76,7 @@
     "deselectAll": "Deselect All",
     "refresh": "Refresh Results",
     "clear": "Clear Results",
-    "reset": "Reset",
+    "reset": "Clear",
     "clearAriaLabel": "Clear search results",
     "clearTitle": "Clear all search results",
     "resultsCount": "Showing {{filtered}} of {{total}} results"
@@ -96,12 +98,25 @@
       "focus": "Focus search box",
       "stop": "Stop search",
       "help": "Show help"
-    }
+    },
+    "firstSearch": "Matches will appear here as sites are checked."
   },
   "loading": {
     "title": "Searching...",
     "description": "Checking websites for profiles",
     "currentSite": "Currently checking: {{site}}",
     "progress": "Progress: {{current}}/{{total}}"
+  },
+  "ui": {
+    "running": "Searching",
+    "checked": "{{count}} sites checked",
+    "noMatch": "No matching results",
+    "waiting": "Waiting for results",
+    "none": "No results in this group",
+    "stopHint": "Esc to stop",
+    "complete": "Complete",
+    "stopped": "Stopped",
+    "failed": "Search failed",
+    "retained": "Current results kept"
   }
 }

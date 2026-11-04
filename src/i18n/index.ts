@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { detectLanguage, setStoredLanguage } from './types';
+import { detectLanguage } from './types';
 
 // Import translation resources
 import enCommon from './locales/en/common.json';
@@ -67,9 +67,8 @@ i18n.use(initReactI18next).init({
   },
 });
 
-// Listen for language changes, auto-persist and update HTML lang attribute
+// Keep screen readers and the active language in sync.
 i18n.on('languageChanged', (lng: string) => {
-  setStoredLanguage(lng as 'en' | 'zh');
   document.documentElement.lang = lng;
 
   if (import.meta.env.DEV) {
@@ -87,5 +86,15 @@ if (import.meta.env.DEV) {
   console.log('📚 Available namespaces:', i18n.options.ns);
   console.log('🌍 Supported languages:', i18n.options.supportedLngs);
 }
+
+const syncLanguage = () => {
+  const language = detectLanguage();
+  if (language !== i18n.language) void i18n.changeLanguage(language);
+};
+window.addEventListener('languagechange', syncLanguage);
+if (import.meta.hot)
+  import.meta.hot.dispose(() =>
+    window.removeEventListener('languagechange', syncLanguage)
+  );
 
 export default i18n;
