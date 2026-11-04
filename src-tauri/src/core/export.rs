@@ -1,10 +1,33 @@
 use crate::core::error::AppError;
 use crate::core::models::{ExportFormat, ExportOptions, SearchResult, SearchResultStatus};
 use std::fs;
-use std::path::PathBuf;
+use std::io::Write;
+use std::path::Path;
 
 /// Export results to file
 pub fn export_results(options: ExportOptions) -> Result<String, AppError> {
+    let dir = dirs::download_dir()
+        .ok_or_else(|| AppError::ExportError("Unable to get downloads directory".to_string()))?;
+    export_to(options, &dir)
+}
+
+fn filename_part(value: &str) -> String {
+    let mut part = String::new();
+    for c in value.chars() {
+        let safe = if c.is_alphanumeric() || matches!(c, '@' | '.' | '-' | '_') {
+            c
+        } else {
+            '_'
+        };
+        if part.len() + safe.len_utf8() > 96 {
+            break;
+        }
+        part.push(safe);
+    }
+    part
+}
+
+fn export_to(options: ExportOptions, dir: &Path) -> Result<String, AppError> {
     // Only export found results
     let found_results: Vec<&SearchResult> = options
         .results
@@ -22,62 +45,77 @@ pub fn export_results(options: ExportOptions) -> Result<String, AppError> {
         .clone()
         .unwrap_or_else(|| chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string());
 
-    let filename = format!(
-        "name_seeker_{}_{}.{}",
-        options.username,
-        timestamp,
-        match options.format {
-            ExportFormat::Pdf => "pdf",
-            ExportFormat::Csv => "csv",
-            ExportFormat::Json => "json",
-            ExportFormat::Txt => "txt",
-        }
+    let stem = format!(
+        "name_seeker_{}_{}",
+        filename_part(&options.username),
+        filename_part(&timestamp)
     );
-
-    // Get downloads directory
-    let downloads_dir = dirs::download_dir()
-        .ok_or_else(|| AppError::ExportError("Unable to get downloads directory".to_string()))?;
-
-    let file_path = downloads_dir.join(filename);
-
-    // Export based on format
-    match options.format {
-        ExportFormat::Json => export_json(&found_results, &file_path)?,
-        ExportFormat::Csv => export_csv(&found_results, &file_path)?,
-        ExportFormat::Pdf => export_pdf(&found_results, &options.username, &file_path)?,
-        ExportFormat::Txt => export_txt(&found_results, &file_path)?,
+    let extension = match options.format {
+        ExportFormat::Pdf => "pdf",
+        ExportFormat::Csv => "csv",
+        ExportFormat::Json => "json",
+        ExportFormat::Txt => "txt",
+    };
+    let mut suffix = 0u64;
+    loop {
+        let filename = if suffix == 0 {
+            format!("{stem}.{extension}")
+        } else {
+            format!("{stem}_{suffix}.{extension}")
+        };
+        let path = dir.join(filename);
+        let file = match fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+        {
+            Ok(file) => file,
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+                suffix += 1;
+                continue;
+            }
+            Err(e) => return Err(e.into()),
+        };
+        let result = match options.format {
+            ExportFormat::Json => export_json(&found_results, file),
+            ExportFormat::Csv => export_csv(&found_results, file),
+            ExportFormat::Pdf => export_pdf(&found_results, &options.username, file),
+            ExportFormat::Txt => export_txt(&found_results, file),
+        };
+        if let Err(error) = result {
+            let _ = fs::remove_file(&path);
+            return Err(error);
+        }
+        return Ok(path.to_string_lossy().into_owned());
     }
-
-    Ok(file_path.to_string_lossy().to_string())
 }
 
 /// Export as TXT
-fn export_txt(results: &[&SearchResult], file_path: &PathBuf) -> Result<(), AppError> {
+fn export_txt(results: &[&SearchResult], mut file: fs::File) -> Result<(), AppError> {
     let txt_data = results
         .iter()
         .map(|r| format!("{}: {}", r.site, r.url.as_deref().unwrap_or("N/A")))
         .collect::<Vec<String>>()
         .join("\n");
-    fs::write(file_path, txt_data)
+    file.write_all(txt_data.as_bytes())
         .map_err(|e| AppError::ExportError(format!("Failed to write TXT file: {}", e)))?;
     Ok(())
 }
 
 /// Export as JSON
-fn export_json(results: &[&SearchResult], file_path: &PathBuf) -> Result<(), AppError> {
+fn export_json(results: &[&SearchResult], mut file: fs::File) -> Result<(), AppError> {
     let json_data = serde_json::to_string_pretty(&results)
         .map_err(|e| AppError::ExportError(format!("JSON serialization failed: {}", e)))?;
 
-    fs::write(file_path, json_data)
+    file.write_all(json_data.as_bytes())
         .map_err(|e| AppError::ExportError(format!("Failed to write JSON file: {}", e)))?;
 
     Ok(())
 }
 
 /// Export as CSV
-fn export_csv(results: &[&SearchResult], file_path: &PathBuf) -> Result<(), AppError> {
-    let mut writer = csv::Writer::from_path(file_path)
-        .map_err(|e| AppError::ExportError(format!("Failed to create CSV file: {}", e)))?;
+fn export_csv(results: &[&SearchResult], file: fs::File) -> Result<(), AppError> {
+    let mut writer = csv::Writer::from_writer(file);
 
     // Write header
     writer
@@ -102,14 +140,34 @@ fn export_csv(results: &[&SearchResult], file_path: &PathBuf) -> Result<(), AppE
     Ok(())
 }
 
-/// Export as PDF
+#[cfg(target_os = "macos")]
 fn export_pdf(
     results: &[&SearchResult],
     username: &str,
-    file_path: &PathBuf,
+    mut file: fs::File,
 ) -> Result<(), AppError> {
+    use std::os::fd::AsRawFd;
+
+    extern "C" {
+        fn name_seeker_write_pdf(bytes: *const u8, len: usize, fd: i32) -> bool;
+    }
+
+    let report = serde_json::to_vec(&serde_json::json!({
+        "username": username,
+        "generated": chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+        "results": results
+    }))?;
+    // The renderer borrows the byte slice and file descriptor for this call only.
+    if !unsafe { name_seeker_write_pdf(report.as_ptr(), report.len(), file.as_raw_fd()) } {
+        return Err(AppError::ExportError("Failed to render PDF".into()));
+    }
+    file.flush()?;
+    Ok(())
+}
+
+#[cfg(not(target_os = "macos"))]
+fn export_pdf(results: &[&SearchResult], username: &str, file: fs::File) -> Result<(), AppError> {
     use printpdf::*;
-    use std::fs::File;
     use std::io::BufWriter;
 
     // Create PDF document
@@ -223,12 +281,64 @@ fn export_pdf(
     }
 
     // Save PDF
-    let file = File::create(file_path)
-        .map_err(|e| AppError::ExportError(format!("Failed to create PDF file: {}", e)))?;
     let mut writer = BufWriter::new(file);
 
     doc.save(&mut writer)
         .map_err(|e| AppError::ExportError(format!("Failed to save PDF file: {}", e)))?;
 
+    writer.flush()?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn writes_all_formats_without_overwriting_or_leaving_the_directory() {
+        let dir = std::env::temp_dir().join(uuid::Uuid::new_v4().to_string());
+        fs::create_dir(&dir).unwrap();
+        for format in [
+            ExportFormat::Pdf,
+            ExportFormat::Json,
+            ExportFormat::Csv,
+            ExportFormat::Txt,
+        ] {
+            let options = ExportOptions {
+                format,
+                username: "../test@example.org".into(),
+                timestamp: Some("same/time".into()),
+                results: vec![SearchResult {
+                    site: "Example".into(),
+                    status: SearchResultStatus::Found,
+                    url: Some("https://example.org".into()),
+                    error: None,
+                    category: None,
+                    metadata: None,
+                }],
+            };
+            let first = export_to(options.clone(), &dir).unwrap();
+            let second = export_to(options, &dir).unwrap();
+            assert_ne!(first, second);
+            assert_eq!(Path::new(&first).parent(), Some(dir.as_path()));
+            let data = fs::read(&first).unwrap();
+            match Path::new(&first).extension().unwrap().to_str().unwrap() {
+                "pdf" => assert!(data.starts_with(b"%PDF")),
+                "json" => assert_eq!(
+                    serde_json::from_slice::<serde_json::Value>(&data).unwrap()[0]["site"],
+                    "Example"
+                ),
+                "csv" => assert_eq!(
+                    &csv::Reader::from_reader(data.as_slice())
+                        .records()
+                        .next()
+                        .unwrap()
+                        .unwrap()[0],
+                    "Example"
+                ),
+                "txt" => assert_eq!(data, b"Example: https://example.org"),
+                _ => unreachable!(),
+            }
+        }
+        fs::remove_dir_all(dir).unwrap();
+    }
 }

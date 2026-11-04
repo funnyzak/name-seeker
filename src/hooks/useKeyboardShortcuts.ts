@@ -13,6 +13,19 @@ export interface KeyboardShortcut {
 export const useKeyboardShortcuts = (shortcuts: KeyboardShortcut[]) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.isComposing ||
+        document.querySelector('.modal-overlay')
+      )
+        return;
+      if (
+        event.key === '/' &&
+        event.target instanceof HTMLElement &&
+        (event.target.isContentEditable ||
+          event.target.matches('input,textarea'))
+      )
+        return;
       for (const shortcut of shortcuts) {
         const ctrlMatch = shortcut.ctrl
           ? event.ctrlKey || event.metaKey

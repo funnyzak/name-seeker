@@ -39,3 +39,8 @@ Thumbs.db
 src-tauri/icons/
 src-tauri/capabilities/
 src-tauri/tauri.conf.json
+
+# Local browser artifacts
+.playwright-mcp/
+temp_files/
+output/

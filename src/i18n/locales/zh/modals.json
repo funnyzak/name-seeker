@@ -40,7 +40,9 @@
     "buttons": {
       "accept": "我已阅读并同意",
       "decline": "拒绝并退出"
-    }
+    },
+    "saveFailed": "保存失败，请重试。",
+    "exitFailed": "退出失败，请重试。"
   },
   "about": {
     "title": "关于",
@@ -102,7 +104,9 @@
       "github": "在GitHub上查看",
       "report": "报告问题",
       "update": "检查更新"
-    }
+    },
+    "overview": "通过用户名或邮箱查找公开账号。使用 WhatsMyName 站点数据，支持筛选和导出搜索结果。",
+    "openProject": "打开 GitHub 项目"
   },
   "help": {
     "title": "帮助与支持",

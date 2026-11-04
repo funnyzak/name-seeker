@@ -1,226 +1,152 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import SearchHistory from './SearchHistory';
-import { SearchType } from '../types';
-import type { SearchFormProps } from '../types';
+import { SearchType, type SearchFormProps } from '../types';
 
-const SearchForm: React.FC<SearchFormProps> = ({
+function validationError(value: string, type: SearchType) {
+  if (!value) return 'required';
+  if (type === SearchType.EMAIL) return null;
+  if (value.includes('@')) return 'invalidEmail';
+  const bytes = new window.TextEncoder().encode(value).length;
+  if (bytes < 2) return 'usernameTooShort';
+  if (bytes > 100) return 'usernameTooLong';
+  return /^[\p{L}\p{N}_.-]+$/u.test(value) ? null : 'invalidUsername';
+}
+
+export default function SearchForm({
+  idle,
   isSearching,
-  searchType: initialSearchType,
   onSubmit,
   onStopSearch,
-  searchHistory,
+  searchHistory = [],
   onAddToHistory,
   onRemoveFromHistory,
   onClearHistory,
-  onError,
-  onWarning,
-}) => {
-  const { t } = useTranslation(['search', 'common']);
-  const [query, setQuery] = useState('');
-  const [searchType, setSearchType] = useState<SearchType>(
-    initialSearchType || SearchType.USERNAME
-  );
-  const [showHistory, setShowHistory] = useState(false);
-  const [justSelectedFromHistory, setJustSelectedFromHistory] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Close history when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setShowHistory(false);
-      }
-    };
-
-    if (showHistory) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showHistory]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!query.trim()) {
-      if (onError) {
-        onError(t('search:validation.emptyQuery'));
-      }
-      return;
-    }
-
-    const trimmed = query.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const detectedType = emailRegex.test(trimmed)
+}: SearchFormProps) {
+  const { t } = useTranslation('search');
+  const [draft, setDraft] = useState('');
+  const [invalid, setInvalid] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+  async function search(raw: string) {
+    if (isSearching || starting) return;
+    const value = raw.trim();
+    const type = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
       ? SearchType.EMAIL
       : SearchType.USERNAME;
-
-    // Basic length validation
-    if (detectedType === SearchType.USERNAME && trimmed.length < 2) {
-      if (onWarning) {
-        onWarning(t('search:validation.usernameTooShort'));
-      }
+    const invalidKey = validationError(value, type);
+    if (invalidKey) {
+      setInvalid(invalidKey);
+      input.current?.focus();
       return;
     }
-
-    setSearchType(detectedType);
-
-    setShowHistory(false);
-
-    // Add to search history
-    if (onAddToHistory) {
-      onAddToHistory(query.trim());
+    setInvalid(null);
+    setStarting(true);
+    try {
+      if (await onSubmit(value, type)) onAddToHistory?.(value);
+    } finally {
+      setStarting(false);
     }
-
-    onSubmit(trimmed, detectedType);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  };
-
-  // const handleSearchTypeChange = (type: SearchType) => {
-  //   setSearchType(type);
-  //   setQuery('');
-  // };
-
-  const handleInputFocus = () => {
-    if (searchHistory && searchHistory.length > 0 && !justSelectedFromHistory) {
-      setShowHistory(true);
-    }
-    if (justSelectedFromHistory) {
-      setTimeout(() => {
-        setJustSelectedFromHistory(false);
-      }, 200);
-    }
-  };
-
-  const handleHistorySelect = (selectedQuery: string) => {
-    setQuery(selectedQuery);
-    setShowHistory(false);
-    setJustSelectedFromHistory(true);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
-  };
-
-  const handleHistoryRemove = (queryToRemove: string) => {
-    if (onRemoveFromHistory) {
-      onRemoveFromHistory(queryToRemove);
-    }
-  };
-
-  const handleHistoryClear = () => {
-    if (onClearHistory) {
-      onClearHistory();
-    }
-    setShowHistory(false);
-  };
-
-  const handleStopSearch = () => {
-    if (onStopSearch) {
-      onStopSearch();
-    }
-  };
-
+  }
   return (
-    <div className="search-form-container" ref={containerRef}>
-      <form onSubmit={handleSubmit} className="search-form-compact">
-        {/* Search type selection dropdown */}
-        {/* <select 
-          className="type-selector-dropdown"
-          value={searchType}
-          onChange={(e) => handleSearchTypeChange(e.target.value as SearchType)}
-          disabled={isSearching}
-          aria-label={t('search:form.searchTypeLabel')}
-        >
-          <option value={SearchType.USERNAME}>👤 {t('search:form.searchTypeUsername')}</option>
-          <option value={SearchType.EMAIL}>📧 {t('search:form.searchTypeEmail')}</option>
-        </select> */}
-
-        {/* Input field container */}
-        <div className="input-wrapper">
-          <div className="input-group">
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={handleInputChange}
-              onFocus={handleInputFocus}
-              placeholder={
-                searchType === SearchType.USERNAME
-                  ? t('search:form.inputPlaceholder')
-                  : t('search:form.inputPlaceholder')
-              }
-              className="search-input"
-              disabled={isSearching}
-              autoFocus
-              aria-label={
-                searchType === SearchType.USERNAME
-                  ? t('search:form.inputLabel')
-                  : t('search:form.inputLabel')
-              }
-            />
-
-            {/* Search history dropdown */}
-            <SearchHistory
-              history={searchHistory || []}
-              onSelect={handleHistorySelect}
-              onRemove={handleHistoryRemove}
-              onClear={handleHistoryClear}
-              show={showHistory && !isSearching}
-            />
-          </div>
-        </div>
-
-        {/* Button group */}
-        <div className="button-group-compact">
-          {!isSearching && (
-            <button
-              type="submit"
-              disabled={isSearching || !query.trim()}
-              className={`search-button-compact ${isSearching ? 'searching' : ''}`}
-              aria-label={
-                isSearching
-                  ? t('common:status.loading')
-                  : t('search:form.searchButton')
-              }
-            >
-              {isSearching ? (
-                <>
-                  <div className="spinner" aria-hidden="true"></div>
-                  {t('common:status.loading')}
-                </>
-              ) : (
-                t('search:form.searchButton')
-              )}
-            </button>
-          )}
-
-          {isSearching && (
+    <>
+      <form
+        className="query-form"
+        onSubmit={e => {
+          e.preventDefault();
+          void search(draft);
+        }}
+      >
+        <label htmlFor="lookup">{t('form.inputLabel')}</label>
+        <div className={'query-line' + (idle && !draft ? ' fingerprint' : '')}>
+          <input
+            id="lookup"
+            ref={input}
+            className="search-input"
+            placeholder={idle ? t('form.example') : undefined}
+            autoFocus
+            value={draft}
+            readOnly={isSearching || starting}
+            aria-invalid={!!invalid}
+            aria-describedby={
+              invalid ? 'query-error' : idle ? 'query-hint' : undefined
+            }
+            onChange={e => {
+              setDraft(e.target.value);
+              setInvalid(null);
+            }}
+          />
+          {isSearching ? (
             <button
               type="button"
-              onClick={handleStopSearch}
-              className="stop-button-compact"
-              aria-label={t('search:form.stopButton')}
+              className="halt"
+              onClick={event => {
+                event.preventDefault();
+                onStopSearch?.();
+              }}
             >
-              <div className="stop-icon" aria-hidden="true">
-                ⏹
-              </div>
-              {t('search:form.stopButton')}
+              {t('form.stopButton')}
+            </button>
+          ) : (
+            <button disabled={starting || !draft.trim()}>
+              {t('form.searchButton')}
             </button>
           )}
         </div>
+        {idle && !invalid && (
+          <small id="query-hint">
+            <span>{t('form.submitHint')}</span>
+            <span>{t('shortcuts.focus')}</span>
+          </small>
+        )}
+        {invalid && (
+          <span id="query-error" role="alert">
+            {t('validation.' + invalid)}
+          </span>
+        )}
       </form>
-    </div>
+      {idle && searchHistory.length > 0 && (
+        <section className="recents">
+          <header>
+            <h2>{t('history.recentSearches')}</h2>
+            <button
+              onClick={() => {
+                onClearHistory?.();
+                input.current?.focus();
+              }}
+            >
+              {t('history.clearHistory')}
+            </button>
+          </header>
+          {searchHistory.map(item => (
+            <div key={item}>
+              <button
+                className="recent-query"
+                title={t('history.runAgain')}
+                aria-label={t('history.runAgain') + ' · ' + item}
+                disabled={starting}
+                onClick={() => {
+                  setDraft(item);
+                  void search(item);
+                }}
+              >
+                <span>{item}</span>
+                <span className="recent-action" aria-hidden="true">
+                  ↵
+                </span>
+              </button>
+              <button
+                aria-label={t('history.deleteRecord', { item })}
+                onClick={() => {
+                  onRemoveFromHistory?.(item);
+                  input.current?.focus();
+                }}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </section>
+      )}
+    </>
   );
-};
-
-export default SearchForm;
+}

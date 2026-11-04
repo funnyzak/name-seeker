@@ -40,7 +40,9 @@
       "limitationsText": "• Results may not be 100% accurate\n• Some websites may block automated requests\n• Search results depend on website availability\n• This tool is for informational purposes only",
       "disclaimer": "Disclaimer",
       "disclaimerText": "This application is provided 'as is' without warranty. Users are responsible for complying with applicable laws and website terms of service. The developers are not liable for any misuse of this tool."
-    }
+    },
+    "saveFailed": "Could not save your choice. Try again.",
+    "exitFailed": "Could not close the app. Try again."
   },
   "about": {
     "title": "About",
@@ -102,7 +104,9 @@
       "github": "View on GitHub",
       "report": "Report Issue",
       "update": "Check for Updates"
-    }
+    },
+    "overview": "Find public profiles by username or email using WhatsMyName site data. Filter matches and export your results.",
+    "openProject": "Open GitHub project"
   },
   "help": {
     "title": "Help & Support",

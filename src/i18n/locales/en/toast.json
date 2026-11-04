@@ -31,7 +31,8 @@
     "permissionError": "Permission denied",
     "fileNotFound": "File not found",
     "invalidFormat": "Invalid file format",
-    "operationFailed": "Operation failed"
+    "operationFailed": "Operation failed",
+    "stopFailed": "Could not stop the search. Try again."
   },
   "warning": {
     "searchInProgress": "Search is already in progress",

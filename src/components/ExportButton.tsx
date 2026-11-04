@@ -34,6 +34,9 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     };
 
     if (isOpen) {
+      dropdownRef.current
+        ?.querySelector<HTMLButtonElement>('[role=menuitem]')
+        ?.focus();
       document.addEventListener('mousedown', handleClickOutside);
     }
 
@@ -81,6 +84,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       }
     } catch (error) {
       console.error('Export failed:', error);
+      onExportError?.(t('export:messages.exportFailed'));
     } finally {
       setIsExporting(false);
     }
@@ -123,6 +127,39 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   return (
     <div
       ref={dropdownRef}
+      onKeyDown={event => {
+        if (
+          !isDisabled &&
+          (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+        ) {
+          event.preventDefault();
+          if (!isOpen) {
+            setIsOpen(true);
+            return;
+          }
+          const items = Array.from(
+            event.currentTarget.querySelectorAll<HTMLButtonElement>(
+              '[role=menuitem]'
+            )
+          );
+          const index = items.findIndex(
+            item => item === document.activeElement
+          );
+          const next =
+            (index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) %
+            items.length;
+          items[next]?.focus();
+        }
+        if (isOpen && event.key === 'Escape') {
+          event.stopPropagation();
+          setIsOpen(false);
+          dropdownRef.current?.querySelector('button')?.focus();
+        }
+      }}
+      onBlur={event => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setIsOpen(false);
+      }}
       className={`export-dropdown ${isOpen ? 'open' : ''}`}
     >
       <button
@@ -152,7 +189,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         </span>
       </button>
 
-      {isOpen && (
+      {isOpen && !isDisabled && (
         <div className="export-menu" role="menu">
           <button
             className="export-menu-item"

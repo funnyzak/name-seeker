@@ -33,12 +33,14 @@
     "checkAgain": "重新检查",
     "clickToVisit": "点击访问个人资料页面",
     "opening": "正在打开...",
-    "viewProfile": "查看资料",
+    "viewProfile": "打开 ↗",
     "userNotFound": "未找到相关用户",
     "searchStopped": "搜索已停止",
     "checking": "正在检查...",
     "detailsTitle": "详细信息:",
-    "statusAriaLabel": "状态: {{status}}"
+    "statusAriaLabel": "状态: {{status}}",
+    "openFailed": "未能打开链接，请重试。",
+    "noResponse": "站点未返回结果"
   },
   "filter": {
     "title": "筛选结果",
@@ -52,7 +54,7 @@
     "byStatus": "按状态筛选",
     "clear": "清除筛选",
     "placeholder": "搜索结果...",
-    "filterPlaceholder": "筛选结果...",
+    "filterPlaceholder": "筛选站点或分类",
     "filterAriaLabel": "筛选搜索结果",
     "clearFilter": "清除筛选",
     "clearFilterTitle": "清除筛选",
@@ -74,7 +76,7 @@
     "deselectAll": "取消全选",
     "refresh": "刷新结果",
     "clear": "清除结果",
-    "reset": "重置结果",
+    "reset": "清空",
     "clearAriaLabel": "清除搜索结果",
     "clearTitle": "清除所有搜索结果",
     "resultsCount": "显示 {{filtered}} 个，共 {{total}} 个结果"
@@ -96,12 +98,25 @@
       "focus": "聚焦搜索框",
       "stop": "停止搜索",
       "help": "显示帮助"
-    }
+    },
+    "firstSearch": "搜索开始后，找到的账号会陆续显示在这里。"
   },
   "loading": {
     "title": "搜索中...",
     "description": "正在检查网站中的个人资料",
     "currentSite": "当前检查：{{site}}",
     "progress": "进度：{{current}}/{{total}}"
+  },
+  "ui": {
+    "running": "搜索中",
+    "checked": "已检查 {{count}} 个站点",
+    "noMatch": "无匹配结果",
+    "waiting": "等待结果",
+    "none": "此分类暂无结果",
+    "stopHint": "Esc 停止搜索",
+    "complete": "已完成",
+    "stopped": "已停止",
+    "failed": "搜索失败",
+    "retained": "已保留本次结果"
   }
 }

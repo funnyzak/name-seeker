@@ -1,11 +1,13 @@
+import ModalOverlay from './ModalOverlay';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AboutModalProps, AppInfo } from '../types';
 import { tauriApi } from '../services/tauriApi';
 
 const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation('modals');
+  const { t } = useTranslation(['modals', 'results']);
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
+  const [linkFailed, setLinkFailed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -27,9 +29,11 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleOpenUrl = async (url: string) => {
+    setLinkFailed(false);
     try {
       await tauriApi.openUrl(url);
     } catch (error) {
+      setLinkFailed(true);
       console.error('Failed to open URL:', error);
     }
   };
@@ -37,7 +41,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <ModalOverlay label={t('about.title')} onDismiss={onClose}>
       <div
         className="modal-container about-modal"
         onClick={e => e.stopPropagation()}
@@ -46,7 +50,11 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <>
             {t('about.title')} {appInfo?.name}
           </>
-          <button className="close-button" onClick={onClose}>
+          <button
+            className="close-button"
+            aria-label={t('common:button.close')}
+            onClick={onClose}
+          >
             ×
           </button>
         </div>
@@ -62,14 +70,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                     <h3 className="app-title">{appInfo.name}</h3>
                     <span className="app-version">v{appInfo.version}</span>
                   </div>
-                  <p className="app-description">
-                    {t('about.longDescription')}
-                  </p>
-                  {appInfo.long_description && (
-                    <p className="long-description">
-                      {appInfo.long_description}
-                    </p>
-                  )}
+                  <p className="app-description">{t('about.overview')}</p>
                   <div className="info-grid">
                     <div className="info-item">
                       <span className="info-label">{t('about.buildDate')}</span>
@@ -98,7 +99,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                           handleOpenUrl('https://github.com/funnyzak')
                         }
                       >
-                        funnyzak
+                        Leon (funnyzak)
                       </button>
                     </div>
                     <div className="info-item">
@@ -110,7 +111,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </>
               ) : (
-                <p>NameSeeker v1.0.0</p>
+                <p>NameSeeker</p>
               )}
             </div>
 
@@ -167,13 +168,18 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
+        {linkFailed && (
+          <p className="dialog-error" role="alert">
+            {t('results:item.openFailed')}
+          </p>
+        )}
         <div className="modal-footer">
           <button className="btn btn-primary" onClick={onClose}>
             {t('about.buttons.confirm')}
           </button>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 
